@@ -59,7 +59,7 @@ function loadUiForWorkflow(workflowConfig) {
                 break;
         }
 
-        element.id = input.input_id
+        element.id = input.input_id;
         element.placeholder = input.input_id;
 
         if (input.default) {
@@ -68,6 +68,11 @@ function loadUiForWorkflow(workflowConfig) {
 
         element.classList.add('workflow-input');
 
+        const labelElem = document.createElement('label');
+        labelElem.setAttribute('for', input.input_id);
+        labelElem.textContent = input.input_id;
+
+        workflowContainer.appendChild(labelElem);
         workflowContainer.appendChild(element);
     }
 }
