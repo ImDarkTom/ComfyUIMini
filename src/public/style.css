@@ -1,3 +1,18 @@
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #181E1A;
+    }
+
+    input.workflow-input {
+        background-color: #3C594F;
+        color: white;
+    }
+
+    div#workflow-container>label {
+        color: white;
+    }
+  }
+
 html, body {
     padding: 0;
     margin: 0;
@@ -5,6 +20,7 @@ html, body {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 button#gen {
@@ -40,4 +56,9 @@ input.workflow-input {
 
 input.workflow-input:focus {
     outline: none;
+}
+
+div#workflow-container>label {
+    text-transform: capitalize;
+    font-weight: 550;
 }
