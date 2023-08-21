@@ -77,11 +77,14 @@ function loadUiForWorkflow(workflowConfig) {
     }
 }
 
-genBtn.addEventListener('click', (e) => {
-    sendRequest();
+genBtn.addEventListener('click', async (e) => {
+    genBtn.textContent = "Awaiting completion...";
+    await sendRequest();
+    genBtn.textContent = "Run";
 });
 
 workflowSelect.addEventListener('change', async (event) => {
+    genBtn.removeAttribute('disabled');
     const value = event.target.value;
 
     const response = await fetch(`/workflowConfig/${value}`);
