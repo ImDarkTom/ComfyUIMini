@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: "Home" }) %>
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/index.js" defer></script>
+</head>
+<body>
+    <%- include('../partials/nav', { title: "My Workflows" }) %>
+    <div class="workflow-grid">
+        <div class="workflow-grid-item import-workflow-item">
+            <a class="workflow-import-text" href="/import">Import workflow from JSON</a>
+        </div>
+    </div>
+</body>
+</html>

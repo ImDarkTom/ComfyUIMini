@@ -1,4 +1,4 @@
 {
     "app_port": 3000,
-    "comfyui_port": 8188
+    "comfyui_url": "http://127.0.0.1:8188"
 }

@@ -1,0 +1,13 @@
+.inputs-container {
+    box-sizing: border-box;
+    padding: 0.5rem;
+}
+
+.workflow-input-container {
+    padding-bottom: 1ch;
+}
+
+.workflow-input {
+    width: 100%;
+    box-sizing: border-box;
+}

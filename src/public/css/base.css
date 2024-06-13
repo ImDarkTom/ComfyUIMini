@@ -1,0 +1,102 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/* End of CSS Reset */
+
+@font-face {
+    font-family: 'Futura';
+    src: url('/fonts/Futura.woff') format('woff2'),
+         url('/fonts/Futura.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Futura', sans-serif;
+    background-color: var(--background-primary-color);
+    color: var(--text-primary-color);
+}
+
+/* nav */
+.title-container {
+	display: flex;
+}
+
+.title-text {
+    font-size: 3rem;
+    font-weight: bold;
+    padding: 1rem 0.5rem;
+    box-sizing: border-box;
+	background: linear-gradient(135deg, #910E92, #6962C3);
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.version-text {
+	display: flex;
+	align-items: end;
+	padding: 1.2rem 0;
+	box-sizing: border-box;
+}
+
+.page-title-container {
+	display: flex;
+}
+
+.page-title {
+    font-size: 2rem;
+    padding-left: 0.5rem;
+}
+
+.home-link {
+	height: 2rem !important;
+	width: 2rem !important;
+	text-decoration: none;
+	padding-left: 0.5rem;
+	color: var(--text-primary-color);
+}

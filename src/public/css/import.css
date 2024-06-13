@@ -1,0 +1,83 @@
+.file-select-container {
+    width: calc(100vw - 1rem);
+    margin: 1ch 0.5rem;
+    background-color: var(--background-secondary-color);
+    border-radius: 0.5rem;
+    height: 5rem;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.edit-container {
+    width: calc(100vw - 1rem);
+    margin: 0.5rem;
+}
+
+.properties-container {
+    padding-bottom: 1rem;
+}
+
+.category-title {
+    font-size: 1.5rem;
+    padding: 0 0 0.5rem 0;
+}
+
+.properties-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#description-input {
+    resize: vertical;
+    height: 6em;
+    min-height: 2em;
+}
+
+.inputs-container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(1, 1fr);
+    column-gap: 1ch;
+    row-gap: 1ch;
+    background-color: var(--background-secondary-color);
+    padding: 1ch;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+.input-item {
+    padding-bottom: 1rem;
+}
+
+.input-title-container {
+    width: 100%;
+    display: flex;
+}
+
+.hide-input-button {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 1ch;
+}
+
+.hide-input-button.disabled {
+    filter: brightness(0.5);
+}
+
+.workflow-input-title {
+    height: 2rem;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    flex: 1;
+}
+
+.inputs-container label {
+    display: block;
+    width: 100%;
+}
+
+.inputs-container input {
+    width: 100%;
+    box-sizing: border-box;
+}

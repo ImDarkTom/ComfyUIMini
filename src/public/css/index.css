@@ -1,0 +1,47 @@
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.workflow-grid-item {
+    --margin-amount: 0.5rem;
+    --calculated-size: calc(50vw - (var(--margin-amount) * 2));
+    width: var(--calculated-size);
+    height: var(--calculated-size);
+    margin: var(--margin-amount);
+    box-sizing: border-box;
+    background-color: var(--background-secondary-color);
+    user-select: none;
+}
+
+.workflow-icon-container {
+    width: 100%;
+    height: 60%;
+}
+
+.icon.workflow {
+    width: 100%;
+    height: 100%;
+}
+
+.workflow-title {
+    display: block;
+    font-size: 1.2rem;
+    height: 40%;
+    align-content: center;
+    padding-left: 0.5ch;
+    text-decoration: none;
+    color: var(--text-primary-color);
+}
+
+
+.workflow-import-text {
+    font-size: 1.5rem;
+    text-align: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    display: block;
+    text-decoration: none;
+    color: var(--text-primary-color);
+}
