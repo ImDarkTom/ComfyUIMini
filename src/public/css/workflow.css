@@ -1,6 +1,12 @@
-.inputs-container {
+.main-container {
     box-sizing: border-box;
     padding: 0.5rem;
+}
+
+.category-title {
+    font-size: 1.5rem;
+    padding: 0 0 0.5rem 0;
+    padding: 1rem 0;
 }
 
 .workflow-input-container {
@@ -10,4 +16,34 @@
 .workflow-input {
     width: 100%;
     box-sizing: border-box;
+    background-color: var(--background-tertiary-color);
+    color: var(--text-secondary-color);
+    border: 0;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-top: 0.1rem;
+}
+
+.run-workflow {
+    margin-top: 1rem;
+    width: 100%;
+    height: 3rem;
+    background-color: var(--background-secondary-color);
+    color: var(--text-primary-color);
+    border: 0;
+    border-radius: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.output-images-container {
+    width: 100%;
+}
+
+.output-images-container a {
+    text-decoration: none;
+}
+
+.output-image {
+    width: 100%;
+    border-radius: 0.5rem;
 }

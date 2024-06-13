@@ -7,10 +7,12 @@
 </head>
 <body data-workflow-title="<%= workflowTitle %>">
     <%- include('../partials/nav', { title: workflowTitle }) %>
-    <div class="inputs-container"></div>
-    <button class="run-workflow" onclick="runWorkflow()">Run</button>
-    <div class="output-images-container">
-        
+    <div class="main-container">
+        <h2 class="category-title">Inputs</h2>
+        <div class="inputs-container"></div>
+        <button class="run-workflow" onclick="runWorkflow()">Run workflow</button>
+        <h2 class="category-title">Output</h2>
+        <div class="output-images-container"></div>
     </div>
 </body>
 </html>

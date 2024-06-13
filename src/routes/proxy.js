@@ -29,8 +29,6 @@ router.get('/history/:promptId', async (req, res) => {
 
     const promptHistoryResponse = await axios.get(`${config.comfyui_url}/history/${promptId}`);
 
-    console.log(promptHistoryResponse);
-
     res.json(promptHistoryResponse.data).status(promptHistoryResponse.status);
 });
 

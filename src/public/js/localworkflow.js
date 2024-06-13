@@ -57,7 +57,7 @@ function renderInput(inputJson) {
 }
 
 async function runWorkflow() {
-    outputImagesContainer.innerHTML = "";
+    outputImagesContainer.innerHTML = "Waiting...";
 
     const workflow = JSON.parse(document.body.getAttribute('data-workflowtext'));
 
@@ -87,6 +87,8 @@ async function runWorkflow() {
 
     const generatedImagesJson = await generationFinish(promptId);
 
+    outputImagesContainer.innerHTML = "";
+
     for (const imageJson of generatedImagesJson) {
         const imageHtml = jsonToImageElem(imageJson);
 
@@ -97,7 +99,7 @@ async function runWorkflow() {
 function jsonToImageElem(imageJson) {
     const imageUrl = generateImageUrl(imageJson.filename, imageJson.subfolder, imageJson.type);
 
-    return `<img src="${imageUrl}">`;
+    return `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="output-image"></a>`;
 }
 
 function generateImageUrl(filename, subfolder = "", type) {
