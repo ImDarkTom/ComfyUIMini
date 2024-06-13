@@ -7,25 +7,26 @@
 </head>
 <body>
     <%- include('../partials/nav', { title: "Import a workflow" }) %>
-    <div class="file-select-container">
-        <input type="file" id="file-input" accept=".json">
-        <input type="button" value="Submit" id="submit-file">
-    </div>
-    <div class="edit-container">
-        <div class="properties-container">
-            <h2 class="category-title">Properties</h2>
-            <label for="title-input">Title</label>
-            <input type="text" id="title-input" class="properties-input" placeholder="My Workflow" disabled>
-            <label for="description-input">Description</label>
-            <textarea id="description-input" class="properties-input" placeholder="This is a workflow to..." disabled></textarea>
+    <div class="main-container">
+        <div class="file-select-container">
+            <input type="file" id="file-input" accept=".json">
+            <input type="button" value="Submit" id="submit-file">
         </div>
-
-        <div class="inputs-container">
-            <h2 class="category-title">Inputs</h2>
-
+        <div class="edit-container">
+            <div class="properties-container">
+                <h2 class="category-title">Properties</h2>
+                <label for="title-input">Title</label>
+                <input type="text" id="title-input" class="properties-input" placeholder="My Workflow" disabled>
+                <label for="description-input">Description</label>
+                <textarea id="description-input" class="properties-input" placeholder="This is a workflow to..." disabled></textarea>
+            </div>
+    
+            <div class="inputs-container">
+                <h2 class="category-title">Inputs</h2>
+            </div>
+            <input type="button" value="Save" onclick="saveToLocalStorage()">
+            <input type="button" value="Download" onclick="downloadModifiedJson()">
         </div>
-        <input type="button" value="Save" onclick="saveToLocalStorage()">
-        <input type="button" value="Download" onclick="downloadModifiedJson()">
     </div>
 </body>
 </html>

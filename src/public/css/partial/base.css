@@ -100,3 +100,15 @@ body {
 	padding-left: 0.5rem;
 	color: var(--text-primary-color);
 }
+
+/* Commonly used across pages */
+.category-title {
+    font-size: 1.5rem;
+    padding: 0 0 0.5rem 0;
+    padding: 1rem 0;
+}
+
+.main-container {
+    box-sizing: border-box;
+    padding: 0.5rem;
+}

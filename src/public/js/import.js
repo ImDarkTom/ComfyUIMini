@@ -39,7 +39,7 @@ submitWorkflowFile.addEventListener('click', async () => {
         descriptionInput.removeAttribute('disabled');
         descriptionInput.value = jsonMetadata.description;
 
-        inputsContainer.innerHTML = "";
+        inputsContainer.innerHTML = `<h2 class="category-title">Inputs</h2>`;
 
         renderAllInputs(workflowJson);
     });

@@ -1,6 +1,6 @@
 .file-select-container {
     width: calc(100vw - 1rem);
-    margin: 1ch 0.5rem;
+    margin: 1ch 0;
     background-color: var(--background-secondary-color);
     border-radius: 0.5rem;
     height: 5rem;
@@ -11,16 +11,11 @@
 
 .edit-container {
     width: calc(100vw - 1rem);
-    margin: 0.5rem;
+    margin: 0.5rem 0;
 }
 
 .properties-container {
     padding-bottom: 1rem;
-}
-
-.category-title {
-    font-size: 1.5rem;
-    padding: 0 0 0.5rem 0;
 }
 
 .properties-input {

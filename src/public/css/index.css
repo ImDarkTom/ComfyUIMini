@@ -1,6 +1,7 @@
 .workflow-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 
 .workflow-grid-item {
@@ -8,7 +9,7 @@
     --calculated-size: calc(50vw - (var(--margin-amount) * 2));
     width: var(--calculated-size);
     height: var(--calculated-size);
-    margin: var(--margin-amount);
+    margin: var(--margin-amount) 0;
     box-sizing: border-box;
     background-color: var(--background-secondary-color);
     user-select: none;
