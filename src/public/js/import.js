@@ -31,13 +31,13 @@ submitWorkflowFile.addEventListener('click', async () => {
         const workflowText = reader.result;
         workflowJson = JSON.parse(workflowText);
 
-        const jsonMetadata = workflowJson["_comfyuimini_meta"];
+        const jsonMetadata = workflowJson["_comfyuimini_meta"] || blankMetadata;
 
         titleInput.removeAttribute('disabled');
-        titleInput.value = jsonMetadata.title || "My Workflow";
+        titleInput.value = jsonMetadata.title;
 
         descriptionInput.removeAttribute('disabled');
-        descriptionInput.value = jsonMetadata.description || "";
+        descriptionInput.value = jsonMetadata.description;
 
         inputsContainer.innerHTML = "";
 
@@ -47,11 +47,9 @@ submitWorkflowFile.addEventListener('click', async () => {
 
 function renderAllInputs(workflowJson) {
     function getInputConfig(nodeId, inputName) {
-
         const cuiMiniMetadata = workflowJson["_comfyuimini_meta"];
 
         if (!cuiMiniMetadata) {
-            console.log("No Metadata");
             return null;
         }
 
