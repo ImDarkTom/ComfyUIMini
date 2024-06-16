@@ -3,9 +3,9 @@
 <head>
     <%- include('../partials/head', { title: workflowTitle }) %>
     <link rel="stylesheet" href="/css/workflow.css">
-    <script src="/js/localworkflow.js" defer></script>
+    <script src="/js/workflow.js" defer></script>
 </head>
-<body data-workflow-title="<%= workflowTitle %>">
+<body data-workflow-title="<%= workflowTitle %>" data-workflowtext="<%= workflowText || '' %>">
     <%- include('../partials/nav', { title: workflowTitle }) %>
     <div class="main-container">
         <h2 class="category-title">Inputs</h2>

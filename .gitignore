@@ -1,2 +1,4 @@
 /node_modules
 /src/index.old.js
+/workflows/*
+!/workflows/converted_workflows_here

@@ -5,12 +5,19 @@ const outputImagesContainer = document.querySelector('.output-images-container')
 
 
 function loadWorkflow() {
-    const currentWorkflow = getCurrentWorkflowJson();
+    let currentWorkflow = "";
+    const workflowTextAttrib = document.body.getAttribute('data-workflowtext');
 
-    document.body.setAttribute('data-workflowtext', JSON.stringify(currentWorkflow));
+    if (workflowTextAttrib !== "") { // Workflow sent by server aka pc-hosted
+        currentWorkflow = JSON.parse(workflowTextAttrib);
+    } else {
+        currentWorkflow = getCurrentWorkflowJson();
 
-    if (!currentWorkflow) {
-        return;
+        document.body.setAttribute('data-workflowtext', JSON.stringify(currentWorkflow));
+
+        if (!currentWorkflow) {
+            return;
+        }
     }
 
     const workflowInputs = currentWorkflow["_comfyuimini_meta"].input_options;

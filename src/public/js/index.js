@@ -12,7 +12,7 @@ function loadLocalWorkflows() {
                 <div class="workflow-icon-container">
                     <div class="icon workflow"></div>
                 </div>
-                <a class="workflow-title" href="/localworkflow/${title}">${title}</a>
+                <a class="workflow-title" href="/workflow/local/${title}">${title}</a>
         </div>
         `;
 
