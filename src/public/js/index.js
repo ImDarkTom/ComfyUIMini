@@ -8,12 +8,14 @@ function loadLocalWorkflows() {
         const title = workflowJson["_comfyuimini_meta"].title;
 
         const gridItemHtml = `
-        <div class="workflow-grid-item">
-                <div class="workflow-icon-container">
-                    <div class="icon workflow"></div>
-                </div>
-                <a class="workflow-title" href="/workflow/local/${title}">${title}</a>
-        </div>
+        <a href="/workflow/local/${title}" class="workflow-grid-link">
+            <div class="workflow-grid-item">
+                    <div class="workflow-icon-container">
+                        <div class="icon phone workflow-icon"></div>
+                    </div>
+                    <span class="workflow-title">${title}</span>
+            </div>
+        </a>
         `;
 
         workflowsGridElem.innerHTML += gridItemHtml;

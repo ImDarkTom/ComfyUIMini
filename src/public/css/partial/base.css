@@ -48,6 +48,11 @@ table {
 }
 /* End of CSS Reset */
 
+body {
+	height: 100vh;
+	width: 100vw;
+}
+
 @font-face {
     font-family: 'Futura';
     src: url('/fonts/Futura.woff') format('woff2'),

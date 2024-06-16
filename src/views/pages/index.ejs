@@ -9,14 +9,16 @@
     <%- include('../partials/nav', { title: "My Workflows" }) %>
     <div class="main-container">
         <div class="workflow-grid">
-            <div class="workflow-grid-item import-workflow-item">
-                <a class="workflow-import-text" href="/import">Import workflow from JSON</a>
-            </div>
+            <a href="/import" class="workflow-grid-link">
+                <div class="workflow-grid-item import-workflow-item">
+                    <span class="workflow-import-text">Import workflow from JSON</span>
+                </div>
+            </a>
             <% serverWorkflows.forEach(function(item) { %>
                 <%- include('../partials/workflow-grid-item', { title: item }) %>
             <% }); %>
         </div>
-        <a href="https://www.buymeacoffee.com/ImDarkTom" target="_blank"><img class="bmac-link" src="/img/bmac-yellow-button.png" alt="Buy Me A Coffee"></a>
     </div>
+    <a href="https://www.buymeacoffee.com/ImDarkTom" target="_blank" class="bmac-link"><img class="bmac-link-img" src="/img/bmac-yellow-button.png" alt="Buy Me A Coffee"></a>
 </body>
 </html>
