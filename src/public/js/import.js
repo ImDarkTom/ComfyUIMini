@@ -29,7 +29,12 @@ submitWorkflowFile.addEventListener('click', async () => {
 
     reader.addEventListener('load', () => {
         const workflowText = reader.result;
-        workflowJson = JSON.parse(workflowText);
+        
+        try {
+            workflowJson = JSON.parse(workflowText);
+        } catch (err) {
+            return alert("Invalid JSON content.");
+        }
 
         const jsonMetadata = workflowJson["_comfyuimini_meta"] || blankMetadata;
 
