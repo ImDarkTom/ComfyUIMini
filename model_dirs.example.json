@@ -1,0 +1,10 @@
+{
+    "checkpoint": {
+        "folder_path": "path/to/checkpoints/folder",
+        "filetypes": [".ckpt", ".safetensors"]
+    },
+    "vae": {
+        "folder_path": "path/to/vae/folder",
+        "filetypes": [".pt", ".safetensors"]
+    }
+}

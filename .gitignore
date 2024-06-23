@@ -1,3 +1,4 @@
 /node_modules
 /workflows/*
 !/workflows/converted_workflows_here
+/model_dirs.json

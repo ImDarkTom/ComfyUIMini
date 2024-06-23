@@ -62,9 +62,27 @@ async function checkForComfyUI() {
     }
 }
 
+function loadModelDirs() {
+    const modelDirsPath = path.join(__dirname, '..', 'model_dirs.json');
+
+    if (!fs.existsSync(modelDirsPath)) {
+        fs.copyFileSync(path.join(__dirname, '..', 'model_dirs.example.json'), modelDirsPath);
+    }
+
+    const modelDirsJson = JSON.parse(fs.readFileSync(modelDirsPath));
+
+    if (!modelDirsJson.checkpoint || modelDirsJson.checkpoint.folder_path == "path/to/checkpoints/folder") {
+        console.warn("⚠ model_dirs.json not configured, MODEL SELECTING WILL NOT WORK work until it is set.")
+        return;
+    }
+
+    global.modelDirs = modelDirsJson;
+}
+
 checkForComfyUI();
 checkForWorkflowsFolder();
+loadModelDirs();
 
 app.listen(config.app_port, '0.0.0.0', () => {
-    console.log(`Running on http://localhost:${config.app_port}`);
+    console.log(`✅ Running on http://localhost:${config.app_port}`);
 });
