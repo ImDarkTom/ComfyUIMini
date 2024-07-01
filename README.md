@@ -47,4 +47,3 @@ If you find this to be useful you can donate at the button below.
 ## Coming Soon
 - Settings page
 - Better image viewing page
-- Better editable input types
