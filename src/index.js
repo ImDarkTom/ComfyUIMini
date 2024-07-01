@@ -83,7 +83,7 @@ function loadSelects() {
 
     Object.assign(modelDirsJson, additionalSelects);
 
-    global.selects = additionalSelects;
+    global.selects = modelDirsJson;
 }
 
 checkForComfyUI();

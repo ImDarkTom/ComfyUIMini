@@ -80,7 +80,7 @@ router.get('/listmodels/:modelType', (req, res) => {
     const modelTypeInfo = global.selects[modelType];
 
     if (!modelTypeInfo) {
-        res.send("Model config not found for" + modelType).status(400);
+        res.send("Model config not found for " + modelType).status(400);
         return;
     }
 
