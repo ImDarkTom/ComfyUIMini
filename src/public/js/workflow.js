@@ -53,10 +53,10 @@ async function renderInput(inputOptions) {
         return "";
     }
 
-    let html;
+    let html = '';
     if (inputOptions.type === "select") {
-        const listResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
-        const listJson = await listResponse.json();
+        const modelListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
+        const modelListJson = await modelListResponse.json();
 
         html = `
         <div class="workflow-input-container">
@@ -64,55 +64,51 @@ async function renderInput(inputOptions) {
             <select id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">
         `;
 
-        for (const item of listJson) {
+        modelListJson.forEach(item => {
             html += `<option value="${item}">${item}</option>`;
-        }
+        });
 
         html += "</select>"
+    } else {
 
-        return html;
-    }
+        let type;
 
-    let stepAttribute;
-    let type;
-    switch (inputOptions.type) {
-        case "integer":
-            stepAttribute = 'step="1"';
-            type = "number"
-            break;
-        case "float":
-            stepAttribute = 'step="any"';
-            type = "number"
-            break;
-        case "text":
-        default:
-            stepAttribute = '';
-            type = "text"
-            break;
-    }
+        switch (inputOptions.type) {
+            case "integer":
+                type = "number"
+                break;
+            case "float":
+                type = "number"
+                break;
+            case "text":
+            default:
+                type = "text"
+                break;
+        }
 
-    html = `
-    <div class="workflow-input-container">
-        <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-        <input 
-            id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" 
-            type="${type}" 
-            placeholder="${inputOptions.default}" 
-            class="workflow-input" 
-            value="${inputOptions.default}"
-            ${stepAttribute}
-            ${inputOptions !== undefined ? `min="${inputOptions.min}"` : ''} 
-            ${inputOptions.max !== undefined ? `max="${inputOptions.max}"` : ''}
-            ${inputOptions.type == "select" ? `select="${inputOptions.modelSuggestionType}"` : ""}>
-    `;
-
-    if (inputOptions.show_randomise_toggle) {
-        html += `
-        <button class="randomise-input" type="button" onclick="randomiseInput('input-${inputOptions.node_id}-${inputOptions.input_name_in_node}')">🎲</button>
+        html = `
+        <div class="workflow-input-container">
+            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
+            <input 
+                id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" 
+                type="${type}" 
+                placeholder="${inputOptions.default}" 
+                class="workflow-input" 
+                value="${inputOptions.default}"
+                ${inputOptions.step !== undefined ? `step="${inputOptions.step}"` : ''}
+                ${inputOptions.min !== undefined ? `min="${inputOptions.min}"` : ''} 
+                ${inputOptions.max !== undefined ? `max="${inputOptions.max}"` : ''}
+            >
         `;
-    }
 
-    html += `</div>`;
+        if (inputOptions.show_randomise_toggle) {
+            html += `
+            <button class="randomise-input" type="button" onclick="randomiseInput('input-${inputOptions.node_id}-${inputOptions.input_name_in_node}')">🎲</button>
+            `;
+        }
+
+        html += `</div>`;
+    }
 
     return html;
 }
@@ -120,7 +116,21 @@ async function renderInput(inputOptions) {
 function randomiseInput(inputId) {
     const input = document.getElementById(inputId);
 
-    input.value = (Math.floor(Math.random() * 1e16)).toString().padStart(16, '0');;
+    const min = parseFloat(input.getAttribute('min'));
+    const max = parseFloat(input.getAttribute('max'));
+    const step = parseFloat(input.getAttribute('step')) || 1;
+
+    let randomNumber;
+    if (!isNaN(min) && !isNaN(max) && max > min) {
+        const range = (max - min) / step;
+
+        randomNumber = min + step * Math.floor(Math.random() * range);
+        randomNumber = Math.min(randomNumber, max);
+    } else {
+        randomNumber = (Math.floor(Math.random() * 1e16)).toString().padStart(16, '0');
+    }
+
+    input.value = randomNumber;
 }
 
 async function runWorkflow() {

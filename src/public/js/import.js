@@ -113,7 +113,7 @@ function inputTypeEventListener() {
                         <input type="number" id="min-value" data-key="min" class="additional-input-option">
                     </div>
                     <div class="additional-option-wrapper">
-                        <label for="min-value">Max</label>
+                        <label for="max-value">Max</label>
                         <input type="number" id="max-value" data-key="max" class="additional-input-option">
                     </div>
                     <div class="additional-option-wrapper">
@@ -129,7 +129,7 @@ function inputTypeEventListener() {
                         <input type="number" id="min-value" data-key="min" class="additional-input-option">
                     </div>
                     <div class="additional-option-wrapper">
-                        <label for="min-value">Max</label>
+                        <label for="max-value">Max</label>
                         <input type="number" id="max-value" data-key="max" class="additional-input-option">
                     </div>
                     <div class="additional-option-wrapper">
