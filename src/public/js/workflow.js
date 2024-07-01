@@ -55,7 +55,7 @@ async function renderInput(inputOptions) {
 
     let html;
     if (inputOptions.type === "select") {
-        const listResponse = await fetch(`/proxy/listmodels/${inputOptions.select_list}`);
+        const listResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
         const listJson = await listResponse.json();
 
         html = `
@@ -142,7 +142,7 @@ async function runWorkflow() {
         workflow[nodeId].inputs[nodeInputName] = inputValue;
     }
 
-    const response = await fetch('/proxy/prompt', {
+    const response = await fetch('/comfyui/prompt', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -170,7 +170,7 @@ function jsonToImageElem(imageJson) {
 }
 
 function generateImageUrl(filename, subfolder = "", type) {
-    return `/proxy/image?filename=${filename}&subfolder=${subfolder}&type=${type}`
+    return `/comfyui/image?filename=${filename}&subfolder=${subfolder}&type=${type}`
 }
 
 function sleep(ms) {
@@ -180,7 +180,7 @@ function sleep(ms) {
 async function generationFinish(promptId) {
     // Redo with WS e.g https://github.com/comfyanonymous/ComfyUI/blob/master/script_examples/websockets_api_example_ws_images.py
     while (true) {
-        const response = await fetch(`/proxy/history/${promptId}`, {
+        const response = await fetch(`/comfyui/history/${promptId}`, {
             method: 'GET'
         });
 

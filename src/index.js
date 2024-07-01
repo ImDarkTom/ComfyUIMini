@@ -6,7 +6,7 @@ const fs = require('fs');
 const os = require('os');
 
 const mainRouter = require('./routes/mainRouter');
-const cuiProxyRouter = require('./routes/proxy');
+const comfyUIRouter = require('./routes/comfyUIRouter');
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use("/", mainRouter);
-app.use("/proxy", cuiProxyRouter);
+app.use("/comfyui", comfyUIRouter);
 
 function checkForWorkflowsFolder() {
     const workflowsFilepath = path.join(__dirname, '..', 'workflows');

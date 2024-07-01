@@ -139,7 +139,7 @@ function inputTypeEventListener() {
                     `;
                     break;
                 case "select":
-                    const response = await fetch("/proxy/modeltypes");
+                    const response = await fetch("/comfyui/modeltypes");
                     const modelTypesList = await response.json();
 
                     let html = `
