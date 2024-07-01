@@ -44,8 +44,6 @@ submitWorkflowFile.addEventListener('click', async () => {
         descriptionInput.removeAttribute('disabled');
         descriptionInput.value = jsonMetadata.description;
 
-        inputsContainer.innerHTML = `<h2 class="category-title">Inputs</h2>`;
-
         renderAllInputs(workflowJson);
     });
 });
@@ -80,7 +78,7 @@ function renderAllInputs(workflowJson) {
 
         for (let [key, value] of Object.entries(node.inputs)) {
             if (Array.isArray(value)) {
-                // Inputs from other nodes come in an array
+                // Inputs that come from other nodes come as an array
                 continue;
             }
 
@@ -93,17 +91,101 @@ function renderAllInputs(workflowJson) {
             }
         }
     }
+
+    inputTypeEventListener();
+}
+
+function inputTypeEventListener() {
+    document.querySelectorAll('.input-type-select').forEach(function (inputTypeInput) {
+        inputTypeInput.addEventListener('change', async (e) => {
+            const changedTo = e.target.value;
+
+            const additionalInputOptionsContainer = e.target.parentNode.querySelector('.additional-input-options');
+
+            switch (changedTo) {
+                case "text":
+                    additionalInputOptionsContainer.innerHTML = "";
+                    break;
+                case "integer": 
+                    additionalInputOptionsContainer.innerHTML = `
+                    <div class="additional-option-wrapper">
+                        <label for="min-value">Min</label>
+                        <input type="number" id="min-value" data-key="min" class="additional-input-option">
+                    </div>
+                    <div class="additional-option-wrapper">
+                        <label for="min-value">Max</label>
+                        <input type="number" id="max-value" data-key="max" class="additional-input-option">
+                    </div>
+                    <div class="additional-option-wrapper">
+                        <label for="show-random-toggle-value">Show randomise value toggle?</label>
+                        <input type="checkbox" id="show-random-toggle-value" data-key="show_randomise_toggle" class="additional-input-option">
+                    </div>
+                    `;
+                    break;
+                case "float":
+                    additionalInputOptionsContainer.innerHTML = `
+                    <div class="additional-option-wrapper">
+                        <label for="min-value">Min</label>
+                        <input type="number" id="min-value" data-key="min" class="additional-input-option">
+                    </div>
+                    <div class="additional-option-wrapper">
+                        <label for="min-value">Max</label>
+                        <input type="number" id="max-value" data-key="max" class="additional-input-option">
+                    </div>
+                    <div class="additional-option-wrapper">
+                        <label for="step-value">Step</label>
+                        <input type="number" id="step-value" data-key="step" class="additional-input-option">
+                    </div>
+                    `;
+                    break;
+                case "select":
+                    const response = await fetch("/proxy/modeltypes");
+                    const modelTypesList = await response.json();
+
+                    let html = `
+                    <div class="additional-option-wrapper">
+                        <label for="model-list-value">Model list</label>
+                        <select id="model-list-value" data-key="select_list" class="additional-input-option">`;
+
+                    for (const type of modelTypesList) {
+                        html += `<option value="${type}">${type}</option>`;
+                    }
+
+                    html += `</select>
+                    </div>`;
+
+                    additionalInputOptionsContainer.innerHTML = html;
+                    break;
+                default:
+                    additionalInputOptionsContainer.innerHTML = "";
+                    break;
+            }
+        })
+    })
 }
 
 function renderInput(defaultLabel, defaultValue, nodeId, inputName) {
     const html = `
     <div class="input-item" data-node-id="${nodeId}" data-node-input-name="${inputName}">
-        <div class="input-title-container">
-            <div class="icon hide hide-input-button" onclick="hideInput(this)"></div>
-            <input type="text" placeholder="${defaultLabel}" value="${defaultLabel}" id="label-${defaultLabel}" class="workflow-input workflow-input-title">
+        <div class="options-container">
+            <select class="input-type-select">
+                <option value="text">Text</option>
+                <option value="integer">Integer</option>
+                <option value="float">Float</option>
+                <option value="select">Select (from model list)</option>
+            </select>
+            <div class="input-title-container">
+                <div class="icon hide hide-input-button" onclick="hideInput(this)"></div>
+                <input type="text" placeholder="${defaultLabel}" value="${defaultLabel}" id="label-${defaultLabel}" class="workflow-input workflow-input-title">
+            </div>
+            <label for="input-${defaultLabel}">Default value</label>
+            <input type="text" placeholder="${defaultValue}" value="${defaultValue}" id="input-${defaultLabel}" class="workflow-input workflow-input-default">
+            <div class="additional-input-options"></div>
         </div>
-        <label for="input-${defaultLabel}">Default value</label>
-        <input type="text" placeholder="${defaultValue}" value="${defaultValue}" id="input-${defaultLabel}" class="workflow-input workflow-input-default">
+        <div class="move-arrows-container">
+            <span onclick="moveUp(this)">&#x25B2;</span>
+            <span onclick="moveDown(this)">&#x25BC;</span>
+        </div>
     </div>
     `;
 
@@ -114,7 +196,7 @@ function hideInput(hideButtonElement) {
     if (hideButtonElement.classList.contains("disabled")) {
         hideButtonElement.classList.remove("disabled");
 
-        const inputOptionsContainer = hideButtonElement.parentNode.parentNode;
+        const inputOptionsContainer = hideButtonElement.closest('.input-item');
         inputOptionsContainer.classList.remove("disabled");
 
         const subInputsForInput = inputOptionsContainer.querySelectorAll("input");
@@ -124,7 +206,7 @@ function hideInput(hideButtonElement) {
     } else {
         hideButtonElement.classList.add("disabled");
 
-        const inputOptionsContainer = hideButtonElement.parentNode.parentNode;
+        const inputOptionsContainer = hideButtonElement.closest('.input-item');
         inputOptionsContainer.classList.add("disabled");
 
         const subInputsForInput = inputOptionsContainer.querySelectorAll("input");
@@ -179,9 +261,22 @@ function updateJsonWithUserInput() {
         inputOptions["title"] = inputTitleElement.value;
         inputOptions["default"] = defaultValueElement.value;
 
+        const inputTypeSelect = inputContainer.querySelector('.input-type-select');
+
+        inputOptions["type"] = inputTypeSelect.value;
+
+        const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-option-wrapper");
+
+        for (const inputOptionContainer of additionalInputOptions) {
+            const inputOptionElem = inputOptionContainer.querySelector('.additional-input-option');
+
+            inputOptions[inputOptionElem.getAttribute('data-key')] = inputOptionElem.value || null;
+        }
+
         inputOptionsList.push(inputOptions);
     });
 
+    workflowJson["_comfyuimini_meta"] = {};
     workflowJson["_comfyuimini_meta"]["title"] = document.getElementById('title-input').value || "Unnamed";
     workflowJson["_comfyuimini_meta"]["description"] = document.getElementById('description-input').value || "";
 
@@ -203,4 +298,20 @@ function saveToLocalStorage() {
     localStorage.setItem("workflows", JSON.stringify(workflows));
 
     location.href = "/";
+}
+
+function moveUp(element) {
+    let item = element.closest('.input-item');
+    let previousItem = item.previousElementSibling;
+    if (previousItem) {
+        item.parentNode.insertBefore(item, previousItem);
+    }
+}
+
+function moveDown(element) {
+    let item = element.closest('.input-item');
+    let nextItem = item.nextElementSibling;
+    if (nextItem) {
+        item.parentNode.insertBefore(nextItem, item);
+    }
 }

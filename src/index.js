@@ -62,7 +62,8 @@ async function checkForComfyUI() {
     }
 }
 
-function loadModelDirs() {
+function loadSelects() {
+    //Load models
     const modelDirsPath = path.join(__dirname, '..', 'model_dirs.json');
 
     if (!fs.existsSync(modelDirsPath)) {
@@ -76,12 +77,17 @@ function loadModelDirs() {
         return;
     }
 
-    global.modelDirs = modelDirsJson;
+    //Get additional selects
+    const additionalSelects = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'additional_selects.json')));
+
+    Object.assign(modelDirsJson, additionalSelects);
+
+    global.selects = additionalSelects;
 }
 
 checkForComfyUI();
 checkForWorkflowsFolder();
-loadModelDirs();
+loadSelects();
 
 app.listen(config.app_port, '0.0.0.0', () => {
     console.log(`✅ Running on http://localhost:${config.app_port}`);

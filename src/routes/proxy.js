@@ -68,10 +68,16 @@ function recursiveFolderRead(folderPath, basePath, accepted_exts, fileList = [])
     return fileList;
 }
 
+router.get('/modeltypes', (req, res) => {
+    const modelTypesList = Object.keys(global.selects);
+
+    res.json(modelTypesList);
+});
+
 router.get('/listmodels/:modelType', (req, res) => {
     const modelType = req.params.modelType;
 
-    const modelTypeInfo = global.modelDirs[modelType];
+    const modelTypeInfo = global.selects[modelType];
 
     if (!modelTypeInfo) {
         res.send("Model config not found for" + modelType).status(400);
