@@ -89,16 +89,17 @@ async function renderInput(inputOptions) {
         html = `
         <div class="workflow-input-container">
             <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-            <input 
-                id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" 
-                type="${type}" 
-                placeholder="${inputOptions.default}" 
-                class="workflow-input" 
-                value="${inputOptions.default}"
-                ${inputOptions.step !== undefined ? `step="${inputOptions.step}"` : ''}
-                ${inputOptions.min !== undefined ? `min="${inputOptions.min}"` : ''} 
-                ${inputOptions.max !== undefined ? `max="${inputOptions.max}"` : ''}
-            >
+            <div class="inner-input-wrapper">
+                <input 
+                    id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" 
+                    type="${type}" 
+                    placeholder="${inputOptions.default}" 
+                    class="workflow-input ${inputOptions.show_randomise_toggle ? "has-random-toggle" : ""}" 
+                    value="${inputOptions.default}"
+                    ${inputOptions.step !== undefined ? `step="${inputOptions.step}"` : ''}
+                    ${inputOptions.min !== undefined ? `min="${inputOptions.min}"` : ''} 
+                    ${inputOptions.max !== undefined ? `max="${inputOptions.max}"` : ''}
+                >
         `;
 
         if (inputOptions.show_randomise_toggle) {
@@ -107,7 +108,7 @@ async function renderInput(inputOptions) {
             `;
         }
 
-        html += `</div>`;
+        html += `</div></div>`;
     }
 
     return html;
