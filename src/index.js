@@ -3,6 +3,7 @@ const config = require('../config.json');
 const path = require('path');
 const axios = require("axios");
 const fs = require('fs');
+const os = require('os');
 
 const mainRouter = require('./routes/mainRouter');
 const cuiProxyRouter = require('./routes/proxy');
@@ -89,6 +90,26 @@ checkForComfyUI();
 checkForWorkflowsFolder();
 loadSelects();
 
+function getLocalIP() {
+    function isVirtualNetwork(interfaceName) {
+        const commonVirtualNetworkNames = ['vmnet', 'vboxnet', 'vethernet', 'virtualbox', 'vmware'];
+        return commonVirtualNetworkNames.some(virtualNet => interfaceName.toLowerCase().startsWith(virtualNet));
+    }
+    
+    const networkInterfaces = os.networkInterfaces();
+    for (const interfaceName in networkInterfaces) {
+        const addresses = networkInterfaces[interfaceName];
+
+        for (const address of addresses) {
+            if (address.family === 'IPv4' && !address.internal && !isVirtualNetwork(interfaceName)) {
+                return address.address;
+            }
+        }
+    }
+
+    return '127.0.0.1';
+}
+
 app.listen(config.app_port, '0.0.0.0', () => {
-    console.log(`✅ Running on http://localhost:${config.app_port}`);
+    console.log(`✅ Running on http://${getLocalIP()}:${config.app_port}`);
 });
