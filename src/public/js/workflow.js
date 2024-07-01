@@ -115,6 +115,8 @@ async function renderInput(inputOptions) {
 }
 
 function randomiseInput(inputId) {
+    //navigator.vibrate(10);
+    // implement later with proper settings page
     const input = document.getElementById(inputId);
 
     const min = parseFloat(input.getAttribute('min'));
