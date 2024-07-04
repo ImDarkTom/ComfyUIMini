@@ -1,9 +1,7 @@
 const axios = require('axios');
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-
+const { loadModelTypes } = require('../utils');
 const config = require('../../config.json');
 
 router.use(express.json());
@@ -44,30 +42,6 @@ router.get('/image', async (req, res) => {
     res.send(response.data);
 });
 
-function recursiveFolderRead(folderPath, basePath, accepted_exts, fileList = []) {
-    const files = fs.readdirSync(folderPath);
-
-    files.forEach((file) => {
-        const filePath = path.join(folderPath, file);
-
-        const stats = fs.statSync(filePath);
-
-        if (stats.isDirectory()) {
-            recursiveFolderRead(filePath, basePath, accepted_exts, fileList);
-        } else if (stats.isFile()) {
-
-            const fileExt = path.extname(file).toLowerCase();
-
-            if (accepted_exts.includes(fileExt)) {
-                const relativePath = path.relative(basePath, filePath);
-                fileList.push(relativePath);
-            }
-        }
-    });
-
-    return fileList;
-}
-
 router.get('/modeltypes', (req, res) => {
     const modelTypesList = Object.keys(global.selects);
 
@@ -84,18 +58,16 @@ router.get('/listmodels/:modelType', (req, res) => {
         return;
     }
 
+    res.json(modelTypeInfo);
+});
+
+router.post('/reloadmodels', (req, res) => {
     try {
-        const fileList = recursiveFolderRead(modelTypeInfo.folder_path, modelTypeInfo.folder_path, modelTypeInfo.filetypes);
-
-        res.json(fileList).status(200);
+        loadModelTypes();
+        res.send("Refreshed model list").status(200);
     } catch (err) {
-        if (err.code == "ENOENT") {
-            res.send(`Invalid directory for ${modelType} in model_dirs.json`).status(400);
-            return;
-        }
-
-        res.send("Internal Server Error").status(500);
-        console.error(err);
+        res.send("Internal Server Error").send(500);
+        console.error("Error when refreshing models list: ", err);
     }
 });
 
