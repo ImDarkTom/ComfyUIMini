@@ -22,7 +22,7 @@ router.get('/workflow/:type/:identifier', (req, res) => {
 
     switch (workflowType) {
         case "local":
-            res.render('pages/workflow', {workflowTitle: workflowIdentifier, workflowText: ""});
+            res.render('pages/workflow', {workflowTitle: workflowIdentifier, workflowText: "", theme: req.theme});
             break;
 
         case "server":
