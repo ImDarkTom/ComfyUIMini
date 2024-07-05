@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('../partials/head.ejs', { title: "Import a workflow" }) %>
+    <%- include('../partials/head', { title: "Import a workflow", theme }) %>
     <link rel="stylesheet" href="/css/import.css">
     <script src="/js/import.js" defer></script>
 </head>
 <body>
-    <%- include('../partials/nav', { title: "Import a workflow" }) %>
+    <%- include('../partials/page-title', { title: "Import a workflow" }) %>
     <div class="main-container">
         <div class="file-select-container">
             <input type="file" id="file-input" accept=".json">

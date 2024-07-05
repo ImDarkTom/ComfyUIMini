@@ -5,6 +5,7 @@ const { logSuccess } = require("./utils/logger");
 
 const mainRouter = require('./routes/mainRouter');
 const comfyUIRouter = require('./routes/comfyUIRouter');
+const settingsRouter = require('./routes/settingsRouter');
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use("/", mainRouter);
 app.use("/comfyui", comfyUIRouter);
+app.use('/setsetting', settingsRouter);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const { 

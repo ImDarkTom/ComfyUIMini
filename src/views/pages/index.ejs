@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('../partials/head', { title: "Home" }) %>
+    <%- include('../partials/head', { title: "Home", theme }) %>
     <link rel="stylesheet" href="/css/index.css">
     <script src="/js/index.js" defer></script>
 </head>
 <body>
-    <%- include('../partials/nav', { title: "My Workflows" }) %>
+    <%- include('../partials/nav') %>
     <div class="main-container">
         <div class="workflow-grid">
             <a href="/import" class="workflow-grid-link">

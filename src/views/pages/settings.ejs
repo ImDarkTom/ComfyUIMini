@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: "Settings", theme }) %>
+    <link rel="stylesheet" href="/css/settings.css">
+    <script src="/js/settings.js" defer></script>
+</head>
+<body>
+    <%- include('../partials/page-title', { title: "Settings" }) %>
+    <div class="main-container">
+        <div class="option-container">
+            <label for="select-theme">Theme</label>
+            <select id="select-theme" onchange="changeTheme(this)">
+                <option value="" disabled selected>Select a theme</option>
+                    <optgroup label="Dark">
+                        <option value="aurora">Aurora</option>
+                        <option value="dark">Dark (Default)</option>
+                        <option value="midnight">Midnight</option>
+                    </optgroup>
+                    <optgroup label="Light">
+                        <option value="citrus">Citrus</option>
+                        <option value="light">Light</option>
+                    </optgroup>
+            </select>
+        </div>
+        <hr>
+        <div class="option-container">
+            <input type="button" value="Reload models list" onclick="reloadModelsList()">
+        </div>
+    </div>
+</body>
+</html>

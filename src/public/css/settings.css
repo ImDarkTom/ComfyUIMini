@@ -1,0 +1,26 @@
+.option-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.option-container label {
+    font-size: 1.5rem;
+    padding-left: 1rem;
+}
+
+.option-container select, input {
+    background-color: var(--background-secondary-color);
+    color: var(--text-primary-color);
+    border: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+    margin: 1rem;
+    font-family: 'Futura', sans-serif;
+    font-size: 1.2rem;
+    border-radius: 0.5rem;
+}
+
+hr {
+    color: #777777;
+}
