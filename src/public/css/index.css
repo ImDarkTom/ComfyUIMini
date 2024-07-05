@@ -27,14 +27,30 @@
     user-select: none;
 }
 
+.workflow-item-icons {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    flex-direction: row;
+}
+
 .workflow-icon-container {
-    width: 35%;
-    height: 35%;
+    width: 50%;
+    height: 100%;
 }
 
 .workflow-icon {
     width: 100%;
     height: 100%;
+}
+
+.workflow-menu-icon {
+    width: 50%;
+    height: 100%;
+    font-size: 2rem;
+    text-align: end;
+    box-sizing: border-box;
+    padding: 1rem;
 }
 
 .workflow-title {

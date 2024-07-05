@@ -1,0 +1,114 @@
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.bottom-sheet-bg-overlay {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    background: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease-in;
+}
+
+
+.bottom-sheet-bg-overlay.fade-out {
+    opacity: 0;
+}
+
+.bottom-sheet-bg-overlay.fade-in {
+    opacity: 1;
+}
+
+.bottom-sheet-bg-overlay.disabled {
+    display: none;
+}
+
+.bottom-sheet-container {
+    background-color: var(--background-secondary-color);
+    position: sticky;
+    bottom: 0;
+    width: 100vw;
+    height: 40vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem 0.5rem 0 0;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    transition: transform 0.3s ease-in-out;
+}
+
+.bottom-sheet-container.slide-down {
+    animation: slideDown 0.3s forwards;
+}
+
+.bottom-sheet-container.slide-in {
+    animation: slideIn 0.3s forwards;
+}
+
+.bottom-sheet-container.disabled {
+    display: none;
+}
+
+.close-button {
+    height: 3rem;
+    width: 3rem;
+    font-size: 3rem;
+    text-align: center;
+    box-sizing: border-box;
+    margin-left: calc(100% - 3rem);
+    user-select: none;
+}
+
+.bottom-sheet-entries-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.bottom-sheet-entry {
+    width: 100%;
+    height: 5rem;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    padding: 1rem;
+    user-select: none;
+}
+
+.bottom-sheet-entry:active {
+    background-color: var(--background-primary-color);
+}
+
+.bottom-sheet-entry-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.bottom-sheet-entry-text {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding-left: 1rem;
+}
