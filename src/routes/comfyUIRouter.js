@@ -1,24 +1,11 @@
 const axios = require('axios');
 const express = require('express');
-const router = express.Router();
 const { loadModelTypes } = require('../utils');
 const config = require('../../config.json');
 
+const router = express.Router();
+
 router.use(express.json());
-
-router.post('/prompt', async (req, res) => {
-    const workflowJson = req.body;
-
-    const postContents = { 'prompt': workflowJson };
-
-    const cuiResponse = await axios.post(`${config.comfyui_url}/prompt`, postContents, {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-
-    res.json(cuiResponse.data).status(cuiResponse.status);
-});
 
 router.get('/history/:promptId', async (req, res) => {
     const promptId = req.params.promptId;

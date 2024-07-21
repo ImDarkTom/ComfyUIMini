@@ -3,6 +3,10 @@ const workflowTitle = document.body.getAttribute('data-workflow-title');
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container')
 
+const totalImagesProgressInnerElem = document.querySelector('.total-images-progress .progress-bar-inner');
+const totalImagesProgressTextElem = document.querySelector('.total-images-progress .progress-bar-text');
+const currentImageProgressInnerElem = document.querySelector('.current-image-progress .progress-bar-inner');
+const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 
 function loadWorkflow() {
     let currentWorkflow = "";
@@ -155,67 +159,65 @@ async function runWorkflow() {
         workflow[nodeId].inputs[nodeInputName] = inputValue;
     }
 
-    const response = await fetch('/comfyui/prompt', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(workflow)
-    });
+    const ws = new WebSocket('ws://127.0.0.1:3000/ws');
 
-    const promptId = (await response.json())["prompt_id"];
-
-    const generatedImagesJson = await generationFinish(promptId);
-
-    outputImagesContainer.innerHTML = "";
-
-    for (const imageJson of generatedImagesJson) {
-        const imageHtml = jsonToImageElem(imageJson);
-
-        outputImagesContainer.innerHTML += imageHtml;
+    ws.onopen = () => {
+        console.log("Connected to WebSocket client");
+        
+        ws.send(JSON.stringify(workflow));
     }
+
+    let imageCount = 1; //0
+    let completedImageCount = 1; // 0
+
+    ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+
+        if (message.type === 'progress') {
+            if (message.data.value === message.data.max) {
+                // completedImageCount += 1; todo
+
+                const allImagesProgress = `${Math.round((completedImageCount / imageCount) * 100)}%`;
+
+                totalImagesProgressTextElem.textContent = allImagesProgress;
+                totalImagesProgressInnerElem.style.width = allImagesProgress;
+            }
+
+            const currentImageProgress = `${Math.round((message.data.value / message.data.max) * 100)}%`;
+
+            currentImageProgressTextElem.textContent = currentImageProgress;
+            currentImageProgressInnerElem.style.width = currentImageProgress;
+        } else if (message.type === "status") { 
+
+            if (message.data.status.exec_info.queue_remaining == 1) {
+                //imageCount += 1; todo
+            }
+
+        } else if (message.status === 'completed') {
+
+            const allImagesJson = message.data;
+
+            const allImageUrls = Object.values(allImagesJson).map((item) => {
+                return item[0];
+            });
+            
+
+            outputImagesContainer.innerHTML = "";
+
+            for (const imageUrl of allImageUrls) {
+                const imageHtml = urlToImageElem(imageUrl);
+
+                outputImagesContainer.innerHTML += imageHtml;
+            }
+
+        } else if (message.status === 'error') {
+            console.error('Error:', message.error);
+        }
+    };
 }
 
-function jsonToImageElem(imageJson) {
-    const imageUrl = generateImageUrl(imageJson.filename, imageJson.subfolder, imageJson.type);
-
+function urlToImageElem(imageUrl) {
     return `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="output-image"></a>`;
-}
-
-function generateImageUrl(filename, subfolder = "", type) {
-    return `/comfyui/image?filename=${filename}&subfolder=${subfolder}&type=${type}`
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function generationFinish(promptId) {
-    // Redo with WS e.g https://github.com/comfyanonymous/ComfyUI/blob/master/script_examples/websockets_api_example_ws_images.py
-    while (true) {
-        const response = await fetch(`/comfyui/history/${promptId}`, {
-            method: 'GET'
-        });
-
-        const historyJson = (await response.json())[promptId];
-
-        if (!historyJson) {
-            await sleep(250);
-            continue;
-        }
-
-        const completed = historyJson["status"]["completed"];
-
-        if (completed) {
-            const outputs = historyJson["outputs"];
-
-            const allImagesJson = Object.values(outputs).flatMap(item => 
-                item.images.map(image => image)
-            );
-
-            return allImagesJson;
-        }
-    }
 }
 
 loadWorkflow();

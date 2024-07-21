@@ -66,7 +66,6 @@ function loadLocalWorkflows() {
     for (const workflowText of workflowsList) {
         const workflowJson = JSON.parse(workflowText);
 
-        console.log(workflowJson);
         const title = workflowJson["_comfyuimini_meta"].title;
 
         const bottomSheetOptions = [
