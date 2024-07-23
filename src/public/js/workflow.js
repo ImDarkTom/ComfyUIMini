@@ -160,8 +160,6 @@ async function runWorkflow() {
     setProgressBar("current", "0%");
     setProgressBar("total", "0%");
 
-    outputImagesContainer.innerHTML = "Waiting...";
-
     const workflow = JSON.parse(document.body.getAttribute('data-workflowtext'));
 
     // ComfyUI can't process the workflow if it contains the additional metadata.
@@ -180,7 +178,7 @@ async function runWorkflow() {
 
     ws.send(JSON.stringify(workflow));
 
-    let imageCount = 0;
+    let totalImageCount = 0;
     let completedImageCount = 0;
     ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
@@ -189,7 +187,7 @@ async function runWorkflow() {
             if (message.data.value === message.data.max) {
                 completedImageCount += 1;
 
-                const allImagesProgress = `${Math.round((completedImageCount / imageCount) * 100)}%`;
+                const allImagesProgress = `${Math.round((completedImageCount / totalImageCount) * 100)}%`;
 
                 setProgressBar("total", allImagesProgress);
             }
@@ -198,8 +196,12 @@ async function runWorkflow() {
 
             setProgressBar("current", currentImageProgress);
         } else if (message.status === "total_images") {
-            imageCount = message.data;
+            totalImageCount = message.data;
 
+            if (totalImageCount !== undefined) {
+                outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
+            }
+            
         } else if (message.status === 'completed') {
             // --- If using cached image and progress isnt set throughout generation
             setProgressBar("current", "100%");
