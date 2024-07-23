@@ -140,7 +140,26 @@ function randomiseInput(inputId) {
     input.value = randomNumber;
 }
 
+function setProgressBar(type, percentage) {
+    if (type == "total") {
+        totalImagesProgressTextElem.textContent = percentage;
+        totalImagesProgressInnerElem.style.width = percentage;
+    } else if (type == "current") {
+        currentImageProgressTextElem.textContent = percentage;
+        currentImageProgressInnerElem.style.width = percentage;
+    }
+}
+
+const ws = new WebSocket(`ws://${window.location.host}/ws`);
+
+ws.onopen = () => {
+    console.log("Connected to WebSocket client");
+}
+
 async function runWorkflow() {
+    setProgressBar("current", "0%");
+    setProgressBar("total", "0%");
+
     outputImagesContainer.innerHTML = "Waiting...";
 
     const workflow = JSON.parse(document.body.getAttribute('data-workflowtext'));
@@ -159,41 +178,33 @@ async function runWorkflow() {
         workflow[nodeId].inputs[nodeInputName] = inputValue;
     }
 
-    const ws = new WebSocket('ws://127.0.0.1:3000/ws');
+    ws.send(JSON.stringify(workflow));
 
-    ws.onopen = () => {
-        console.log("Connected to WebSocket client");
-        
-        ws.send(JSON.stringify(workflow));
-    }
-
-    let imageCount = 1; //0
-    let completedImageCount = 1; // 0
-
+    let imageCount = 0;
+    let completedImageCount = 0;
     ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
         if (message.type === 'progress') {
             if (message.data.value === message.data.max) {
-                // completedImageCount += 1; todo
+                completedImageCount += 1;
 
                 const allImagesProgress = `${Math.round((completedImageCount / imageCount) * 100)}%`;
 
-                totalImagesProgressTextElem.textContent = allImagesProgress;
-                totalImagesProgressInnerElem.style.width = allImagesProgress;
+                setProgressBar("total", allImagesProgress);
             }
 
             const currentImageProgress = `${Math.round((message.data.value / message.data.max) * 100)}%`;
 
-            currentImageProgressTextElem.textContent = currentImageProgress;
-            currentImageProgressInnerElem.style.width = currentImageProgress;
-        } else if (message.type === "status") { 
-
-            if (message.data.status.exec_info.queue_remaining == 1) {
-                //imageCount += 1; todo
-            }
+            setProgressBar("current", currentImageProgress);
+        } else if (message.status === "total_images") {
+            imageCount = message.data;
 
         } else if (message.status === 'completed') {
+            // --- If using cached image and progress isnt set throughout generation
+            setProgressBar("current", "100%");
+            setProgressBar("total", "100%");
+            // ---
 
             const allImagesJson = message.data;
 

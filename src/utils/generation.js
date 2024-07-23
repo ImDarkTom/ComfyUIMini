@@ -29,13 +29,52 @@ async function getHistory(promptId) {
     return response.data;
 }
 
+async function getQueue() {
+    const response = await axios.get(`${config.comfyui_url}/queue`);
+
+    return response.data;
+}
+
+async function getOutputImages(promptId) {
+    const outputImages = {};
+
+    const history = await getHistory(promptId);
+    const historyOutputs = history[promptId].outputs;
+
+    for (const nodeId in historyOutputs) {
+        const nodeOutput = historyOutputs[nodeId];
+        if (nodeOutput.images) {
+            const imageUrls = await Promise.all(nodeOutput.images.map(async (image) => {
+                return await getImageUrl(image.filename, image.subfolder, image.type);
+            }));
+            outputImages[nodeId] = imageUrls;
+        }
+    }
+
+    return outputImages;
+}
+
 async function generateImage(workflowPrompt, wsClient) {
     const wsServer = new WebSocket(`${config.comfyui_ws_url}/ws?clientId=${clientId}`);
-    const outputImages = {};
 
     wsServer.on('open', async () => {
         const promptData = await queuePrompt(workflowPrompt);
         const promptId = promptData.prompt_id;
+
+        const queueJson = await getQueue();
+        let totalImages;
+
+        if (queueJson["queue_running"][0] === undefined) {
+            // Exact workflow was ran before and was cached by ComfyUI.
+            const cachedImages = await getOutputImages(promptId);
+
+            wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
+            
+        } else {
+            totalImages = queueJson["queue_running"][0][4].length;
+        }
+        
+        wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
 
         wsServer.on('message', async (data) => {
             const message = JSON.parse(data.toString());
@@ -51,18 +90,7 @@ async function generateImage(workflowPrompt, wsClient) {
         });
 
         wsServer.on('close', async () => {
-            const history = await getHistory(promptId);
-            const historyOutputs = history[promptId].outputs;
-
-            for (const nodeId in historyOutputs) {
-                const nodeOutput = historyOutputs[nodeId];
-                if (nodeOutput.images) {
-                    const imageUrls = await Promise.all(nodeOutput.images.map(async (image) => {
-                        return await getImageUrl(image.filename, image.subfolder, image.type);
-                    }));
-                    outputImages[nodeId] = imageUrls;
-                }
-            }
+            const outputImages = await getOutputImages(promptId);
 
             wsClient.send(JSON.stringify({ status: 'completed', data: outputImages }));
         });

@@ -58,4 +58,11 @@ router.post('/reloadmodels', (req, res) => {
     }
 });
 
+router.get('/queue', async (req, res) => {
+    const response = await axios.get(`${config.comfyui_url}/queue`);
+
+    res.send(response.data);
+});
+
+
 module.exports = router;
