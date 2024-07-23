@@ -1,10 +1,5 @@
 {
     "app_port": 3000,
     "comfyui_url": "http://127.0.0.1:8188",
-    "comfyui_ws_url": "ws://127.0.0.1:8188",
-    "optional_log": {
-        "generation_finish": true,
-        "queue_image": false
-    },
-    "use_log_emojis": false
+    "comfyui_ws_url": "ws://127.0.0.1:8188"
 }

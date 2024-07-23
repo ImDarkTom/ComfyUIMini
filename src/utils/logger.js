@@ -1,42 +1,17 @@
-const config = require('../../config.json');
-
-let logPreprends = {
-    "info": "INFO",
-    "success": "SUCCESS",
-    "warn": "WARN",
-    "optional": "OPTIONAL",
-};
-
-if (config.use_log_emojis) {
-    logPreprends = {
-        "info": "ℹ",
-        "success": "✅",
-        "warn": "⚠",
-        "optional": "OPTIONAL ℹ",
-    };
-}
-
 function logInfo(message) {
-    console.log(`[${logPreprends.info}] ${message}`);
+    console.log(`[INFO] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`[${logPreprends.success}] ${message}`);
+    console.log(`[SUCCESS] ${message}`);
 }
 
 function logWarning(message) {
-    console.log(`[${logPreprends.warn}] ${message}`);
-}
-
-function optionalLog(option, message) {
-    if (option === true) {
-        console.log(`[${logPreprends.optional}] ${message}`);
-    }
+    console.log(`[WARN] ${message}`);
 }
 
 module.exports = {
     logInfo,
     logSuccess,
-    logWarning,
-    optionalLog
+    logWarning
 }

@@ -2,7 +2,6 @@ const { default: axios } = require('axios');
 const config = require('../../config.json');
 const uuid = require('uuid');
 const WebSocket = require('ws');
-const { optionalLog } = require('./logger');
 
 const clientId = uuid.v4();
 
@@ -62,22 +61,19 @@ async function generateImage(workflowPrompt, wsClient) {
         const promptData = await queuePrompt(workflowPrompt);
         const promptId = promptData.prompt_id;
 
-        optionalLog(config.optional_log.queue_image, "Queued image.");
-
         const queueJson = await getQueue();
         let totalImages;
 
         if (queueJson["queue_running"][0] === undefined) {
             // Exact workflow was ran before and was cached by ComfyUI.
             const cachedImages = await getOutputImages(promptId);
-            optionalLog(config.optional_log.generation_finish, "Using cached generation result.");
 
             wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
             
         } else {
             totalImages = queueJson["queue_running"][0][4].length;
         }
-
+        
         wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
 
         wsServer.on('message', async (data) => {
@@ -85,7 +81,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
             if (message.type === "status") {
                 if (message.data.status.exec_info.queue_remaining == 0) {
-                    optionalLog(config.optional_log.generation_finish, "Image generation finished.");
+                    console.log("Generation finished")
                     wsServer.close();
                 }
             }
