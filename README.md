@@ -44,6 +44,3 @@ After a sucessful run you should see text along the lines of `Running on http://
 If you find this to be useful you can donate at the button below.
 
 <a href="https://www.buymeacoffee.com/ImDarkTom" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-## Coming Soon
-- Settings page
-- Better image viewing page
