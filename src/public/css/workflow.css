@@ -29,6 +29,8 @@ textarea.workflow-input {
     height: 5rem;
     resize: vertical;
     font-size: 1rem;
+    border-radius: 0.5rem 0.5rem 0 0.5rem;
+    min-height: 2.2rem;
 }
 
 .inner-input-wrapper {

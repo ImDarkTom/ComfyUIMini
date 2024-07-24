@@ -230,7 +230,8 @@ async function runWorkflow() {
             }
 
         } else if (message.status === 'error') {
-            console.error('Error:', message.error);
+            console.error('Error:', message.message);
+            openPopupWindow(message.message);
         }
     };
 }

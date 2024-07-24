@@ -2,7 +2,7 @@ const { default: axios } = require('axios');
 const config = require('../../config.json');
 const uuid = require('uuid');
 const WebSocket = require('ws');
-const { optionalLog } = require('./logger');
+const { optionalLog, logWarning } = require('./logger');
 
 const clientId = uuid.v4();
 
@@ -59,46 +59,61 @@ async function generateImage(workflowPrompt, wsClient) {
     const wsServer = new WebSocket(`${config.comfyui_ws_url}/ws?clientId=${clientId}`);
 
     wsServer.on('open', async () => {
-        const promptData = await queuePrompt(workflowPrompt);
-        const promptId = promptData.prompt_id;
+        try {
+            const promptData = await queuePrompt(workflowPrompt);
+            const promptId = promptData.prompt_id;
 
-        optionalLog(config.optional_log.queue_image, "Queued image.");
+            optionalLog(config.optional_log.queue_image, "Queued image.");
 
-        const queueJson = await getQueue();
-        let totalImages;
+            const queueJson = await getQueue();
+            let totalImages;
 
-        if (queueJson["queue_running"][0] === undefined) {
-            // Exact workflow was ran before and was cached by ComfyUI.
-            const cachedImages = await getOutputImages(promptId);
-            optionalLog(config.optional_log.generation_finish, "Using cached generation result.");
+            if (queueJson["queue_running"][0] === undefined) {
+                // Exact workflow was ran before and was cached by ComfyUI.
+                const cachedImages = await getOutputImages(promptId);
+                optionalLog(config.optional_log.generation_finish, "Using cached generation result.");
 
-            wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
-            
-        } else {
-            totalImages = queueJson["queue_running"][0][4].length;
-        }
-
-        wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
-
-        wsServer.on('message', async (data) => {
-            const message = JSON.parse(data.toString());
-
-            if (message.type === "status") {
-                if (message.data.status.exec_info.queue_remaining == 0) {
-                    optionalLog(config.optional_log.generation_finish, "Image generation finished.");
-                    wsServer.close();
-                }
+                wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
+                
+            } else {
+                totalImages = queueJson["queue_running"][0][4].length;
             }
 
-            wsClient.send(JSON.stringify(message));
-        });
+            wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
 
-        wsServer.on('close', async () => {
-            const outputImages = await getOutputImages(promptId);
+            wsServer.on('message', async (data) => {
+                const message = JSON.parse(data.toString());
 
-            wsClient.send(JSON.stringify({ status: 'completed', data: outputImages }));
-        });
+                if (message.type === "status") {
+                    if (message.data.status.exec_info.queue_remaining == 0) {
+                        optionalLog(config.optional_log.generation_finish, "Image generation finished.");
+                        wsServer.close();
+                    }
+                }
+
+                wsClient.send(JSON.stringify(message));
+            });
+
+            wsServer.on('close', async () => {
+                const outputImages = await getOutputImages(promptId);
+
+                wsClient.send(JSON.stringify({ status: 'completed', data: outputImages }));
+            });
+        } catch (error) {
+            console.error("Unknown error when generating image:", error);
+            wsClient.send(JSON.stringify({ status: 'error', message: "Unknown error when generating image. Check console for more information." }));
+        }
     });
+
+    wsServer.on('error', (error) => {
+        if (error.code === "ECONNREFUSED") {
+            logWarning(`Could not connect to ComfyUI when attempting to generate image: ${error}`);
+            wsClient.send(JSON.stringify({ status: 'error', message: 'Could not connect to ComfyUI. Check console for more information.' }));
+        } else {
+            console.error("WebSocket error when generating image:", error);
+            wsClient.send(JSON.stringify({ status: 'error', message: 'Unknown WebSocket error when generating image. Check console for more information.' }));
+        }
+    })
 
 }
 
