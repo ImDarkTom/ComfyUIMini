@@ -67,6 +67,10 @@ body {
     color: var(--text-primary-color);
 }
 
+button {
+	font-family: 'Futura', sans-serif;
+}
+
 /* nav */
 .nav-container {
 	display: flex;

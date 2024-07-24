@@ -8,6 +8,8 @@ const totalImagesProgressTextElem = document.querySelector('.total-images-progre
 const currentImageProgressInnerElem = document.querySelector('.current-image-progress .progress-bar-inner');
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 
+const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
+
 function loadWorkflow() {
     let currentWorkflow = "";
     const workflowTextAttrib = document.body.getAttribute('data-workflowtext');
@@ -183,6 +185,7 @@ async function runWorkflow() {
     }
 
     ws.send(JSON.stringify(workflow));
+    cancelGenerationButtonElem.classList.remove('disabled');
 
     let totalImageCount = 0;
     let completedImageCount = 0;
@@ -214,6 +217,8 @@ async function runWorkflow() {
             setProgressBar("total", "100%");
             // ---
 
+            cancelGenerationButtonElem.classList.add('disabled');
+
             const allImagesJson = message.data;
 
             const allImageUrls = Object.values(allImagesJson).map((item) => {
@@ -234,6 +239,15 @@ async function runWorkflow() {
             openPopupWindow(message.message);
         }
     };
+}
+
+function cancelRun() {
+    if (cancelGenerationButtonElem.classList.contains('disabled')) {
+        return;
+    }
+
+    fetch('/comfyui/interrupt');
+    cancelGenerationButtonElem.classList.add('disabled');
 }
 
 function urlToImageElem(imageUrl) {

@@ -64,5 +64,11 @@ router.get('/queue', async (req, res) => {
     res.send(response.data);
 });
 
+router.get('/interrupt', async (req, res) => {
+    const response = await axios.post(`${config.comfyui_url}/interrupt`);
+
+    res.send(response.data);
+});
+
 
 module.exports = router;

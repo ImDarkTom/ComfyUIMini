@@ -87,6 +87,25 @@ textarea.workflow-input {
     user-select: none;
 }
 
+.cancel-run-button {
+    width: 100%;
+    height: 3rem;
+    background-color: var(--background-secondary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 0.5rem;
+    border: 0;
+    color: var(--text-primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.cancel-run-button.disabled {
+    filter: brightness(0.75);
+}
+
 .output-images-container {
     width: 100%;
 }
