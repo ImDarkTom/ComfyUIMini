@@ -22,8 +22,11 @@
             </div>
             <h2 class="category-title">Inputs</h2>
             <div class="inputs-container"></div>
-            <input type="button" value="Save" onclick="saveToLocalStorage()">
-            <input type="button" value="Download" onclick="downloadModifiedJson()">
+            <div class="export-buttons">
+                <input type="button" value="Save to browser" onclick="saveToLocalStorage()">
+                <div class="buttons-divider"></div>
+                <input type="button" value="Download" onclick="downloadModifiedJson()">
+            </div>
         </div>
     </div>
 </body>

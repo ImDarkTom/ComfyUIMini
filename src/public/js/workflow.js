@@ -73,6 +73,13 @@ async function renderInput(inputOptions) {
         });
 
         html += "</select>"
+    
+    } else if (inputOptions.type === "text") {
+        html = `
+        <div class="workflow-input-container">
+            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
+            <textarea id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">${inputOptions.default}</textarea>
+        `;
     } else {
 
         let type;
@@ -84,7 +91,6 @@ async function renderInput(inputOptions) {
             case "float":
                 type = "number"
                 break;
-            case "text":
             default:
                 type = "text"
                 break;

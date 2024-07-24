@@ -84,10 +84,10 @@ function renderAllInputs(workflowJson) {
 
             const inputConfig = getInputConfig(nodeId, key);
 
-            if (inputConfig) {
-                renderInput(inputConfig.title, inputConfig.default, nodeId, key);
+            if (inputConfig && !inputConfig.disabled) {
+                renderInput({title: inputConfig.title, defaultValue: inputConfig.default, nodeId: nodeId, inputName: key, type: inputConfig.type});
             } else {
-                renderInput(`${nodeId}_${key}`, value, nodeId, key);
+                renderInput({title: `${nodeId}_${key}`, defaultValue: value, nodeId: nodeId, inputName: key});
             }
         }
     }
@@ -100,7 +100,7 @@ function inputTypeEventListener() {
         inputTypeInput.addEventListener('change', async (e) => {
             const changedTo = e.target.value;
 
-            const additionalInputOptionsContainer = e.target.parentNode.querySelector('.additional-input-options');
+            const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
 
             switch (changedTo) {
                 case "text":
@@ -164,27 +164,34 @@ function inputTypeEventListener() {
     })
 }
 
-function renderInput(defaultLabel, defaultValue, nodeId, inputName) {
+let inputCount = 0;
+function renderInput(inputData) {
+    // title, defaultValue, nodeId, inputName, type
+    inputCount += 1;
+
     const html = `
-    <div class="input-item" data-node-id="${nodeId}" data-node-input-name="${inputName}">
+    <div class="input-item" data-node-id="${inputData.nodeId}" data-node-input-name="${inputData.inputName}">
         <div class="options-container">
-            <select class="input-type-select">
-                <option value="text">Text</option>
-                <option value="integer">Integer</option>
-                <option value="float">Float</option>
-                <option value="select">Select (from model list)</option>
-            </select>
-            <div class="input-title-container">
-                <div class="icon hide hide-input-button" onclick="hideInput(this)"></div>
-                <input type="text" placeholder="${defaultLabel}" value="${defaultLabel}" id="label-${defaultLabel}" class="workflow-input workflow-input-title">
+            <div class="input-top-container">
+                <span class="input-counter">${inputCount}.</span>
+                <div class="icon eye hide-input-button" onclick="hideInput(this)"></div>
+                <select class="input-type-select">
+                    <option value="" disabled selected>(Choose input type)</option>
+                    <option value="text">Text</option>
+                    <option value="integer">Integer</option>
+                    <option value="float">Float</option>
+                    <option value="select">Select</option>
+                </select>
             </div>
-            <label for="input-${defaultLabel}">Default value</label>
-            <input type="text" placeholder="${defaultValue}" value="${defaultValue}" id="input-${defaultLabel}" class="workflow-input workflow-input-default">
+            <label for="label-${inputData.title}">Title</label>
+            <input type="text" placeholder="${inputData.title}" value="${inputData.title}" id="label-${inputData.title}" class="workflow-input workflow-input-title">
+            <label for="input-${inputData.title}">Default value</label>
+            <input type="text" placeholder="${inputData.defaultValue}" value="${inputData.defaultValue}" id="input-${inputData.title}" class="workflow-input workflow-input-default">
             <div class="additional-input-options"></div>
         </div>
         <div class="move-arrows-container">
-            <span onclick="moveUp(this)">&#x25B2;</span>
-            <span onclick="moveDown(this)">&#x25BC;</span>
+            <span onclick="moveUp(this)" class="move-arrow-up">&#x25B2;</span>
+            <span onclick="moveDown(this)" class="move-arrow-down">&#x25BC;</span>
         </div>
     </div>
     `;
@@ -193,49 +200,29 @@ function renderInput(defaultLabel, defaultValue, nodeId, inputName) {
 }
 
 function hideInput(hideButtonElement) {
-    if (hideButtonElement.classList.contains("disabled")) {
-        hideButtonElement.classList.remove("disabled");
+    if (hideButtonElement.classList.contains("hide")) {
+        hideButtonElement.classList.add("eye");
+        hideButtonElement.classList.remove("hide");
 
         const inputOptionsContainer = hideButtonElement.closest('.input-item');
         inputOptionsContainer.classList.remove("disabled");
 
-        const subInputsForInput = inputOptionsContainer.querySelectorAll("input");
+        const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
         subInputsForInput.forEach(element => {
             element.removeAttribute("disabled");
         });
     } else {
-        hideButtonElement.classList.add("disabled");
+        hideButtonElement.classList.remove("eye");
+        hideButtonElement.classList.add("hide");
 
         const inputOptionsContainer = hideButtonElement.closest('.input-item');
         inputOptionsContainer.classList.add("disabled");
 
-        const subInputsForInput = inputOptionsContainer.querySelectorAll("input");
+        const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
         subInputsForInput.forEach(element => {
             element.setAttribute("disabled", true);
         })
     }
-}
-
-function downloadModifiedJson() {
-    if (!workflowJson) {
-        return alert("No file selected.")
-    }
-    
-    const newJson = updateJsonWithUserInput();
-
-    const jsonString = JSON.stringify(newJson, null, 2);
-
-    const blob = new Blob([jsonString], { type: 'application/json' });
-
-    const link = document.createElement('a');
-    link.download = 'workflow.json';
-    link.href = window.URL.createObjectURL(blob);
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
 }
 
 function updateJsonWithUserInput() {
@@ -243,25 +230,46 @@ function updateJsonWithUserInput() {
 
     const allInputs = inputsContainer.querySelectorAll('.input-item');
 
-    allInputs.forEach(inputContainer => {
+    for (const inputContainer of allInputs) {
         const inputNodeId = inputContainer.getAttribute("data-node-id");
         const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
-
-        let inputOptions = {};
-
-        if (inputContainer.classList.contains('disabled')) {
-            inputOptions["disabled"] = true;
-        }
 
         const inputTitleElement = inputContainer.querySelector('.workflow-input-title');
         const defaultValueElement = inputContainer.querySelector('.workflow-input-default');
 
+        let inputOptions = {};
         inputOptions["node_id"] = inputNodeId;
         inputOptions["input_name_in_node"] = inputNameInNode;
+
+        if (inputContainer.classList.contains('disabled')) {
+            inputOptions["disabled"] = true;
+            inputOptionsList.push(inputOptions);
+            continue;
+        }
+
         inputOptions["title"] = inputTitleElement.value;
         inputOptions["default"] = defaultValueElement.value;
 
         const inputTypeSelect = inputContainer.querySelector('.input-type-select');
+
+        if (inputTypeSelect.value == "") {
+            alert(`Input type for "${inputTitleElement.value}" not selected.`);
+            return "";
+        }
+
+        if (inputTypeSelect.value == "integer" || inputTypeSelect.value == "float") {
+            if (isNaN(defaultValueElement.value)) {
+                alert(`Default value for "${inputTitleElement.value}" is not a number.`);
+                return "";
+            }
+        } 
+        
+        if (inputTypeSelect.value == "integer") {
+            if (Number.isInteger(defaultValueElement.value)) {
+                alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
+                return "";
+            }
+        }
 
         inputOptions["type"] = inputTypeSelect.value;
 
@@ -270,11 +278,23 @@ function updateJsonWithUserInput() {
         for (const inputOptionContainer of additionalInputOptions) {
             const inputOptionElem = inputOptionContainer.querySelector('.additional-input-option');
 
-            inputOptions[inputOptionElem.getAttribute('data-key')] = inputOptionElem.value || null;
+            if (inputOptionElem.value === null || 
+                inputOptionElem.value === "" || 
+                !inputOptionElem.checked) {
+                continue;
+            }
+
+            if (inputOptionElem.type === "checkbox") {
+                // We have already skipped if checkbox value is false, therefore it can only be true
+                inputOptions[inputOptionElem.getAttribute('data-key')] = true;
+                continue;
+            }
+
+            inputOptions[inputOptionElem.getAttribute('data-key')] = inputOptionElem.value;
         }
 
         inputOptionsList.push(inputOptions);
-    });
+    };
 
     workflowJson["_comfyuimini_meta"] = {};
     workflowJson["_comfyuimini_meta"]["title"] = document.getElementById('title-input').value || "Unnamed";
@@ -292,12 +312,42 @@ function saveToLocalStorage() {
 
     const newJson = updateJsonWithUserInput();
 
+    if (newJson == "") {
+        return;
+    }
+    
     const workflows = JSON.parse(localStorage.getItem("workflows")) || [];
     workflows.push(JSON.stringify(newJson))
 
     localStorage.setItem("workflows", JSON.stringify(workflows));
 
     location.href = "/";
+}
+
+function downloadModifiedJson() {
+    if (!workflowJson) {
+        return alert("No file selected.")
+    }
+    
+    const newJson = updateJsonWithUserInput();
+
+    if (newJson == "") {
+        return;
+    }
+
+    const jsonString = JSON.stringify(newJson, null, 2);
+
+    const blob = new Blob([jsonString], { type: 'application/json' });
+
+    const link = document.createElement('a');
+    link.download = 'workflow.json';
+    link.href = window.URL.createObjectURL(blob);
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
 }
 
 function moveUp(element) {

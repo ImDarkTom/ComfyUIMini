@@ -56,18 +56,24 @@
     border-radius: 0.5rem;
 }
 
-.inputs-container input {
+.inputs-container input,
+.additional-input-options select {
     background-color: var(--background-tertiary-color);
     color: var(--text-secondary-color);
     border: 0;
     padding: 0.5rem;
     border-radius: 0.5rem;
     margin-top: 0.1rem;
+    width: 100%;
 }
 
 .input-type-select {
-    width: 100%;
-    margin-bottom: 1ch;
+    flex: 1;
+    background: var(--background-secondary-color);
+    color: var(--text-primary-color);
+    border: none;
+    box-shadow: 0px -1px 0px 0px var(--text-primary-color) inset;
+    font-weight: bold;
 }
 
 .move-arrows-container {
@@ -86,9 +92,31 @@
     font-size: 2rem;
 }
 
-.input-title-container {
+.move-arrow-down {
+    box-shadow: 0px 1px 0px 0px var(--text-primary-color) inset;
+}
+
+.move-arrow-up {
+    box-shadow: 0px -1px 0px 0px var(--text-primary-color) inset;
+}
+
+.input-top-container {
     width: 100%;
+    height: 2rem;
     display: flex;
+    flex-direction: row;
+}
+
+.input-counter {
+    color: var(--text-primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+    user-select: none;
 }
 
 .hide-input-button {
@@ -101,10 +129,6 @@
     filter: brightness(0.8);
 }
 
-.hide-input-button.disabled {
-    filter: brightness(0.5);
-}
-
 .workflow-input-title {
     height: 2rem;
     font-size: 1rem;
@@ -115,9 +139,33 @@
 .inputs-container label {
     display: block;
     width: 100%;
+    padding: 0.5rem 0 0.1rem 0;
 }
 
 .inputs-container input {
     width: 100%;
     box-sizing: border-box;
+}
+
+.export-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-top: 0.5rem;
+}
+
+.export-buttons input {
+    flex: 1;
+    border: none;
+    background-color: var(--background-tertiary-color);
+    color: var(--text-primary-color);
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.export-buttons .buttons-divider {
+    width: 0.5rem;
 }
