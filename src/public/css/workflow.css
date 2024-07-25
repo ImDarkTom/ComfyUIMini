@@ -67,7 +67,7 @@ textarea.workflow-input {
     width: 100%;
     box-sizing: border-box;
     padding: 1px;
-    background: linear-gradient(135deg, #910E92, #6962C3);
+    background: var(--accent-gradient);
     border-radius: 0.5rem;
 }
 
@@ -138,7 +138,7 @@ textarea.workflow-input {
     border-radius: 0.5rem;
     width: 0%;
     height: 100%;
-    background: linear-gradient(135deg, #910E92, #6962C3);
+    background: var(--accent-gradient);
     transition: width 0.5s ease;
 }
 

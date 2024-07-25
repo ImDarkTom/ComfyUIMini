@@ -1,7 +1,8 @@
 :root {
-    --text-primary-color: #111111;
-    --text-secondary-color: #222222;
-    --background-primary-color: #dddddd;
-    --background-secondary-color: #eeeeee;
+    --text-primary-color: #2c3e50;
+    --text-secondary-color: #34495e;
+    --background-primary-color: #ecf0f1;
+    --background-secondary-color: #bdc3c7;
     --background-tertiary-color: #ffffff;
+    --accent-gradient: linear-gradient(135deg, #910E92, #6962C3);
 }

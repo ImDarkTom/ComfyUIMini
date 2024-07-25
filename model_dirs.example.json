@@ -14,5 +14,9 @@
     "upscaler": {
         "folder_path": "path/to/upscaler/folder",
         "filetypes": [".pth"]
+    },
+    "lora": {
+        "folder_path": "path/to/lora/folder",
+        "filetypes": [".safetensors"]
     }
 }

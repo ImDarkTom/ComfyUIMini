@@ -4,4 +4,5 @@
     --background-primary-color: #111111;
     --background-secondary-color: #222222;
     --background-tertiary-color: #333333;
+    --accent-gradient: linear-gradient(135deg, #910E92, #6962C3);
 }

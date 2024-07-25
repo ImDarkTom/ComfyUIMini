@@ -1,0 +1,8 @@
+:root {
+    --text-primary-color: #111111;
+    --text-secondary-color: #222222;
+    --background-primary-color: #dddddd;
+    --background-secondary-color: #eeeeee;
+    --background-tertiary-color: #ffffff;
+    --accent-gradient: linear-gradient(135deg, #910E92, #6962C3);
+}
