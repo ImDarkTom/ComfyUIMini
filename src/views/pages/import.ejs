@@ -9,8 +9,8 @@
     <%- include('../partials/page-title', { title: "Import a workflow" }) %>
     <div class="main-container">
         <div class="file-select-container">
-            <input type="file" id="file-input" accept=".json">
-            <input type="button" value="Submit" id="submit-file">
+            <label for="file-input" class="file-input-label">Select a workflow file</label>
+            <input type="file" id="file-input" class="file-input" accept=".json">
         </div>
         <div class="edit-container">
             <div class="properties-container">

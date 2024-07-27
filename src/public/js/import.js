@@ -1,5 +1,5 @@
 const workflowFileInput = document.getElementById('file-input');
-const submitWorkflowFile = document.getElementById('submit-file');
+const workflowInputLabel = document.querySelector('.file-input-label');
 
 const inputsContainer = document.querySelector('.inputs-container')
 
@@ -10,7 +10,7 @@ const blankMetadata = {
 
 let workflowJson = null;
 
-submitWorkflowFile.addEventListener('click', async () => {
+workflowFileInput.addEventListener('change', () => {
     const titleInput = document.getElementById('title-input');
     const descriptionInput = document.getElementById('description-input');
 
@@ -23,6 +23,8 @@ submitWorkflowFile.addEventListener('click', async () => {
     if (file.type != "application/json") {
         return alert("Please select a valid JSON file.");
     }
+
+    workflowInputLabel.textContent = `Selected file: ${file.name}`;
 
     const reader = new FileReader();
     reader.readAsText(file);
@@ -44,11 +46,14 @@ submitWorkflowFile.addEventListener('click', async () => {
         descriptionInput.removeAttribute('disabled');
         descriptionInput.value = jsonMetadata.description;
 
+        inputsContainer.innerHTML = "";
+        inputCount = 0;
+
         renderAllInputs(workflowJson);
     });
 });
 
-function renderAllInputs(workflowJson) {
+async function renderAllInputs(workflowJson) {
     function getInputConfig(nodeId, inputName) {
         const cuiMiniMetadata = workflowJson["_comfyuimini_meta"];
 
@@ -85,14 +90,74 @@ function renderAllInputs(workflowJson) {
             const inputConfig = getInputConfig(nodeId, key);
 
             if (inputConfig && !inputConfig.disabled) {
-                renderInput({title: inputConfig.title, defaultValue: inputConfig.default, nodeId: nodeId, inputName: key, type: inputConfig.type});
+                await renderInput({...inputConfig, inputName: key, nodeId: nodeId});
             } else {
-                renderInput({title: `${nodeId}_${key}`, defaultValue: value, nodeId: nodeId, inputName: key});
+                await renderInput({...inputConfig, title: `${nodeId}_${key}`, default: value, nodeId: nodeId, inputName: key});
             }
         }
     }
 
     inputTypeEventListener();
+}
+
+async function renderAdditionalOptions(type, data) {
+    switch (type) {
+        case "text":
+            return "";
+        case "integer": 
+            const showRandomiseChecked = data.show_randomise_toggle === "on" || data.show_randomise_toggle === true ? "checked" : "" || "";
+
+            return `
+            <div class="additional-option-wrapper">
+                <label for="min-value">Min</label>
+                <input type="number" id="min-value" data-key="min" class="additional-input-option" value="${data.min || ""}">
+            </div>
+            <div class="additional-option-wrapper">
+                <label for="max-value">Max</label>
+                <input type="number" id="max-value" data-key="max" class="additional-input-option" value="${data.max || ""}">
+            </div>
+            <div class="additional-option-wrapper">
+                <label for="show-random-toggle-value">Show randomise value toggle?</label>
+                <input type="checkbox" id="show-random-toggle-value" data-key="show_randomise_toggle" class="additional-input-option" ${showRandomiseChecked}>
+            </div>
+            `;
+        case "float":
+            return `
+            <div class="additional-option-wrapper">
+                <label for="min-value">Min</label>
+                <input type="number" id="min-value" data-key="min" class="additional-input-option" value="${data.min || ""}">
+            </div>
+            <div class="additional-option-wrapper">
+                <label for="max-value">Max</label>
+                <input type="number" id="max-value" data-key="max" class="additional-input-option" value="${data.max || ""}">
+            </div>
+            <div class="additional-option-wrapper">
+                <label for="step-value">Step</label>
+                <input type="number" id="step-value" data-key="step" class="additional-input-option" value="${data.step || ""}">
+            </div>
+            `;
+        case "select":
+            const response = await fetch("/comfyui/modeltypes");
+            const modelTypesList = await response.json();
+
+            let html = `
+            <div class="additional-option-wrapper">
+                <label for="model-list-value">Model list</label>
+                <select id="model-list-value" data-key="select_list" class="additional-input-option">`;
+
+            const isSelected = (listType) => data.select_list == listType ? "selected" : "";
+
+            for (const type of modelTypesList) {
+                html += `<option value="${type}" ${isSelected(type)}>${type}</option>`;
+            }
+
+            html += `</select>
+            </div>`;
+
+            return html;
+        default:
+            return "";
+    }
 }
 
 function inputTypeEventListener() {
@@ -102,92 +167,37 @@ function inputTypeEventListener() {
 
             const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
 
-            switch (changedTo) {
-                case "text":
-                    additionalInputOptionsContainer.innerHTML = "";
-                    break;
-                case "integer": 
-                    additionalInputOptionsContainer.innerHTML = `
-                    <div class="additional-option-wrapper">
-                        <label for="min-value">Min</label>
-                        <input type="number" id="min-value" data-key="min" class="additional-input-option">
-                    </div>
-                    <div class="additional-option-wrapper">
-                        <label for="max-value">Max</label>
-                        <input type="number" id="max-value" data-key="max" class="additional-input-option">
-                    </div>
-                    <div class="additional-option-wrapper">
-                        <label for="show-random-toggle-value">Show randomise value toggle?</label>
-                        <input type="checkbox" id="show-random-toggle-value" data-key="show_randomise_toggle" class="additional-input-option">
-                    </div>
-                    `;
-                    break;
-                case "float":
-                    additionalInputOptionsContainer.innerHTML = `
-                    <div class="additional-option-wrapper">
-                        <label for="min-value">Min</label>
-                        <input type="number" id="min-value" data-key="min" class="additional-input-option">
-                    </div>
-                    <div class="additional-option-wrapper">
-                        <label for="max-value">Max</label>
-                        <input type="number" id="max-value" data-key="max" class="additional-input-option">
-                    </div>
-                    <div class="additional-option-wrapper">
-                        <label for="step-value">Step</label>
-                        <input type="number" id="step-value" data-key="step" class="additional-input-option">
-                    </div>
-                    `;
-                    break;
-                case "select":
-                    const response = await fetch("/comfyui/modeltypes");
-                    const modelTypesList = await response.json();
-
-                    let html = `
-                    <div class="additional-option-wrapper">
-                        <label for="model-list-value">Model list</label>
-                        <select id="model-list-value" data-key="select_list" class="additional-input-option">`;
-
-                    for (const type of modelTypesList) {
-                        html += `<option value="${type}">${type}</option>`;
-                    }
-
-                    html += `</select>
-                    </div>`;
-
-                    additionalInputOptionsContainer.innerHTML = html;
-                    break;
-                default:
-                    additionalInputOptionsContainer.innerHTML = "";
-                    break;
-            }
+            additionalInputOptionsContainer.innerHTML = await renderAdditionalOptions(changedTo, {});
         })
     })
 }
 
 let inputCount = 0;
-function renderInput(inputData) {
+async function renderInput(inputData) {
     // title, defaultValue, nodeId, inputName, type
     inputCount += 1;
+
+    const isSelected = (type) => inputData.type == type ? "selected" : "";
 
     const html = `
     <div class="input-item" data-node-id="${inputData.nodeId}" data-node-input-name="${inputData.inputName}">
         <div class="options-container">
             <div class="input-top-container">
                 <span class="input-counter">${inputCount}.</span>
-                <div class="icon eye hide-input-button" onclick="hideInput(this)"></div>
+                <div class="icon eye hide-input-button" id="hide-button-${inputData.nodeId}-${inputData.inputName}" onclick="hideInput(this)"></div>
                 <select class="input-type-select">
                     <option value="" disabled selected>(Choose input type)</option>
-                    <option value="text">Text</option>
-                    <option value="integer">Integer</option>
-                    <option value="float">Float</option>
-                    <option value="select">Select</option>
+                    <option value="text" ${isSelected("text")}>Text</option>
+                    <option value="integer" ${isSelected("integer")}>Integer</option>
+                    <option value="float" ${isSelected("float")}>Float</option>
+                    <option value="select" ${isSelected("select")}>Select</option>
                 </select>
             </div>
             <label for="label-${inputData.title}">Title</label>
             <input type="text" placeholder="${inputData.title}" value="${inputData.title}" id="label-${inputData.title}" class="workflow-input workflow-input-title">
             <label for="input-${inputData.title}">Default value</label>
-            <input type="text" placeholder="${inputData.defaultValue}" value="${inputData.defaultValue}" id="input-${inputData.title}" class="workflow-input workflow-input-default">
-            <div class="additional-input-options"></div>
+            <input type="text" placeholder="${inputData.default}" value="${inputData.default}" id="input-${inputData.title}" class="workflow-input workflow-input-default">
+            <div class="additional-input-options">${await renderAdditionalOptions(inputData.type, inputData)}</div>
         </div>
         <div class="move-arrows-container">
             <span onclick="moveUp(this)" class="move-arrow-up">&#x25B2;</span>
@@ -197,6 +207,10 @@ function renderInput(inputData) {
     `;
 
     inputsContainer.innerHTML += html;
+
+    if (inputData.disabled) {
+        hideInput(inputsContainer.querySelector(`#hide-button-${inputData.nodeId}-${inputData.inputName}`));
+    }
 }
 
 function hideInput(hideButtonElement) {
@@ -234,9 +248,6 @@ function updateJsonWithUserInput() {
         const inputNodeId = inputContainer.getAttribute("data-node-id");
         const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
 
-        const inputTitleElement = inputContainer.querySelector('.workflow-input-title');
-        const defaultValueElement = inputContainer.querySelector('.workflow-input-default');
-
         let inputOptions = {};
         inputOptions["node_id"] = inputNodeId;
         inputOptions["input_name_in_node"] = inputNameInNode;
@@ -247,50 +258,60 @@ function updateJsonWithUserInput() {
             continue;
         }
 
+        const inputTitleElement = inputContainer.querySelector('.workflow-input-title');
+        const defaultValueElement = inputContainer.querySelector('.workflow-input-default');
+
         inputOptions["title"] = inputTitleElement.value;
         inputOptions["default"] = defaultValueElement.value;
 
         const inputTypeSelect = inputContainer.querySelector('.input-type-select');
+        const inputType = inputTypeSelect.value;
 
-        if (inputTypeSelect.value == "") {
+        if (inputType == "") {
             alert(`Input type for "${inputTitleElement.value}" not selected.`);
             return "";
         }
 
-        if (inputTypeSelect.value == "integer" || inputTypeSelect.value == "float") {
+        if (inputType == "integer" || inputType == "float") {
             if (isNaN(defaultValueElement.value)) {
                 alert(`Default value for "${inputTitleElement.value}" is not a number.`);
                 return "";
             }
         } 
         
-        if (inputTypeSelect.value == "integer") {
+        if (inputType == "integer") {
             if (Number.isInteger(defaultValueElement.value)) {
                 alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
                 return "";
             }
         }
 
-        inputOptions["type"] = inputTypeSelect.value;
+        inputOptions["type"] = inputType;
 
-        const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-option-wrapper");
 
-        for (const inputOptionContainer of additionalInputOptions) {
-            const inputOptionElem = inputOptionContainer.querySelector('.additional-input-option');
+        const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-input-option");
 
-            if (inputOptionElem.value === null || 
-                inputOptionElem.value === "" || 
-                !inputOptionElem.checked) {
+        for (const additionalInputOption of additionalInputOptions) {
+
+            const additionalInputOptionValue = additionalInputOption.value;
+            const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
+            const additionalInputType = additionalInputOption.type;
+
+            if (additionalInputOptionValue === null || additionalInputOptionValue === "") {
                 continue;
             }
 
-            if (inputOptionElem.type === "checkbox") {
+            if (additionalInputType === "checkbox" && !additionalInputOption.checked) {
+                continue;
+            }
+
+            if (additionalInputOption.type === "checkbox") {
                 // We have already skipped if checkbox value is false, therefore it can only be true
-                inputOptions[inputOptionElem.getAttribute('data-key')] = true;
+                inputOptions[additionalInputOptionKey] = true;
                 continue;
             }
 
-            inputOptions[inputOptionElem.getAttribute('data-key')] = inputOptionElem.value;
+            inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
         }
 
         inputOptionsList.push(inputOptions);
@@ -299,6 +320,7 @@ function updateJsonWithUserInput() {
     workflowJson["_comfyuimini_meta"] = {};
     workflowJson["_comfyuimini_meta"]["title"] = document.getElementById('title-input').value || "Unnamed";
     workflowJson["_comfyuimini_meta"]["description"] = document.getElementById('description-input').value || "";
+    workflowJson["_comfyuimini_meta"]["format_version"] = "1";
 
     workflowJson["_comfyuimini_meta"]["input_options"] = inputOptionsList;
 

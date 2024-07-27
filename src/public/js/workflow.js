@@ -59,10 +59,12 @@ async function renderInput(inputOptions) {
         return "";
     }
 
+    const inputType = inputOptions.type;
+
     let html = '';
-    if (inputOptions.type === "select") {
-        const modelListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
-        const modelListJson = await modelListResponse.json();
+    if (inputType === "select") {
+        const selectListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
+        const selectListJson = await selectListResponse.json();
 
         html = `
         <div class="workflow-input-container">
@@ -70,20 +72,19 @@ async function renderInput(inputOptions) {
             <select id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">
         `;
 
-        modelListJson.forEach(item => {
+        selectListJson.forEach(item => {
             html += `<option value="${item}">${item}</option>`;
         });
 
         html += "</select>"
     
-    } else if (inputOptions.type === "text") {
+    } else if (inputType === "text") {
         html = `
         <div class="workflow-input-container">
             <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
             <textarea id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">${inputOptions.default}</textarea>
         `;
     } else {
-
         let type;
 
         switch (inputOptions.type) {
@@ -98,25 +99,34 @@ async function renderInput(inputOptions) {
                 break;
         }
 
+        const hasRandomiseToggle = inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === "on";
+
+        const inputId = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
+        const defaultValue = inputOptions.default;
+
+        const inputStep = inputOptions.step;
+        const inputMin = inputOptions.min;
+        const inputMax = inputOptions.max;
+
         html = `
         <div class="workflow-input-container">
-            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
+            <label for="${inputId}">${inputOptions.title}</label>
             <div class="inner-input-wrapper">
                 <input 
-                    id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" 
+                    id="${inputId}" 
                     type="${type}" 
-                    placeholder="${inputOptions.default}" 
-                    class="workflow-input ${inputOptions.show_randomise_toggle ? "has-random-toggle" : ""}" 
-                    value="${inputOptions.default}"
-                    ${inputOptions.step !== undefined ? `step="${inputOptions.step}"` : ''}
-                    ${inputOptions.min !== undefined ? `min="${inputOptions.min}"` : ''} 
-                    ${inputOptions.max !== undefined ? `max="${inputOptions.max}"` : ''}
+                    placeholder="${defaultValue}" 
+                    class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
+                    value="${defaultValue}"
+                    ${inputStep !== undefined ? `step="${inputStep}"` : ''}
+                    ${inputMin !== undefined ? `min="${inputMin}"` : ''} 
+                    ${inputMax !== undefined ? `max="${inputMax}"` : ''}
                 >
         `;
 
-        if (inputOptions.show_randomise_toggle) {
+        if (hasRandomiseToggle) {
             html += `
-            <button class="randomise-input" type="button" onclick="randomiseInput('input-${inputOptions.node_id}-${inputOptions.input_name_in_node}')">🎲</button>
+            <button class="randomise-input" type="button" onclick="randomiseInput('${inputId}')">🎲</button>
             `;
         }
 
@@ -142,6 +152,7 @@ function randomiseInput(inputId) {
         randomNumber = min + step * Math.floor(Math.random() * range);
         randomNumber = Math.min(randomNumber, max);
     } else {
+        // If no valid min/max set, generate a random 16-long number, e.g for seed.
         randomNumber = (Math.floor(Math.random() * 1e16)).toString().padStart(16, '0');
     }
 
