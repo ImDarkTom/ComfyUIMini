@@ -82,6 +82,12 @@ function loadLocalWorkflows() {
                 functionParams: ""
             },
             {
+                icon: "💾",
+                text: "Download",
+                function: "downloadWorkflow",
+                functionParams: title
+            },
+            {
                 icon: "❌",
                 text: "Delete workflow",
                 function: `deleteWorkflow`,
@@ -105,6 +111,47 @@ function loadLocalWorkflows() {
 
         workflowsGridElem.innerHTML += gridItemHtml;
     }
+}
+
+function downloadWorkflow(workflowTitle) {
+    function sanitizeFilename(filename) {
+        const sanitized = filename
+            .replace(/[/\\?%*:|"<>]/g, '_')
+            .replace(/^\s+|\s+$/g, '')
+            .replace(/\s+/g, '_')
+    
+        return sanitized;
+    }
+    
+    const workflowsList = JSON.parse(localStorage.getItem("workflows")) || [];
+
+    const workflowNames = workflowsList.map((workflow) => {
+        return JSON.parse(workflow)["_comfyuimini_meta"].title;
+    });
+
+    if (!workflowNames.includes(workflowTitle)) {
+        return;
+    }
+
+    const workflowListJson = workflowsList.map((workflow) => {
+        return JSON.parse(workflow);
+    });
+
+    const selectedWorkflow = workflowListJson.find(workflow => workflow["_comfyuimini_meta"].title === workflowTitle);
+    
+    const workflowString = JSON.stringify(selectedWorkflow, null, 2);
+
+
+    const blob = new Blob([workflowString], {type: 'application/json'});
+
+    const link = document.createElement('a');
+
+    link.href = URL.createObjectURL(blob);
+    link.download = `${sanitizeFilename(selectedWorkflow["_comfyuimini_meta"].title)}.json`;
+
+    link.click();
+
+    URL.revokeObjectURL(link.href);
 }
 
 loadLocalWorkflows();
