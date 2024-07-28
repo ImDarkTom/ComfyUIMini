@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
-const { writeToWorkflowFile } = require('../utils/workflowFileManager');
+const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/workflowFileManager');
 
 router.use(cookieParser());
 router.use(themeMiddleware);
@@ -28,8 +26,7 @@ router.get('/edit/:type/:identifier', (req, res) => {
             break;
         
         case "server":
-            const workflowFileBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', workflowIdentifier));
-            const workflowFileJson = JSON.parse(workflowFileBuffer);
+            const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
 
             const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
 
@@ -68,8 +65,7 @@ router.get('/workflow/:type/:identifier', (req, res) => {
             break;
 
         case "server":
-            const workflowFileBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', workflowIdentifier));
-            const workflowFileJson = JSON.parse(workflowFileBuffer);
+            const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
 
             const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
 

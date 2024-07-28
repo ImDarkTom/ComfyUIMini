@@ -11,6 +11,14 @@ function writeToWorkflowFile(fileName, workflowJson) {
     }
 }
 
+function getWorkflowFromFile(fileName) {
+    const fileContents = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', fileName));
+    const workflowJson = JSON.parse(fileContents);
+
+    return workflowJson;
+}
+
 module.exports = {
-    writeToWorkflowFile
+    writeToWorkflowFile,
+    getWorkflowFromFile
 }
