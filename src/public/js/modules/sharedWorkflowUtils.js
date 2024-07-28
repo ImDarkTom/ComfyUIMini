@@ -78,7 +78,7 @@ async function renderAllInputs(workflowJson) {
         }
     }
 
-    inputTypeEventListener();
+    startInputEventListeners();
 }
 
 
@@ -187,7 +187,7 @@ async function renderAdditionalOptions(type, data) {
 // Editing
 // -------
 
-function inputTypeEventListener() {
+function startInputEventListeners() {
     document.querySelectorAll('.input-type-select').forEach(function (inputTypeInput) {
         inputTypeInput.addEventListener('change', async (e) => {
             const changedTo = e.target.value;
@@ -198,27 +198,36 @@ function inputTypeEventListener() {
         })
     });
 
-    document.querySelectorAll('.move-arrow-up').forEach(function (upButton) {
-        upButton.addEventListener('click', () => {
-            let item = upButton.closest('.input-item');
-            let previousItem = item.previousElementSibling;
-            
-            if (previousItem) {
-                item.parentNode.insertBefore(item, previousItem);
-            }
-        });
-    });
+    inputsContainerElem.addEventListener('click', (e) => {
+        const targetHasClass = (className) => e.target.classList.contains(className);
 
-    document.querySelectorAll('.move-arrow-down').forEach(function (downButton) {
-        downButton.addEventListener('click', () => {
-            let item = downButton.closest('.input-item');
-            let nextItem = item.nextElementSibling;
+        if (targetHasClass('move-arrow-up')) {
+            moveUp(e.target.closest('.input-item'));
 
-            if (nextItem) {
-                item.parentNode.insertBefore(nextItem, item);
-            }
-        });
+        } else if (targetHasClass('move-arrow-down')) {
+            moveDown(e.target.closest('.input-item'));
+
+        } else if (targetHasClass('hide-input-button')) {
+            hideInput(e.target); 
+
+        }
     });
+}
+
+function moveUp(item) {
+    const previousItem = item.previousElementSibling;
+
+    if (previousItem) {
+        item.parentNode.insertBefore(item, previousItem);
+    }
+}
+
+function moveDown(item) {
+    const nextItem = item.nextElementSibling;
+
+    if (nextItem) {
+        item.parentNode.insertBefore(nextItem, item);
+    }
 }
 
 function hideInput(hideButtonElement) {

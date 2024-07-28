@@ -24,8 +24,10 @@ function loadBottomSheet(entriesList, event) {
 
     bottomSheetEntriesList.innerHTML = "";
     for (const entry of entriesList) {
+        const functionParamsString = entry.functionParams.map(param => JSON.stringify(param)).join(',');
+
         const html = `
-        <div class="bottom-sheet-entry" onclick="${entry.function}(\`${entry.functionParams}\`)">
+        <div class="bottom-sheet-entry" onclick="${entry.function}(${functionParamsString.replace(/"/g, '\`')})">
             <span class="bottom-sheet-entry-icon">${entry.icon}</span>
             <span class="bottom-sheet-entry-text">${entry.text}</span>
         </div>

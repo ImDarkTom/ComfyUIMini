@@ -4,7 +4,7 @@
             <div class="workflow-icon-container">
                 <div class="icon server workflow-icon"></div>
             </div>
-            <span class="workflow-menu-icon" onclick='loadBottomSheet([{icon: "✏", text: "Edit workflow (Not implemented)", function: "editWorkflow", functionParams: ""}], event)'>☰</span>
+            <span class="workflow-menu-icon" onclick='loadBottomSheet([{icon: "✏", text: "Edit", function: "editWorkflow", functionParams: ["server", "<%= title %>"]}], event)'>☰</span>
         </div>
         <span class="workflow-title"><%= title %></span>
     </div>

@@ -4,9 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
+const { writeToWorkflowFile } = require('../utils/workflowFileManager');
 
 router.use(cookieParser());
 router.use(themeMiddleware);
+router.use(express.json());
 
 router.get('/', (req, res) => {
     res.render('pages/index', { serverWorkflows: global.serverWorkflowFilenames, theme: req.theme });
@@ -14,6 +16,46 @@ router.get('/', (req, res) => {
 
 router.get('/import', (req, res) => {
     res.render('pages/import', { theme: req.theme });
+});
+
+router.get('/edit/:type/:identifier', (req, res) => {
+    const workflowType = req.params.type;
+    const workflowIdentifier = req.params.identifier;
+
+    switch (workflowType) {
+        case "local":
+            res.render('pages/edit', { workflowTitle: workflowIdentifier, workflowText: "", workflowType: "local", theme: req.theme });
+            break;
+        
+        case "server":
+            const workflowFileBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', workflowIdentifier));
+            const workflowFileJson = JSON.parse(workflowFileBuffer);
+
+            const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
+
+            res.render('pages/edit', { workflowTitle: workflowTitle, 
+                workflowText: JSON.stringify(workflowFileJson), 
+                workflowType: "server", 
+                workflowFilename: workflowIdentifier, 
+                theme: req.theme });
+            break;
+        default:
+            res.status(400).send("Invalid workflow type");
+            break;
+    }
+});
+
+router.put('/edit/:fileName', (req, res) => {
+    const workflowFilename = req.params.fileName;
+    const workflowJson = req.body;
+
+    const finishedSuccessfully = writeToWorkflowFile(workflowFilename, workflowJson);
+
+    if (finishedSuccessfully) {
+        res.status(200).send("Successfully saved edited workflow.")
+    } else {
+        res.status(500).send("Internal Server Error. Check logs for more info.");
+    }
 });
 
 router.get('/workflow/:type/:identifier', (req, res) => {

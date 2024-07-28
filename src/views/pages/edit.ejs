@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: "Editing workflow", theme }) %>
+    <link rel="stylesheet" href="/css/import.css">
+    <script src="/js/edit.js" type="module" defer></script>
+    <script src="/js/popupwindow.js" defer></script>
+</head>
+<body 
+    data-workflow-title="<%= workflowTitle %>" 
+    data-workflow-type="<%= workflowType %>" 
+    data-workflow-filename="<%= workflowFilename %>"  
+    data-workflow-text="<%= workflowText || '' %>"
+    >
+    <%- include('../partials/page-title', { title: "Editing " + workflowTitle }) %>
+    <div class="main-container">
+        <div class="edit-container">
+            <div class="properties-container">
+                <h2 class="category-title">Properties</h2>
+                <label for="title-input">Title</label>
+                <input type="text" id="title-input" class="properties-input" placeholder="My Workflow" disabled>
+                <label for="description-input">Description</label>
+                <textarea id="description-input" class="properties-input" placeholder="This is a workflow to..." disabled></textarea>
+            </div>
+            <h2 class="category-title">Inputs</h2>
+            <div class="inputs-container"></div>
+            <div class="export-buttons">
+                <input type="button" value="Save" id="save">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

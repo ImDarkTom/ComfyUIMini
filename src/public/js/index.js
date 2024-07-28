@@ -1,5 +1,5 @@
-function editWorkflow() {
-    alert("WIP");
+function editWorkflow(type, title) {
+    window.location.href = `/edit/${type}/${title}`;
 }
 
 function renameWorkflow(name) {
@@ -73,25 +73,25 @@ function loadLocalWorkflows() {
                 icon: "🏷️",
                 text: "Rename",
                 function: `renameWorkflow`,
-                functionParams: title
+                functionParams: [title]
             },
             {
                 icon: "✏",
-                text: "Edit workflow (Not implemented)",
+                text: "Edit",
                 function: "editWorkflow",
-                functionParams: ""
+                functionParams: ["local", title]
             },
             {
                 icon: "💾",
                 text: "Download",
                 function: "downloadWorkflow",
-                functionParams: title
+                functionParams: [title]
             },
             {
                 icon: "❌",
                 text: "Delete workflow",
                 function: `deleteWorkflow`,
-                functionParams: title
+                functionParams: [title]
             }
         ];
 

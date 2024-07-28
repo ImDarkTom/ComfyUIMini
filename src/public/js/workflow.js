@@ -12,14 +12,14 @@ const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
 function loadWorkflow() {
     let currentWorkflow = "";
-    const workflowTextAttrib = document.body.getAttribute('data-workflowtext');
+    const workflowTextAttrib = document.body.getAttribute('data-workflow-text');
 
     if (workflowTextAttrib !== "") { // Workflow sent by server aka pc-hosted
         currentWorkflow = JSON.parse(workflowTextAttrib);
     } else {
         currentWorkflow = getCurrentWorkflowJson();
 
-        document.body.setAttribute('data-workflowtext', JSON.stringify(currentWorkflow));
+        document.body.setAttribute('data-workflow-text', JSON.stringify(currentWorkflow));
 
         if (!currentWorkflow) {
             return;
@@ -179,7 +179,7 @@ async function runWorkflow() {
     setProgressBar("current", "0%");
     setProgressBar("total", "0%");
 
-    const workflow = JSON.parse(document.body.getAttribute('data-workflowtext'));
+    const workflow = JSON.parse(document.body.getAttribute('data-workflow-text'));
 
     // ComfyUI can't process the workflow if it contains the additional metadata.
     delete workflow["_comfyuimini_meta"];
