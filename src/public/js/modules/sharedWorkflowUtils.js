@@ -11,11 +11,11 @@ export let workflowJson = null;
 
 let inputsContainerElem;
 
-export async function renderWorkflow(workflowText, inputsContainer, titleInput, descriptionInput) {
+export async function renderWorkflow(passedWorkflowJson, inputsContainer, titleInput, descriptionInput) {
     inputsContainerElem = inputsContainer;
 
     try {
-        workflowJson = JSON.parse(workflowText);
+        workflowJson = passedWorkflowJson;
     } catch (err) {
         return alert("Invalid JSON content.");
     }
@@ -57,6 +57,10 @@ async function renderAllInputs(workflowJson) {
         return null;
     }
 
+    if (workflowJson.version !== undefined) {
+        return null;
+    }
+    
     for (const [nodeId, node] of Object.entries(workflowJson)) {
         if (nodeId.charAt(0) == "_") {
             continue;

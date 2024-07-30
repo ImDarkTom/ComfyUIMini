@@ -17,7 +17,7 @@ function loadWorkflow() {
         workflowJson = JSON.parse(workflowTextAttrib);
     }
 
-    renderWorkflow(JSON.stringify(workflowJson), inputsContainer, titleInput, descriptionInput);
+    renderWorkflow(workflowJson, inputsContainer, titleInput, descriptionInput);
 }
 
 function getWorkflowFromStorage(workflowTitle) {

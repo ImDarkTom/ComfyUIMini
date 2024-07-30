@@ -176,6 +176,10 @@ button {
 	font-size: 1.1rem;
 }
 
+.popup-message a {
+	color: var(--text-secondary-color);
+}
+
 .popup-continue-button {
 	width: 50%;
 	background-color: var(--background-secondary-color);

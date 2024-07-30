@@ -26,8 +26,15 @@ workflowFileInput.addEventListener('change', () => {
 
     reader.addEventListener('load', () => {
         const workflowText = reader.result;
+
+        const importingWorkflowJson = JSON.parse(workflowText);
+
+        if (importingWorkflowJson.version !== undefined) {
+            openPopupWindow("<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>");
+            return;
+        }
         
-        renderWorkflow(workflowText, inputsContainer, titleInput, descriptionInput);
+        renderWorkflow(importingWorkflowJson, inputsContainer, titleInput, descriptionInput);
     });
 });
 
