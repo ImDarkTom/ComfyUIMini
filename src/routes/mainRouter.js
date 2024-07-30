@@ -28,6 +28,14 @@ router.get('/edit/:type/:identifier', (req, res) => {
         case "server":
             const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
 
+            if (workflowFileJson === "invalid") {
+                res.status(400).send("Invalid workflow filename.");
+                break;
+            } else if (workflowFileJson === "error") {
+                res.status(500).send("Internal Server Error");
+                break;
+            }
+
             const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
 
             res.render('pages/edit', { workflowTitle: workflowTitle, 
@@ -66,6 +74,14 @@ router.get('/workflow/:type/:identifier', (req, res) => {
 
         case "server":
             const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
+
+            if (workflowFileJson === "invalid") {
+                res.status(400).send("Invalid workflow filename.");
+                break;
+            } else if (workflowFileJson === "error") {
+                res.status(500).send("Internal Server Error");
+                break;
+            }
 
             const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
 

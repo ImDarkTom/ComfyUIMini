@@ -12,10 +12,19 @@ function writeToWorkflowFile(fileName, workflowJson) {
 }
 
 function getWorkflowFromFile(fileName) {
-    const fileContents = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', fileName));
-    const workflowJson = JSON.parse(fileContents);
+    try {
+        const fileContents = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', fileName));
+        const workflowJson = JSON.parse(fileContents);
 
-    return workflowJson;
+        return workflowJson;
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            return "invalid";
+        }
+
+        console.error("Error when reading workflow from file:", error);
+        return "error";
+    }
 }
 
 module.exports = {
