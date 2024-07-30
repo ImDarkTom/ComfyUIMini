@@ -41,6 +41,12 @@ node .
 You may change the ComfyUI url/port in the config.json folder as well as the port the app runs on.
 
 After a sucessful run you should see text along the lines of `Running on http://192.168.x.x:3000` in the console, simply put the local address of your PC along with the port into the url bar of another device and you should be able to see the main page.
+
+## FAQ
+**Q**: I can't import my workflow.
+
+**A**: You need to save your workflow in API Format to be able to import it as regular saving doesnt provide enough information to list all available inputs. For a guide on how to enable this option see video [here](https://imgur.com/a/YsZQu83).
+
 ## Donating
 If you find this to be useful you can donate at the button below.
 
