@@ -22,7 +22,7 @@ router.get('/edit/:type/:identifier', (req, res) => {
 
     switch (workflowType) {
         case "local":
-            res.render('pages/edit', { workflowTitle: workflowIdentifier, workflowText: "", workflowType: "local", theme: req.theme });
+            res.render('pages/edit', { workflowTitle: workflowIdentifier, workflowText: "", workflowType: "local", workflowFilename: "", theme: req.theme });
             break;
         
         case "server":
