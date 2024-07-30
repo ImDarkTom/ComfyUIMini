@@ -2,13 +2,14 @@
 A mobile-friendly frontend to run ComfyUI workflows.
 
 ![](https://repository-images.githubusercontent.com/681240572/8c2ca9fa-921d-4490-959d-669c543ace4c)
+\**Not affiliated with ComfyUI or comfyanonymous*
 
-\* Not affiliated with ComfyUI or comfyanonymous
+![](https://github.com/user-attachments/assets/f5356183-6f82-45ed-acab-82b015e22496)
 ## Features
-
 - Lightweight UI built for mobile devices
-- Store workflows locally on device or on PC
-- More coming soon
+- Store workflows locally in device localStorage or on PC
+- Easy importing of workflows.
+- Generation progress info
 ## Requirements
 #### PC:
 - ComfyUI installed and functional
@@ -39,7 +40,7 @@ node .
 
 You may change the ComfyUI url/port in the config.json folder as well as the port the app runs on.
 
-After a sucessful run you should see text along the lines of `Running on http://localhost:3000` in the console, simply put the local address of your PC along with the port into the url bar of another device and you should be able to see the main page.
+After a sucessful run you should see text along the lines of `Running on http://192.168.x.x:3000` in the console, simply put the local address of your PC along with the port into the url bar of another device and you should be able to see the main page.
 ## Donating
 If you find this to be useful you can donate at the button below.
 
