@@ -91,27 +91,50 @@ async function renderInput(inputData) {
     // title, defaultValue, nodeId, inputName, type
     inputCount += 1;
 
-    const isSelected = (type) => inputData.type == type ? "selected" : "";
+    const inputName = inputData.inputName;
+    const inputType = inputData.type;
+    
+    const inputNodeId = inputData.nodeId;
+
+    // Add predicted type fill to options later
+    const assumedTypes = {
+        seed: "integer",
+        steps: "integer",
+        cfg: "float",
+        sampler_name: "select",
+        scheduler: "select",
+        denoise: "float",
+        ckpt_name: "select",
+        width: "integer",
+        height: "integer",
+        batch_size: "integer",
+        text: "text",
+        filename_prefix: "text",
+        vae_name: "select"
+    }
+
+    const selectedInputType = inputType || assumedTypes[inputName] || "";
+
+    const generateInputOptions = () => ["text", "integer", "float", "select"].map(
+        type => `<option value="${type}" ${type === selectedInputType ? "selected" : ""}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`
+    ).join('');
 
     const html = `
-    <div class="input-item" data-node-id="${inputData.nodeId}" data-node-input-name="${inputData.inputName}">
+    <div class="input-item" data-node-id="${inputNodeId}" data-node-input-name="${inputName}">
         <div class="options-container">
             <div class="input-top-container">
                 <span class="input-counter">${inputCount}.</span>
-                <div class="icon eye hide-input-button" id="hide-button-${inputData.nodeId}-${inputData.inputName}" onclick="hideInput(this)"></div>
+                <div class="icon eye hide-input-button" id="hide-button-${inputNodeId}-${inputName}" onclick="hideInput(this)"></div>
                 <select class="input-type-select">
-                    <option value="" disabled selected>(Choose input type)</option>
-                    <option value="text" ${isSelected("text")}>Text</option>
-                    <option value="integer" ${isSelected("integer")}>Integer</option>
-                    <option value="float" ${isSelected("float")}>Float</option>
-                    <option value="select" ${isSelected("select")}>Select</option>
+                    <option value="" disabled ${selectedInputType === "" ? "selected" : ""}>(Choose input type)</option>
+                    ${generateInputOptions()}
                 </select>
             </div>
-            <label for="label-${inputData.title}">Title</label>
-            <input type="text" placeholder="${inputData.title}" value="${inputData.title}" id="label-${inputData.title}" class="workflow-input workflow-input-title">
-            <label for="input-${inputData.title}">Default value</label>
-            <input type="text" placeholder="${inputData.default}" value="${inputData.default}" id="input-${inputData.title}" class="workflow-input workflow-input-default">
-            <div class="additional-input-options">${await renderAdditionalOptions(inputData.type, inputData)}</div>
+            <label for="${inputNodeId}-${inputName}-title">Title</label>
+            <input type="text" id="${inputNodeId}-${inputName}-title" placeholder="${inputData.title}" value="${inputData.title}" class="workflow-input workflow-input-title">
+            <label for="${inputNodeId}-${inputName}-default">Default value</label>
+            <input type="text" id="${inputNodeId}-${inputName}-default" placeholder="${inputData.default}" value="${inputData.default}" class="workflow-input workflow-input-default">
+            <div class="additional-input-options">${await renderAdditionalOptions(inputData)}</div>
         </div>
         <div class="move-arrows-container">
             <span class="move-arrow-up">&#x25B2;</span>
@@ -123,12 +146,12 @@ async function renderInput(inputData) {
     inputsContainerElem.innerHTML += html;
 
     if (inputData.disabled) {
-        hideInput(inputsContainerElem.querySelector(`#hide-button-${inputData.nodeId}-${inputData.inputName}`));
+        hideInput(inputsContainerElem.querySelector(`#hide-button-${inputNodeId}-${inputData.inputName}`));
     }
 }
 
-async function renderAdditionalOptions(type, data) {
-    switch (type) {
+async function renderAdditionalOptions(data) {
+    switch (data.type) {
         case "text":
             return "";
         case "integer": 
