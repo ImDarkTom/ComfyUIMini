@@ -221,7 +221,7 @@ function startInputEventListeners() {
 
             const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
 
-            additionalInputOptionsContainer.innerHTML = await renderAdditionalOptions(changedTo, {});
+            additionalInputOptionsContainer.innerHTML = await renderAdditionalOptions({type: changedTo});
         })
     });
 
