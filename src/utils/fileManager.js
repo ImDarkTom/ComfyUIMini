@@ -75,7 +75,7 @@ function loadModelTypes() {
             models[modelTypeName] = fileList;
         } catch (err) {
             if (err.code == "ENOENT") {
-                logWarning(`Invalid directory for ${modelType} in model_dirs.json`);
+                logWarning(`Invalid directory for ${modelTypeName} in model_dirs.json`);
                 continue;
             }
     
