@@ -1,12 +1,9 @@
-const path = require('path');
 const fs = require('fs');
-const os = require('os');
-const axios = require("axios");
-const config = require('../config.json');
-const { logInfo, logSuccess, logWarning } = require('./utils/logger');
+const path = require('path');
+const { logInfo } = require('./logger');
 
 function checkForWorkflowsFolder() {
-    const workflowsFilepath = path.join(__dirname, '..', 'workflows');
+    const workflowsFilepath = path.join(__dirname, '..', '..', 'workflows');
     
     if (!fs.existsSync(workflowsFilepath)) {
         fs.mkdirSync(workflowsFilepath);
@@ -27,38 +24,6 @@ function checkForWorkflowsFolder() {
         console.err('Error reading workflows folder: ', err);
         return;
     }
-}
-
-async function checkForComfyUI() {
-    try {
-        const responseCodeMeaning = {
-            200: "ComfyUI is running."
-        };
-
-        const request = await axios.get(config.comfyui_url);
-        const status = request.status;
-
-        logSuccess(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
-    } catch (err) {
-        const errorCode = err.code;
-
-        const errorMeaning = {
-            "ECONNREFUSED": "Make sure ComfyUI is running and is accessible at the URL in the config.json file."
-        }
-
-        logWarning(`${errorCode}: ${errorMeaning[errorCode] || err}`)
-    }
-}
-
-function loadSelectTypes() {
-    const selectTypesFromFile = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'selects.json')));
-
-    const modelSelects = loadModelTypes();
-
-    // Merge selectTypesFromFile into modelSelects, then set global var to that
-    Object.assign(modelSelects, selectTypesFromFile);
-    
-    global.selects = modelSelects;
 }
 
 function loadModelTypes() {
@@ -86,10 +51,10 @@ function loadModelTypes() {
         return fileList;
     }
 
-    const modelDirsConfigPath = path.join(__dirname, '..', 'model_dirs.json');
+    const modelDirsConfigPath = path.join(__dirname, '..', '..', 'model_dirs.json');
 
     if (!fs.existsSync(modelDirsConfigPath)) {
-        fs.copyFileSync(path.join(__dirname, '..', 'model_dirs.example.json'), modelDirsConfigPath);
+        fs.copyFileSync(path.join(__dirname, '..', '..', 'model_dirs.example.json'), modelDirsConfigPath);
     }
 
     const modelDirsConfigJson = JSON.parse(fs.readFileSync(modelDirsConfigPath));
@@ -123,30 +88,19 @@ function loadModelTypes() {
     return models;
 }
 
-function getLocalIP() {
-    function isVirtualNetwork(interfaceName) {
-        const commonVirtualNetworkNames = ['vmnet', 'vboxnet', 'vethernet', 'virtualbox', 'vmware'];
-        return commonVirtualNetworkNames.some(virtualNet => interfaceName.toLowerCase().startsWith(virtualNet));
-    }
+function loadSelectTypes() {
+    const selectTypesFromFile = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'selects.json')));
+
+    const modelSelects = loadModelTypes();
+
+    // Merge selectTypesFromFile into modelSelects, then set global var to that
+    Object.assign(modelSelects, selectTypesFromFile);
     
-    const networkInterfaces = os.networkInterfaces();
-    for (const interfaceName in networkInterfaces) {
-        const addresses = networkInterfaces[interfaceName];
-
-        for (const address of addresses) {
-            if (address.family === 'IPv4' && !address.internal && !isVirtualNetwork(interfaceName)) {
-                return address.address;
-            }
-        }
-    }
-
-    return '127.0.0.1';
+    global.selects = modelSelects;
 }
 
 module.exports = {
     checkForWorkflowsFolder,
-    checkForComfyUI,
     loadSelectTypes,
-    getLocalIP,
     loadModelTypes
 }

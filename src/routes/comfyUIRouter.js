@@ -1,6 +1,6 @@
 const axios = require('axios');
 const express = require('express');
-const { loadModelTypes } = require('../utils');
+const { loadModelTypes } = require('../utils/fileManager');
 const config = require('../../config.json');
 
 const router = express.Router();

@@ -22,12 +22,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 server.on('upgrade', handleUpgrade)
 
-const { 
-    checkForWorkflowsFolder,
-    checkForComfyUI,
-    loadSelectTypes,
-    getLocalIP
-} = require("./utils");
+const { checkForWorkflowsFolder, loadSelectTypes } = require('./utils/fileManager');
+const { checkForComfyUI, getLocalIP } = require('./utils/comfyUI');
 
 checkForComfyUI();
 checkForWorkflowsFolder();
