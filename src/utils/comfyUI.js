@@ -1,11 +1,11 @@
 const { default: axios } = require('axios');
 const config = require('../../config.json');
-const uuid = require('uuid');
 const WebSocket = require('ws');
 const { optionalLog, logWarning } = require('./logger');
 const { logSuccess } = require('./logger');
+const crypto = require('crypto');
 
-const clientId = uuid.v4();
+const clientId = crypto.randomUUID();
 
 async function queuePrompt(workflowPrompt, clientId) {
     const postContents = { 'prompt': workflowPrompt, client_id: clientId };
