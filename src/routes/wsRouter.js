@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const generateImage = require('../utils/generation');
+const { generateImage } = require('../utils/comfyUi');
 
 const wss = new WebSocket.Server({ noServer: true });
 

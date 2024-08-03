@@ -1,7 +1,6 @@
-const axios = require('axios');
 const express = require('express');
 const { loadModelTypes } = require('../utils/fileManager');
-const config = require('../../config.json');
+const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyUi');
 
 const router = express.Router();
 
@@ -14,19 +13,19 @@ router.get('/history/:promptId', async (req, res) => {
         res.send("Prompt id cannot be undefined").status(400);
     }
 
-    const promptHistoryResponse = await axios.get(`${config.comfyui_url}/history/${promptId}`);
+    const promptHistory = getHistory();
 
-    res.json(promptHistoryResponse.data).status(promptHistoryResponse.status);
+    res.json(promptHistory);
 });
 
 router.get('/image', async (req, res) => {
     const queries = req.query;
     
-    const response = await axios.get(`${config.comfyui_url}/view?filename=${queries.filename}&subfolder=${queries.subfolder}&type=${queries.type}`, { responseType: 'arraybuffer' });
+    const imageResponse = await getImage(queries.filename, queries.subfolder, queries.type);
 
-    res.set('Content-Type', response.headers['content-type']);
-    res.set('Content-Length', response.headers['content-length']);
-    res.send(response.data);
+    res.set('Content-Type', imageResponse.headers['content-type']);
+    res.set('Content-Length', imageResponse.headers['content-length']);
+    res.send(imageResponse.data);
 });
 
 router.get('/modeltypes', (req, res) => {
@@ -59,15 +58,15 @@ router.post('/reloadmodels', (req, res) => {
 });
 
 router.get('/queue', async (req, res) => {
-    const response = await axios.get(`${config.comfyui_url}/queue`);
+    const queue = getQueue();
 
-    res.send(response.data);
+    res.json(queue);
 });
 
 router.get('/interrupt', async (req, res) => {
-    const response = await axios.post(`${config.comfyui_url}/interrupt`);
+    const interruptionResponse = interruptGeneration();
 
-    res.send(response.data);
+    res.send(interruptionResponse.data);
 });
 
 

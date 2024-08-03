@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
-const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/workflowFileManager');
+const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/fileManager');
 
 router.use(cookieParser());
 router.use(themeMiddleware);

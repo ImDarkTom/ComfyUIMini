@@ -20,15 +20,16 @@ app.use("/comfyui", comfyUIRouter);
 app.use('/setsetting', settingsRouter);
 app.use(express.static(path.join(__dirname, 'public')));
 
-server.on('upgrade', handleUpgrade)
+server.on('upgrade', handleUpgrade);
 
-const { checkForWorkflowsFolder, loadSelectTypes } = require('./utils/fileManager');
-const { checkForComfyUI, getLocalIP } = require('./utils/comfyUI');
+const { checkForWorkflowsFolder, loadSelectOptions } = require('./utils/fileManager');
+const { checkForComfyUI } = require('./utils/comfyUi');
+const getLocalIp = require('./utils/localIp');
 
 checkForComfyUI();
 checkForWorkflowsFolder();
-loadSelectTypes();
+loadSelectOptions();
 
 server.listen(config.app_port, '0.0.0.0', () => {
-    logSuccess(`Running on http://${getLocalIP()}:${config.app_port}`);
+    logSuccess(`Running on http://${getLocalIp()}:${config.app_port}`);
 });

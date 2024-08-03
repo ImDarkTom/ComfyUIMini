@@ -57,6 +57,7 @@ function loadModelTypes() {
         fs.copyFileSync(path.join(__dirname, '..', '..', 'model_dirs.example.json'), modelDirsConfigPath);
     }
 
+    // readFileSync is preferable here as require() wouldn't reflect changes during runtime (user changing model path)
     const modelDirsConfigJson = JSON.parse(fs.readFileSync(modelDirsConfigPath));
 
     if (!modelDirsConfigJson.checkpoint || modelDirsConfigJson.checkpoint.folder_path == "path/to/checkpoints/folder") {
@@ -88,19 +89,49 @@ function loadModelTypes() {
     return models;
 }
 
-function loadSelectTypes() {
-    const selectTypesFromFile = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'selects.json')));
+function loadSelectOptions() {
+    const selectsFromFile = require('../../selects.json');
 
     const modelSelects = loadModelTypes();
 
-    // Merge selectTypesFromFile into modelSelects, then set global var to that
-    Object.assign(modelSelects, selectTypesFromFile);
+    // Merge selectsFromFile into modelSelects, then set global var to that
+    Object.assign(modelSelects, selectsFromFile);
     
     global.selects = modelSelects;
 }
 
+
+// Workflows
+function getWorkflowFromFile(fileName) {
+    try {
+        const fileContents = fs.readFileSync(path.join(__dirname, '..', '..', 'workflows', fileName));
+        const workflowJson = JSON.parse(fileContents);
+
+        return workflowJson;
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            return "invalid";
+        }
+
+        console.error("Error when reading workflow from file:", error);
+        return "error";
+    }
+}
+
+function writeToWorkflowFile(fileName, workflowJson) {
+    try {
+        fs.writeFileSync(path.join(__dirname, '..', '..', 'workflows', fileName), JSON.stringify(workflowJson, null, 2), 'utf8');
+        return true;
+    } catch (error) {
+        console.error('Error when saving edited workflow to file:', error);
+        return false;
+    }
+}
+
 module.exports = {
     checkForWorkflowsFolder,
-    loadSelectTypes,
-    loadModelTypes
+    loadSelectOptions,
+    loadModelTypes,
+    getWorkflowFromFile,
+    writeToWorkflowFile
 }
