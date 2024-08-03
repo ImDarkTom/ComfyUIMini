@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { logInfo } = require('./logger');
+const { logInfo, logWarning } = require('./logger');
 
 function checkForWorkflowsFolder() {
     const workflowsFilepath = path.join(__dirname, '..', '..', 'workflows');
