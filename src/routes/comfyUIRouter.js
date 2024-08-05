@@ -29,7 +29,7 @@ router.get('/image', async (req, res) => {
 });
 
 router.get('/modeltypes', (req, res) => {
-    const modelTypesList = Object.keys(global.selects);
+    const modelTypesList = Object.keys(global.selectOptions);
 
     res.json(modelTypesList);
 });
@@ -37,7 +37,7 @@ router.get('/modeltypes', (req, res) => {
 router.get('/listmodels/:modelType', (req, res) => {
     const modelType = req.params.modelType;
 
-    const modelTypeInfo = global.selects[modelType];
+    const modelTypeInfo = global.selectOptions[modelType];
 
     if (!modelTypeInfo) {
         res.send("Model config not found for " + modelType).status(400);

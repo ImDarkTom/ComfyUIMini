@@ -1,8 +1,10 @@
 const express = require("express");
-const config = require('../config.json');
-const path = require('path');
-const { logSuccess } = require("./utils/logger");
 const http = require('http');
+const path = require('path');
+
+global.config = require('../config.json');
+
+const { logSuccess } = require("./utils/logger");
 const { handleUpgrade } = require("./routes/wsRouter");
 
 const mainRouter = require('./routes/mainRouter');
@@ -30,6 +32,6 @@ checkForComfyUI();
 checkForWorkflowsFolder();
 loadSelectOptions();
 
-server.listen(config.app_port, '0.0.0.0', () => {
+server.listen(global.config.app_port, '0.0.0.0', () => {
     logSuccess(`Running on http://${getLocalIp()}:${config.app_port}`);
 });

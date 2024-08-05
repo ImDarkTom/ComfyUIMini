@@ -1,5 +1,4 @@
 const { default: axios } = require('axios');
-const config = require('../../config.json');
 const WebSocket = require('ws');
 const { optionalLog, logWarning } = require('./logger');
 const { logSuccess } = require('./logger');
@@ -10,7 +9,7 @@ const clientId = crypto.randomUUID();
 async function queuePrompt(workflowPrompt, clientId) {
     const postContents = { 'prompt': workflowPrompt, client_id: clientId };
 
-    const response = await axios.post(`${config.comfyui_url}/prompt`, postContents, {
+    const response = await axios.post(`${global.config.comfyui_url}/prompt`, postContents, {
         headers: {
             'Content-Type': 'application/json'
         }
@@ -22,7 +21,7 @@ async function queuePrompt(workflowPrompt, clientId) {
 async function getImage(filename, subfolder, type) {
     const params = new URLSearchParams({ filename, subfolder, type });
 
-    const response = await axios.get(`${config.comfyui_url}/view?${params.toString()}`, { responseType: 'arraybuffer' });
+    const response = await axios.get(`${global.config.comfyui_url}/view?${params.toString()}`, { responseType: 'arraybuffer' });
 
     return response;
 }
@@ -34,13 +33,13 @@ async function generateProxiedImageUrl(filename, subfolder, folderType) {
 }
 
 async function getHistory(promptId) {
-    const response = await axios.get(`${config.comfyui_url}/history/${promptId}`);
+    const response = await axios.get(`${global.config.comfyui_url}/history/${promptId}`);
 
     return response.data;
 }
 
 async function getQueue() {
-    const response = await axios.get(`${config.comfyui_url}/queue`);
+    const response = await axios.get(`${global.config.comfyui_url}/queue`);
 
     return response.data;
 }
@@ -65,14 +64,14 @@ async function getOutputImages(promptId) {
 }
 
 async function generateImage(workflowPrompt, wsClient) {
-    const wsServer = new WebSocket(`${config.comfyui_ws_url}/ws?clientId=${clientId}`);
+    const wsServer = new WebSocket(`${global.config.comfyui_ws_url}/ws?clientId=${clientId}`);
 
     wsServer.on('open', async () => {
         try {
             const promptData = await queuePrompt(workflowPrompt);
             const promptId = promptData.prompt_id;
 
-            optionalLog(config.optional_log.queue_image, "Queued image.");
+            optionalLog(global.config.optional_log.queue_image, "Queued image.");
 
             const queueJson = await getQueue();
             let totalImages;
@@ -80,7 +79,7 @@ async function generateImage(workflowPrompt, wsClient) {
             if (queueJson["queue_running"][0] === undefined) {
                 // Exact workflow was ran before and was cached by ComfyUI.
                 const cachedImages = await getOutputImages(promptId);
-                optionalLog(config.optional_log.generation_finish, "Using cached generation result.");
+                optionalLog(global.config.optional_log.generation_finish, "Using cached generation result.");
 
                 wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
                 
@@ -95,7 +94,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
                 if (message.type === "status") {
                     if (message.data.status.exec_info.queue_remaining == 0) {
-                        optionalLog(config.optional_log.generation_finish, "Image generation finished.");
+                        optionalLog(global.config.optional_log.generation_finish, "Image generation finished.");
                         wsServer.close();
                     }
                 }
@@ -132,7 +131,7 @@ async function checkForComfyUI() {
             200: "ComfyUI is running."
         };
 
-        const request = await axios.get(config.comfyui_url);
+        const request = await axios.get(global.config.comfyui_url);
         const status = request.status;
 
         logSuccess(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
@@ -148,7 +147,7 @@ async function checkForComfyUI() {
 }
 
 async function interruptGeneration() {
-    const response = await axios.post(`${config.comfyui_url}/interrupt`);
+    const response = await axios.post(`${global.config.comfyui_url}/interrupt`);
 
     return response.data;
 }

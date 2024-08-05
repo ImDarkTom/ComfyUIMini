@@ -1,5 +1,3 @@
-const config = require('../../config.json');
-
 let logPreprends = {
     "info": "INFO",
     "success": "SUCCESS",
@@ -7,7 +5,7 @@ let logPreprends = {
     "optional": "OPTIONAL",
 };
 
-if (config.use_log_emojis) {
+if (global.config.use_log_emojis) {
     logPreprends = {
         "info": "ℹ",
         "success": "✅",

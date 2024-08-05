@@ -14,11 +14,11 @@ function checkForWorkflowsFolder() {
 
     try {
         const filesList = fs.readdirSync(workflowsFilepath);
-        const jsonFilesList = filesList.filter(file => path.extname(file).toLowerCase() === ".json");
+        const listJsonFiles = filesList.filter(file => path.extname(file).toLowerCase() === ".json");
 
-        global.serverWorkflowFilenames = jsonFilesList;
+        global.serverWorkflowFilenames = listJsonFiles;
 
-        logInfo(`Found ${jsonFilesList.length} workflows in the workflow folder.`);
+        logInfo(`Found ${listJsonFiles.length} workflows in the workflow folder.`);
         return;
     } catch (err) {
         console.err('Error reading workflows folder: ', err);
@@ -97,7 +97,7 @@ function loadSelectOptions() {
     // Merge selectsFromFile into modelSelects, then set global var to that
     Object.assign(modelSelects, selectsFromFile);
     
-    global.selects = modelSelects;
+    global.selectOptions = modelSelects;
 }
 
 
