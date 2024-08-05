@@ -108,6 +108,11 @@ async function generateImage(workflowPrompt, wsClient) {
                 wsClient.send(JSON.stringify({ status: 'completed', data: outputImages }));
             });
         } catch (error) {
+            if (error.code === "ERR_BAD_REQUEST") {
+                wsClient.send(JSON.stringify({ status: 'error', message: "Bad Request error when sending workflow request. This can happen if you have disabled extensions that are required to run the workflow." }));
+                return;
+            }
+
             console.error("Unknown error when generating image:", error);
             wsClient.send(JSON.stringify({ status: 'error', message: "Unknown error when generating image. Check console for more information." }));
         }
