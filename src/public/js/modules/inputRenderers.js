@@ -1,67 +1,50 @@
+const createInputContainer = (id, title, inputHtml) => `
+    <div class="workflow-input-container">
+        <label for="${id}">${title}</label>
+        ${inputHtml}
+    </div>
+`;
+
 export async function renderSelectInput(inputOptions) {
     const selectListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
     const selectListJson = await selectListResponse.json();
 
-    let html = `
-        <div class="workflow-input-container">
-            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-            <select id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">
-        `;
+    const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
-    selectListJson.forEach(item => {
-        html += `<option value="${item}">${item}</option>`;
-    });
-
-    html += "</select>"
-
-    return html;
-}
-
-export async function renderTextInput(inputOptions) {
-    let html = `
-        <div class="workflow-input-container">
-            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-            <textarea id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">${inputOptions.default}</textarea>
-        `;
-
-    return html;
-}
-
-export async function renderNumberInput(inputOptions) {
-    const type = inputOptions.type === "integer" ? "number" : "number";
-    const hasRandomiseToggle = inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === "on";
-
-    const inputId = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
-    const defaultValue = inputOptions.default;
-
-    const inputStep = inputOptions.step;
-    const inputMin = inputOptions.min;
-    const inputMax = inputOptions.max;
-
-    let html = `
-        <div class="workflow-input-container">
-            <label for="${inputId}">${inputOptions.title}</label>
-            <div class="inner-input-wrapper">
-                <input 
-                    id="${inputId}" 
-                    type="${type}" 
-                    placeholder="${defaultValue}" 
-                    class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
-                    value="${defaultValue}"
-                    ${inputStep !== undefined ? `step="${inputStep}"` : ''}
-                    ${inputMin !== undefined ? `min="${inputMin}"` : ''} 
-                    ${inputMax !== undefined ? `max="${inputMax}"` : ''}
-                >
-        `;
-
-    if (hasRandomiseToggle) {
-        html += `
-            <button class="randomise-input" type="button" onclick="randomiseInput('${inputId}')">🎲</button>
-            `;
+    const createSelectOptions = (options) => {
+        return options.map(item => `<option value="${item}">${item}</option>`).join('');
     }
 
-    html += `</div></div>`;
-    return html;
+    return createInputContainer(id, inputOptions.title, `<select id="${id}" class="workflow-input">${createSelectOptions(selectListJson)}</select>`);
+}
+
+export function renderTextInput(inputOptions) {
+    const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
+
+    return createInputContainer(id, inputOptions.title, `<textarea id="${id}" class="workflow-input">${inputOptions.default}</textarea>`);
+}
+
+export function renderNumberInput(inputOptions) {
+    const hasRandomiseToggle = inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === "on";
+
+    const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
+    const { default: defaultValue, step, min, max } = inputOptions;
+
+    return createInputContainer(id, inputOptions.title, `
+        <div class="inner-input-wrapper">
+            <input 
+                id="${id}" 
+                type="number" 
+                placeholder="${defaultValue}" 
+                class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
+                value="${defaultValue}"
+                ${step !== undefined ? `step="${step}"` : ''}
+                ${min !== undefined ? `min="${min}"` : ''} 
+                ${max !== undefined ? `max="${max}"` : ''}
+            >
+            ${hasRandomiseToggle ? `<button class="randomise-input" type="button" data-linked-input-id="${id}">🎲</button>` : ''}
+        </div>
+    `);
 }
 
 export const inputRenderers = {

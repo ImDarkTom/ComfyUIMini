@@ -10,9 +10,10 @@ const totalImagesProgressTextElem = document.querySelector('.total-images-progre
 const currentImageProgressInnerElem = document.querySelector('.current-image-progress .progress-bar-inner');
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 
+const runButtonElem = document.querySelector('.run-workflow');
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
-function loadWorkflow() {
+async function loadWorkflow() {
     let currentWorkflow = "";
     const workflowTextAttrib = document.body.getAttribute('data-workflow-text');
 
@@ -30,15 +31,23 @@ function loadWorkflow() {
 
     const workflowInputs = currentWorkflow["_comfyuimini_meta"].input_options;
 
-    renderInputs(workflowInputs);
+    //console.time('renderWorkflow');
+    await renderInputs(workflowInputs);
+    //console.timeEnd('renderWorkflow');
+
+    startEventListeners();
 }
 
 async function renderInputs(workflowInputs) {
+    let html = "";
+
     for (const inputJson of workflowInputs) {
         const inputHtml = await renderInput(inputJson);
-
-        inputsContainer.innerHTML += inputHtml;
+        
+        html += inputHtml;
     }
+
+    inputsContainer.innerHTML = html;
 }
 
 function getCurrentWorkflowJson() {
@@ -70,6 +79,22 @@ async function renderInput(inputOptions) {
         console.error(`Invalid input type: ${inputType}`);
         return "";
     }
+}
+
+function startEventListeners() {
+    runButtonElem.addEventListener('click', () => {
+        runWorkflow();
+    });
+
+    cancelGenerationButtonElem.addEventListener('click', () => {
+        cancelRun();
+    })
+
+    inputsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('randomise-input')) {
+            randomiseInput(e.target.getAttribute('data-linked-input-id'));
+        }
+    });
 }
 
 function randomiseInput(inputId) {
