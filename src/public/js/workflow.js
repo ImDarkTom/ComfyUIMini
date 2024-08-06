@@ -1,3 +1,5 @@
+import { inputRenderers } from '/js/modules/inputRenderers.js';
+
 const workflowTitle = document.body.getAttribute('data-workflow-title');
 
 const inputsContainer = document.querySelector('.inputs-container');
@@ -60,80 +62,14 @@ async function renderInput(inputOptions) {
     }
 
     const inputType = inputOptions.type;
+    const renderer = inputRenderers[inputType];
 
-    let html = '';
-    if (inputType === "select") {
-        const selectListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
-        const selectListJson = await selectListResponse.json();
-
-        html = `
-        <div class="workflow-input-container">
-            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-            <select id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">
-        `;
-
-        selectListJson.forEach(item => {
-            html += `<option value="${item}">${item}</option>`;
-        });
-
-        html += "</select>"
-    
-    } else if (inputType === "text") {
-        html = `
-        <div class="workflow-input-container">
-            <label for="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}">${inputOptions.title}</label>
-            <textarea id="input-${inputOptions.node_id}-${inputOptions.input_name_in_node}" class="workflow-input">${inputOptions.default}</textarea>
-        `;
+    if (renderer) {
+        return await renderer(inputOptions);
     } else {
-        let type;
-
-        switch (inputOptions.type) {
-            case "integer":
-                type = "number"
-                break;
-            case "float":
-                type = "number"
-                break;
-            default:
-                type = "text"
-                break;
-        }
-
-        const hasRandomiseToggle = inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === "on";
-
-        const inputId = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
-        const defaultValue = inputOptions.default;
-
-        const inputStep = inputOptions.step;
-        const inputMin = inputOptions.min;
-        const inputMax = inputOptions.max;
-
-        html = `
-        <div class="workflow-input-container">
-            <label for="${inputId}">${inputOptions.title}</label>
-            <div class="inner-input-wrapper">
-                <input 
-                    id="${inputId}" 
-                    type="${type}" 
-                    placeholder="${defaultValue}" 
-                    class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
-                    value="${defaultValue}"
-                    ${inputStep !== undefined ? `step="${inputStep}"` : ''}
-                    ${inputMin !== undefined ? `min="${inputMin}"` : ''} 
-                    ${inputMax !== undefined ? `max="${inputMax}"` : ''}
-                >
-        `;
-
-        if (hasRandomiseToggle) {
-            html += `
-            <button class="randomise-input" type="button" onclick="randomiseInput('${inputId}')">🎲</button>
-            `;
-        }
-
-        html += `</div></div>`;
+        console.error(`Invalid input type: ${inputType}`);
+        return "";
     }
-
-    return html;
 }
 
 function randomiseInput(inputId) {
