@@ -1,4 +1,4 @@
-import { inputRenderers } from '/js/modules/inputRenderers.js';
+import { inputRenderers } from '../modules/inputRenderers.js';
 
 const workflowTitle = document.body.getAttribute('data-workflow-title');
 

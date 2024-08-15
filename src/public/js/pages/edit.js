@@ -1,6 +1,6 @@
-import { handleError } from "./common/errorHandler.js";
-import { getLocalWorkflow } from "./modules/getLocalWorkflow.js";
-import { renderWorkflow, updateJsonWithUserInput } from "./modules/sharedWorkflowUtils.js";
+import { handleError } from "../common/errorHandler.js";
+import { getLocalWorkflow } from "../modules/getLocalWorkflow.js";
+import { renderWorkflow, updateJsonWithUserInput } from "../modules/sharedWorkflowUtils.js";
 
 const inputsContainer = document.querySelector('.inputs-container');
 const titleInput = document.getElementById('title-input');

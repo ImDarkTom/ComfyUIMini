@@ -1,4 +1,4 @@
-import { renderWorkflow, updateJsonWithUserInput, workflowJson } from "./modules/sharedWorkflowUtils.js";
+import { renderWorkflow, updateJsonWithUserInput, workflowJson } from "../modules/sharedWorkflowUtils.js";
 
 const workflowFileInput = document.getElementById('file-input');
 const workflowInputLabel = document.querySelector('.file-input-label');
