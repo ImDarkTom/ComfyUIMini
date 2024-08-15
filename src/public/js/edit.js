@@ -1,3 +1,5 @@
+import { handleError } from "./common/errorHandler.js";
+import { getLocalWorkflow } from "./modules/getLocalWorkflow.js";
 import { renderWorkflow, updateJsonWithUserInput } from "./modules/sharedWorkflowUtils.js";
 
 const inputsContainer = document.querySelector('.inputs-container');
@@ -11,28 +13,18 @@ const workflowFilename = document.body.getAttribute('data-workflow-filename') ||
 
 function loadWorkflow() {
     let workflowJson;
-    if (workflowTextAttrib == "") {
-        workflowJson = getWorkflowFromStorage(workflowTitle);
-    } else {
-        workflowJson = JSON.parse(workflowTextAttrib);
+
+    try {
+        if (workflowTextAttrib == "") {
+            workflowJson = getLocalWorkflow(workflowTitle);
+        } else {
+            workflowJson = JSON.parse(workflowTextAttrib);
+        }
+    
+        renderWorkflow(workflowJson, inputsContainer, titleInput, descriptionInput);
+    } catch (error) { 
+        handleError(error);
     }
-
-    renderWorkflow(workflowJson, inputsContainer, titleInput, descriptionInput);
-}
-
-function getWorkflowFromStorage(workflowTitle) {
-    const allWorkflows = JSON.parse(localStorage.getItem('workflows')) || [];
-
-    const allWorkflowTitles = allWorkflows.map((item) => JSON.parse(item)["_comfyuimini_meta"].title);
-
-    if (!allWorkflowTitles.includes(workflowTitle)) {
-        alert(`Workflow with name '${workflowTitle}' not found in localStorage.`);
-        return null;
-    }
-
-    const currentWorkflow = JSON.parse(allWorkflows.filter((item) => JSON.parse(item)["_comfyuimini_meta"].title == workflowTitle)[0]);
-
-    return currentWorkflow;
 }
 
 document.getElementById('save').addEventListener('click', async () => {
