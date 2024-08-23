@@ -69,5 +69,4 @@ router.get('/interrupt', async (req, res) => {
     res.send(interruptionResponse.data);
 });
 
-
 module.exports = router;

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: "Gallery", theme }) %>
+    <link rel="stylesheet" href="/css/gallery.css">
+    <script src="/js/pages/gallery.js" type="module" defer></script>
+</head>
+<body>
+    <%- include('../partials/page-title', { title: "Gallery" }) %>
+    <div class="main-container">
+        <div class="pagination-container">
+            <div class="pagination-controls">
+                <a href="?page=0" class="pagination-button"><span class="icon arrow-double-left"></span></a>
+                <a href="?page=<%= pageInfo.prevPage %>" class="pagination-button"><span class="icon arrow-left"></span></a>
+                <input type="number" id="page-input" class="pagination-button" placeholder="<%= pageInfo.currentPage %>" value="<%= pageInfo.currentPage %>">
+                <a href="?page=<%= pageInfo.nextPage %>" class="pagination-button"><span class="icon arrow-right"></span></a>
+                <a href="?page=<%= pageInfo.totalPages %>" class="pagination-button"><span class="icon arrow-double-right"></span></a>
+            </div>
+        </div>
+        <div id="subfolders-list">
+            <a href="/gallery" class="subfolder-link">(Default)</a>
+            <% for (const subfolder of scanned.subfolders) { %>
+                <a href="/gallery/<%= subfolder %>" class="subfolder-link"><%= subfolder %></a>
+            <% } %>
+        </div>
+        <div id="images-grid">
+            <% for (const image of scanned.images) { %>
+                <div class="image-item">
+                    <span><%= image.timeText %> </span>
+                    <img src="<%= image.path %>">
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

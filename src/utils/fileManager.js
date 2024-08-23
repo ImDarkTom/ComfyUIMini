@@ -26,31 +26,31 @@ function checkForWorkflowsFolder() {
     }
 }
 
-function loadModelTypes() {
-    function recursiveFolderRead(folderPath, basePath, accepted_exts, fileList = []) {
-        const files = fs.readdirSync(folderPath);
-    
-        files.forEach((file) => {
-            const filePath = path.join(folderPath, file);
-    
-            const stats = fs.statSync(filePath);
-    
-            if (stats.isDirectory()) {
-                recursiveFolderRead(filePath, basePath, accepted_exts, fileList);
-            } else if (stats.isFile()) {
-    
-                const fileExt = path.extname(file).toLowerCase();
-    
-                if (accepted_exts.includes(fileExt)) {
-                    const relativePath = path.relative(basePath, filePath);
-                    fileList.push(relativePath);
-                }
-            }
-        });
-    
-        return fileList;
-    }
+function recursiveFolderRead(folderPath, basePath, accepted_exts, fileList = []) {
+    const files = fs.readdirSync(folderPath);
 
+    files.forEach((file) => {
+        const filePath = path.join(folderPath, file);
+
+        const stats = fs.statSync(filePath);
+
+        if (stats.isDirectory()) {
+            recursiveFolderRead(filePath, basePath, accepted_exts, fileList);
+        } else if (stats.isFile()) {
+
+            const fileExt = path.extname(file).toLowerCase();
+
+            if (accepted_exts.includes(fileExt)) {
+                const relativePath = path.relative(basePath, filePath);
+                fileList.push(relativePath);
+            }
+        }
+    });
+
+    return fileList;
+}
+
+function loadModelTypes() {
     const modelDirsConfigPath = path.join(__dirname, '..', '..', 'model_dirs.json');
 
     if (!fs.existsSync(modelDirsConfigPath)) {
@@ -133,5 +133,6 @@ module.exports = {
     loadSelectOptions,
     loadModelTypes,
     getWorkflowFromFile,
-    writeToWorkflowFile
+    writeToWorkflowFile,
+    recursiveFolderRead
 }

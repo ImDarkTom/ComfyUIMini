@@ -3,6 +3,8 @@ const WebSocket = require('ws');
 const { optionalLog, logWarning } = require('./logger');
 const { logSuccess } = require('./logger');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const clientId = crypto.randomUUID();
 
@@ -18,12 +20,32 @@ async function queuePrompt(workflowPrompt, clientId) {
     return response.data;
 }
 
+
+
 async function getImage(filename, subfolder, type) {
     const params = new URLSearchParams({ filename, subfolder, type });
 
-    const response = await axios.get(`${global.config.comfyui_url}/view?${params.toString()}`, { responseType: 'arraybuffer' });
+    try {
+        const response = await axios.get(`${global.config.comfyui_url}/view?${params.toString()}`, { responseType: 'arraybuffer' });
 
-    return response;
+        return response;
+    } catch (err) {
+        if (err.code === "ECONNREFUSED") {
+
+            // Fallback if ComfyUI is unavailable
+            if (type === "output") {
+                const readFile = fs.readFileSync(path.join(global.config.output_dir, subfolder, filename));
+
+                return {
+                    data: readFile,
+                    headers: {
+                        'Content-Type': 'image/png',
+                        'Content-Length': readFile.length
+                    }
+                };
+            }
+        }
+    }
 }
 
 async function generateProxiedImageUrl(filename, subfolder, folderType) {

@@ -94,6 +94,20 @@ button {
 	margin: 1rem;
 }
 
+.gallery-nav-link {
+	height: 3rem;
+	width: 3rem;
+	margin: 1rem;
+	font-size: 3rem;
+	color: var(--text-primary-color);
+	text-decoration: none;
+}
+
+.nav-buttons {
+	display: flex;
+	flex-direction: row;
+}
+
 .icon-container {
 	display: flex;
 	flex-direction: row;

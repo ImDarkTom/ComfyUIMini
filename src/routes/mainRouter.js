@@ -3,6 +3,7 @@ const router = express.Router();
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
 const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/fileManager');
+const { getGalleryPageData } = require('../utils/gallery');
 
 router.use(cookieParser());
 router.use(themeMiddleware);
@@ -92,6 +93,16 @@ router.get('/workflow/:type/:identifier', (req, res) => {
             res.status(400).send("Invalid workflow type");
             break;
     }
+});
+
+router.get('/gallery/:subfolder?', (req, res) => {
+    const pageData = getGalleryPageData(req, res);
+
+    if (pageData?.error) {
+        res.status(500).send("Internal Server Error");
+    }
+
+    res.render('pages/gallery', {theme: req.theme, ...pageData});
 });
 
 router.get('/settings', (req, res) => {

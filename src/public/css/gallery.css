@@ -1,0 +1,92 @@
+#images-grid {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 5rem;  /* so navbar doesnt cut off bottom image */
+}
+
+.image-item {
+    width: 100%;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.image-item img {
+    width: 100%;
+    border-radius: 0.5rem;
+}
+
+.image-item span {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--background-secondary-color);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.pagination-container {
+    width: 100%;
+    padding: 1rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.pagination-controls {
+    height: 4rem;
+    width: calc(100% - 2rem);
+    border-radius: 0.5rem;
+    background-color: var(--background-secondary-color);
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: row;
+    box-shadow: 0px 0px 10px 1px var(--background-primary-color);
+}
+
+.pagination-button {
+    height: 3rem;
+    width: 3rem;
+    background-color: var(--background-tertiary-color);
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-primary-color);
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+#page-input {
+    border: none;
+    text-align: center;
+    width: 4rem;;
+}
+
+#subfolders-list {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+    white-space: nowrap;
+    margin: 0.5rem;
+}
+
+#subfolders-list .subfolder-link::before {
+    content: '📁';
+    padding-right: 0.5ch;
+}
+
+#subfolders-list .subfolder-link {
+    flex: 0 0 auto;
+    color: var(--text-primary-color);
+    text-decoration: none;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    background-color: var(--background-secondary-color);
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    border-radius: 0.5rem;
+}
