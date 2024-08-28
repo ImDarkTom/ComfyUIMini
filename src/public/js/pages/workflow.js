@@ -176,13 +176,30 @@ async function runWorkflow() {
             const currentImageProgress = `${Math.round((message.data.value / message.data.max) * 100)}%`;
 
             setProgressBar("current", currentImageProgress);
+
+        } else if (message.type === "preview") {
+            const firstSkeletonLoaderElem = outputImagesContainer.querySelector('.image-placeholder-skeleton');
+
+            let previewImageElem = firstSkeletonLoaderElem.querySelector('.preview');
+
+            if (!previewImageElem) {
+                previewImageElem = document.createElement('img');
+                previewImageElem.classList.add('preview');
+                previewImageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
+                // To ensure no flicker between when element is loaded and src is set
+                
+                firstSkeletonLoaderElem.appendChild(previewImageElem);
+            }
+
+            previewImageElem.src = `data:${message.mimetype};base64,${message.data}`;
+
         } else if (message.status === "total_images") {
             totalImageCount = message.data;
 
             if (totalImageCount !== undefined) {
                 outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
             }
-            
+
         } else if (message.status === 'completed') {
             // --- If using cached image and progress isnt set throughout generation
             setProgressBar("current", "100%");
@@ -196,7 +213,7 @@ async function runWorkflow() {
             const allImageUrls = Object.values(allImagesJson).map((item) => {
                 return item[0];
             });
-            
+
 
             outputImagesContainer.innerHTML = "";
 

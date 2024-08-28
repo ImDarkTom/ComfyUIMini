@@ -85,6 +85,16 @@ async function getOutputImages(promptId) {
     return outputImages;
 }
 
+function bufferIsText(buffer) {
+    try {
+        const text = buffer.toString('utf8');
+        JSON.parse(text);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 async function generateImage(workflowPrompt, wsClient) {
     const wsServer = new WebSocket(`${global.config.comfyui_ws_url}/ws?clientId=${clientId}`);
 
@@ -112,16 +122,44 @@ async function generateImage(workflowPrompt, wsClient) {
             wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
 
             wsServer.on('message', async (data) => {
-                const message = JSON.parse(data.toString());
 
-                if (message.type === "status") {
-                    if (message.data.status.exec_info.queue_remaining == 0) {
-                        optionalLog(global.config.optional_log.generation_finish, "Image generation finished.");
-                        wsServer.close();
+                if (bufferIsText(data)) {
+                    const message = JSON.parse(data.toString());
+
+                    if (message.type === "status") {
+                        if (message.data.status.exec_info.queue_remaining == 0) {
+                            optionalLog(global.config.optional_log.generation_finish, "Image generation finished.");
+                            wsServer.close();
+                        }
                     }
-                }
 
-                wsClient.send(JSON.stringify(message));
+                    wsClient.send(data.toString());
+                } else {
+
+                    // Handle image buffers like ComfyUI client
+                    const imageType = data.readUInt32BE(0);
+                    let imageMime;
+
+                    switch (imageType) {
+                        case 1:
+                        default:
+                            imageMime = 'image/jpeg'
+                            break
+                        case 2:
+                            imageMime = 'image/png'
+                    }
+
+                    const imageBlob = data.slice(8);
+                    const base64Image = imageBlob.toString('base64');
+
+                    const jsonPayload = {
+                        type: 'preview',
+                        data: base64Image,
+                        mimetype: imageMime
+                    };
+
+                    wsClient.send(JSON.stringify(jsonPayload));
+                }
             });
 
             wsServer.on('close', async () => {
