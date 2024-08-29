@@ -178,9 +178,13 @@ async function runWorkflow() {
             setProgressBar("current", currentImageProgress);
 
         } else if (message.type === "preview") {
-            const firstSkeletonLoaderElem = outputImagesContainer.querySelector('.image-placeholder-skeleton');
+            const currentSkeletonLoaderElem = outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[(totalImageCount - completedImageCount) - 1];
 
-            let previewImageElem = firstSkeletonLoaderElem.querySelector('.preview');
+            if (!currentSkeletonLoaderElem) {
+                return;
+            }
+
+            let previewImageElem = currentSkeletonLoaderElem.querySelector('.preview');
 
             if (!previewImageElem) {
                 previewImageElem = document.createElement('img');
@@ -188,7 +192,7 @@ async function runWorkflow() {
                 previewImageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
                 // To ensure no flicker between when element is loaded and src is set
                 
-                firstSkeletonLoaderElem.appendChild(previewImageElem);
+                currentSkeletonLoaderElem.appendChild(previewImageElem);
             }
 
             previewImageElem.src = `data:${message.mimetype};base64,${message.data}`;

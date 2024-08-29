@@ -122,7 +122,6 @@ async function generateImage(workflowPrompt, wsClient) {
             wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
 
             wsServer.on('message', async (data) => {
-
                 if (bufferIsText(data)) {
                     const message = JSON.parse(data.toString());
 
