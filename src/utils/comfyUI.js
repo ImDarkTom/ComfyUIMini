@@ -21,7 +21,6 @@ async function queuePrompt(workflowPrompt, clientId) {
 }
 
 
-
 async function getImage(filename, subfolder, type) {
     const params = new URLSearchParams({ filename, subfolder, type });
 
@@ -113,13 +112,13 @@ async function generateImage(workflowPrompt, wsClient) {
                 const cachedImages = await getOutputImages(promptId);
                 optionalLog(global.config.optional_log.generation_finish, "Using cached generation result.");
 
-                wsClient.send(JSON.stringify({ status: 'completed', data: cachedImages }));
+                wsClient.send(JSON.stringify({ type: 'completed', data: cachedImages }));
                 
             } else {
                 totalImages = queueJson["queue_running"][0][4].length;
             }
 
-            wsClient.send(JSON.stringify({status: "total_images", data: totalImages}));
+            wsClient.send(JSON.stringify({type: "total_images", data: totalImages}));
 
             wsServer.on('message', async (data) => {
                 if (bufferIsText(data)) {
@@ -131,8 +130,7 @@ async function generateImage(workflowPrompt, wsClient) {
                             wsServer.close();
                         }
                     }
-
-                    wsClient.send(data.toString());
+                    
                 } else {
 
                     // Handle image buffers like ComfyUI client
@@ -153,8 +151,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
                     const jsonPayload = {
                         type: 'preview',
-                        data: base64Image,
-                        mimetype: imageMime
+                        data: { image: base64Image, mimetype: imageMime }
                     };
 
                     wsClient.send(JSON.stringify(jsonPayload));
@@ -164,26 +161,26 @@ async function generateImage(workflowPrompt, wsClient) {
             wsServer.on('close', async () => {
                 const outputImages = await getOutputImages(promptId);
 
-                wsClient.send(JSON.stringify({ status: 'completed', data: outputImages }));
+                wsClient.send(JSON.stringify({ type: 'completed', data: outputImages }));
             });
         } catch (error) {
             if (error.code === "ERR_BAD_REQUEST") {
-                wsClient.send(JSON.stringify({ status: 'error', message: "Bad Request error when sending workflow request. This can happen if you have disabled extensions that are required to run the workflow." }));
+                wsClient.send(JSON.stringify({ type: 'error', message: "Bad Request error when sending workflow request. This can happen if you have disabled extensions that are required to run the workflow." }));
                 return;
             }
 
             console.error("Unknown error when generating image:", error);
-            wsClient.send(JSON.stringify({ status: 'error', message: "Unknown error when generating image. Check console for more information." }));
+            wsClient.send(JSON.stringify({ type: 'error', message: "Unknown error when generating image. Check console for more information." }));
         }
     });
 
     wsServer.on('error', (error) => {
         if (error.code === "ECONNREFUSED") {
             logWarning(`Could not connect to ComfyUI when attempting to generate image: ${error}`);
-            wsClient.send(JSON.stringify({ status: 'error', message: 'Could not connect to ComfyUI. Check console for more information.' }));
+            wsClient.send(JSON.stringify({ type: 'error', message: 'Could not connect to ComfyUI. Check console for more information.' }));
         } else {
             console.error("WebSocket error when generating image:", error);
-            wsClient.send(JSON.stringify({ status: 'error', message: 'Unknown WebSocket error when generating image. Check console for more information.' }));
+            wsClient.send(JSON.stringify({ type: 'error', message: 'Unknown WebSocket error when generating image. Check console for more information.' }));
         }
     })
 

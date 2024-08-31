@@ -1,77 +1,48 @@
+import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { inputRenderers } from '../modules/inputRenderers.js';
-
-const workflowTitle = document.body.getAttribute('data-workflow-title');
+import { handleError } from '../common/errorHandler.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container')
-
 const totalImagesProgressInnerElem = document.querySelector('.total-images-progress .progress-bar-inner');
 const totalImagesProgressTextElem = document.querySelector('.total-images-progress .progress-bar-text');
 const currentImageProgressInnerElem = document.querySelector('.current-image-progress .progress-bar-inner');
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
-
-const runButtonElem = document.querySelector('.run-workflow');
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
+let workflow = workflowFromEjs;
+let totalImageCount = 0;
+let completedImageCount = 0;
+
+const ws = new WebSocket(`ws://${window.location.host}/ws`);
+ws.onopen = () => console.log("Connected to WebSocket client");
+
 async function loadWorkflow() {
-    let currentWorkflow = "";
-    const workflowTextAttrib = document.body.getAttribute('data-workflow-text');
+    workflow = workflowFromEjs ? workflowFromEjs : await fetchLocalWorkflow();
 
-    if (workflowTextAttrib !== "") { // Workflow sent by server aka pc-hosted
-        currentWorkflow = JSON.parse(workflowTextAttrib);
-    } else {
-        currentWorkflow = getCurrentWorkflowJson();
-
-        document.body.setAttribute('data-workflow-text', JSON.stringify(currentWorkflow));
-
-        if (!currentWorkflow) {
-            return;
-        }
-    }
-
-    const workflowInputs = currentWorkflow["_comfyuimini_meta"].input_options;
-
-    //console.time('renderWorkflow');
+    const workflowInputs = workflow["_comfyuimini_meta"].input_options;
     await renderInputs(workflowInputs);
-    //console.timeEnd('renderWorkflow');
 
     startEventListeners();
 }
 
-async function renderInputs(workflowInputs) {
-    let html = "";
-
-    for (const inputJson of workflowInputs) {
-        const inputHtml = await renderInput(inputJson);
-        
-        html += inputHtml;
+async function fetchLocalWorkflow() {
+    try {
+        return getLocalWorkflow(workflowTitleFromEjs);
+    } catch (error) {
+        handleError(error);
     }
-
-    inputsContainer.innerHTML = html;
 }
 
-function getCurrentWorkflowJson() {
-    const allWorkflows = JSON.parse(localStorage.getItem('workflows')) || [];
-
-    const allWorkflowTitles = allWorkflows.map((item) => JSON.parse(item)["_comfyuimini_meta"].title);
-
-    if (!allWorkflowTitles.includes(workflowTitle)) {
-        inputsContainer.textContent = `Workflow with name '${workflowTitle}' not found in localStorage.`;
-        return null;
-    }
-
-    const currentWorkflow = JSON.parse(allWorkflows.filter((item) => JSON.parse(item)["_comfyuimini_meta"].title == workflowTitle)[0]);
-
-    return currentWorkflow;
+async function renderInputs(workflowInputs) {
+    const html = await Promise.all(workflowInputs.map(renderInput));
+    inputsContainer.innerHTML = html.join('');
 }
 
 async function renderInput(inputOptions) {
-    if (inputOptions.disabled) {
-        return "";
-    }
+    if (inputOptions.disabled) return "";
 
-    const inputType = inputOptions.type;
-    const renderer = inputRenderers[inputType];
+    const renderer = inputRenderers[inputOptions.type];
 
     if (renderer) {
         return await renderer(inputOptions);
@@ -82,156 +53,164 @@ async function renderInput(inputOptions) {
 }
 
 function startEventListeners() {
-    runButtonElem.addEventListener('click', () => {
-        runWorkflow();
-    });
+    document.querySelector('.run-workflow').addEventListener('click', runWorkflow);
 
-    cancelGenerationButtonElem.addEventListener('click', () => {
-        cancelRun();
-    })
+    cancelGenerationButtonElem.addEventListener('click', cancelRun);
+    inputsContainer.addEventListener('click', handleInputContainerClick);
+}
 
-    inputsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('randomise-input')) {
-            randomiseInput(e.target.getAttribute('data-linked-input-id'));
-        }
-    });
+function handleInputContainerClick(e) {
+    if (e.target.classList.contains('randomise-input')) {
+        randomiseInput(e.target.getAttribute('data-linked-input-id'));
+    }
 }
 
 function randomiseInput(inputId) {
-    //navigator.vibrate(10);
-    // implement later with proper settings page
     const input = document.getElementById(inputId);
-
     const min = parseFloat(input.getAttribute('min'));
     const max = parseFloat(input.getAttribute('max'));
     const step = parseFloat(input.getAttribute('step')) || 1;
 
     let randomNumber;
     if (!isNaN(min) && !isNaN(max) && max > min) {
-        const range = (max - min) / step;
-
-        randomNumber = min + step * Math.floor(Math.random() * range);
-        randomNumber = Math.min(randomNumber, max);
+        randomNumber = generateRandomNum(min, max, step);
     } else {
-        // If no valid min/max set, generate a random 16-long number, e.g for seed.
-        randomNumber = (Math.floor(Math.random() * 1e16)).toString().padStart(16, '0');
+        randomNumber = generateSeed();
     }
 
     input.value = randomNumber;
 }
 
-function setProgressBar(type, percentage) {
-    if (type == "total") {
-        totalImagesProgressTextElem.textContent = percentage;
-        totalImagesProgressInnerElem.style.width = percentage;
-    } else if (type == "current") {
-        currentImageProgressTextElem.textContent = percentage;
-        currentImageProgressInnerElem.style.width = percentage;
-    }
+function generateRandomNum(min, max, step) {
+    const range = (max - min) / step;
+    return Math.min(min + step * Math.floor(Math.random() * range), max);
 }
 
-const ws = new WebSocket(`ws://${window.location.host}/ws`);
+function generateSeed() {
+    return (Math.floor(Math.random() * 1e16)).toString().padStart(16, '0');
+}
 
-ws.onopen = () => {
-    console.log("Connected to WebSocket client");
+function setProgressBar(type, percentage) {
+    const textElem = type === "total" ? totalImagesProgressTextElem : currentImageProgressTextElem;
+    const barElem = type === "total" ? totalImagesProgressInnerElem : currentImageProgressInnerElem;
+
+    textElem.textContent = percentage;
+    barElem.style.width = percentage;
+}
+
+function fillWorkflowWithUserParams() {
+    const workflowModified = workflow;
+    // ComfyUI can't process the workflow if it contains the additional metadata.
+    delete workflowModified["_comfyuimini_meta"];
+
+    document.querySelectorAll('.workflow-input-container').forEach(inputContainer => {
+        const inputElem = inputContainer.querySelector('.workflow-input');
+
+        const [_, nodeId, nodeInputName] = inputElem.id.split('-');
+        const inputValue = inputElem.value;
+
+        workflowModified[nodeId].inputs[nodeInputName] = inputValue;
+    });
+
+    return workflowModified;
 }
 
 async function runWorkflow() {
     setProgressBar("current", "0%");
     setProgressBar("total", "0%");
 
-    const workflow = JSON.parse(document.body.getAttribute('data-workflow-text'));
+    totalImageCount = 0;
+    completedImageCount = 0;
 
-    // ComfyUI can't process the workflow if it contains the additional metadata.
-    delete workflow["_comfyuimini_meta"];
+    const filledWorkflow = fillWorkflowWithUserParams();
+    ws.send(JSON.stringify(filledWorkflow));
 
-    const allInputContainers = document.querySelectorAll('.workflow-input-container');
-
-    for (const inputContainer of allInputContainers) {
-        const inputElem = inputContainer.querySelector('.workflow-input');
-        
-        const [_, nodeId, nodeInputName] = inputElem.id.split('-');
-        const inputValue = inputElem.value;
-
-        workflow[nodeId].inputs[nodeInputName] = inputValue;
-    }
-
-    ws.send(JSON.stringify(workflow));
     cancelGenerationButtonElem.classList.remove('disabled');
 
-    let totalImageCount = 0;
-    let completedImageCount = 0;
     ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
-        if (message.type === 'progress') {
-            if (message.data.value === message.data.max) {
-                completedImageCount += 1;
+        switch (message.type) {
+            case 'progress':
+                updateProgressBars(message.data);
+                break;
 
-                const allImagesProgress = `${Math.round((completedImageCount / totalImageCount) * 100)}%`;
+            case 'preview':
+                updateImagePreview(message.data);
+                break;
 
-                setProgressBar("total", allImagesProgress);
-            }
+            case 'total_images':
+                setupImagePlaceholders(message.data);
+                break;
+            
+            case 'completed':
+                finishGeneration(message.data);
+                break;
 
-            const currentImageProgress = `${Math.round((message.data.value / message.data.max) * 100)}%`;
+            case 'error':
+                console.error('Error:', message.message);
+                openPopupWindow(message.message);
+                break;
 
-            setProgressBar("current", currentImageProgress);
-
-        } else if (message.type === "preview") {
-            const currentSkeletonLoaderElem = outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[(totalImageCount - completedImageCount) - 1];
-
-            if (!currentSkeletonLoaderElem) {
-                return;
-            }
-
-            let previewImageElem = currentSkeletonLoaderElem.querySelector('.preview');
-
-            if (!previewImageElem) {
-                previewImageElem = document.createElement('img');
-                previewImageElem.classList.add('preview');
-                previewImageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
-                // To ensure no flicker between when element is loaded and src is set
-                
-                currentSkeletonLoaderElem.appendChild(previewImageElem);
-            }
-
-            previewImageElem.src = `data:${message.mimetype};base64,${message.data}`;
-
-        } else if (message.status === "total_images") {
-            totalImageCount = message.data;
-
-            if (totalImageCount !== undefined) {
-                outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
-            }
-
-        } else if (message.status === 'completed') {
-            // --- If using cached image and progress isnt set throughout generation
-            setProgressBar("current", "100%");
-            setProgressBar("total", "100%");
-            // ---
-
-            cancelGenerationButtonElem.classList.add('disabled');
-
-            const allImagesJson = message.data;
-
-            const allImageUrls = Object.values(allImagesJson).map((item) => {
-                return item[0];
-            });
-
-
-            outputImagesContainer.innerHTML = "";
-
-            for (const imageUrl of allImageUrls) {
-                const imageHtml = urlToImageElem(imageUrl);
-
-                outputImagesContainer.innerHTML += imageHtml;
-            }
-
-        } else if (message.status === 'error') {
-            console.error('Error:', message.message);
-            openPopupWindow(message.message);
+            default: 
+                console.warn('Unknown WebSocket message type:', message.type);
+                console.log(message);
+                break;
         }
     };
+}
+
+function updateProgressBars(messageData) {
+    const currentImageProgress = `${Math.round((messageData.value / messageData.max) * 100)}%`;
+    setProgressBar("current", currentImageProgress);
+
+    if (messageData.value === messageData.max) {
+        completedImageCount += 1;
+
+        const allImagesProgress = `${Math.round((completedImageCount / totalImageCount) * 100)}%`;
+        setProgressBar("total", allImagesProgress);
+    }
+}
+
+function updateImagePreview(messageData) {
+    const currentSkeletonLoaderElem = outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[(totalImageCount - completedImageCount) - 1];
+
+    if (!currentSkeletonLoaderElem) {
+        return;
+    }
+
+    let previewImageElem = currentSkeletonLoaderElem.querySelector('.preview');
+    if (!previewImageElem) {
+        previewImageElem = document.createElement('img');
+        previewImageElem.classList.add('preview');
+        previewImageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        // Empty image to ensure no flicker between when element is loaded and src is set
+
+        currentSkeletonLoaderElem.appendChild(previewImageElem);
+    }
+
+    previewImageElem.src = `data:${messageData.mimetype};base64,${messageData.image}`;
+}
+
+function setupImagePlaceholders(messageData) {
+    totalImageCount = messageData;
+    outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
+}
+
+function finishGeneration(messageData) {
+    // --- If using cached image and progress isnt set throughout generation
+    setProgressBar("current", "100%");
+    setProgressBar("total", "100%");
+    // ---
+    cancelGenerationButtonElem.classList.add('disabled');
+
+    const allImageUrls = Object.values(messageData).map((item) => item[0]);
+
+    outputImagesContainer.innerHTML = allImageUrls.map(urlToImageElem).join('');
+}
+
+function urlToImageElem(imageUrl) {
+    return `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="output-image"></a>`;
 }
 
 function cancelRun() {
@@ -241,10 +220,6 @@ function cancelRun() {
 
     fetch('/comfyui/interrupt');
     cancelGenerationButtonElem.classList.add('disabled');
-}
-
-function urlToImageElem(imageUrl) {
-    return `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="output-image"></a>`;
 }
 
 loadWorkflow();

@@ -6,7 +6,7 @@
     <script src="/js/pages/workflow.js" defer type="module"></script>
     <script src="/js/common/popupWindow.js" defer></script>
 </head>
-<body data-workflow-title="<%= workflowTitle %>" data-workflow-text="<%= workflowText || '' %>">
+<body>
     <%- include('../partials/page-title', { title: workflowTitle }) %>
     <div class="main-container">
         <h2 class="category-title">Inputs</h2>
@@ -24,5 +24,9 @@
         <h2 class="category-title">Output</h2>
         <div class="output-images-container"></div>
     </div>
+    <script>
+            const workflowFromEjs = <%- JSON.stringify(workflowJson) || "null" %>;
+            const workflowTitleFromEjs = '<%= workflowTitle %>';
+    </script>
 </body>
 </html>

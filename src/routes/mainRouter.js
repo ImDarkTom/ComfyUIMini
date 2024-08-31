@@ -70,7 +70,7 @@ router.get('/workflow/:type/:identifier', (req, res) => {
 
     switch (workflowType) {
         case "local":
-            res.render('pages/workflow', { workflowTitle: workflowIdentifier, workflowText: "", theme: req.theme });
+            res.render('pages/workflow', { workflowTitle: workflowIdentifier, workflowJson: null, theme: req.theme });
             break;
 
         case "server":
@@ -86,7 +86,7 @@ router.get('/workflow/:type/:identifier', (req, res) => {
 
             const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
 
-            res.render('pages/workflow', { workflowTitle: workflowTitle, workflowText: JSON.stringify(workflowFileJson), theme: req.theme });
+            res.render('pages/workflow', { workflowTitle: workflowTitle, workflowJson: workflowFileJson, theme: req.theme });
             break;
         
         default:
