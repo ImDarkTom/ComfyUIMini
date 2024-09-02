@@ -129,6 +129,8 @@ async function generateImage(workflowPrompt, wsClient) {
                             optionalLog(global.config.optional_log.generation_finish, "Image generation finished.");
                             wsServer.close();
                         }
+                    } else if (message.type === "progress") {
+                        wsClient.send(JSON.stringify(message));
                     }
                     
                 } else {
