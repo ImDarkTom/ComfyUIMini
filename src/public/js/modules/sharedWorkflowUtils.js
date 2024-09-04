@@ -167,7 +167,7 @@ async function renderAdditionalOptions(data) {
                 <input type="number" id="max-value" data-key="max" class="additional-input-option" value="${data.max || ""}">
             </div>
             <div class="additional-option-wrapper">
-                <label for="show-random-toggle-value">Show randomise value toggle?</label>
+                <label for="show-random-toggle-value">Show randomise toggle?</label>
                 <input type="checkbox" id="show-random-toggle-value" data-key="show_randomise_toggle" class="additional-input-option" ${showRandomiseChecked}>
             </div>
             `;

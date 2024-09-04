@@ -1,13 +1,16 @@
-.workflow-input-container {
-    padding-bottom: 1ch;
-}
-
 :root {
     --input-height: 3rem;
     --input-font-size: 1.2rem;
 }
 
+.workflow-input-container label {
+    display: block;
+    padding-top: 1ch;
+    padding-bottom: 0.25ch;
+}
+
 .workflow-input {
+    flex: 1;
     width: 100%;
     box-sizing: border-box;
     background-color: var(--background-tertiary-color);
@@ -15,7 +18,6 @@
     border: 0;
     padding: 0.5rem;
     border-radius: 0.5rem;
-    margin-top: 0.1rem;
     height: var(--input-height);
     font-size: var(--input-font-size);
 }
@@ -40,25 +42,52 @@ textarea.workflow-input {
 
 .workflow-input.has-random-toggle{
     /* styles for workflow-input if there is a randomise button */
-    width: calc(100% - var(--input-height));
     border-radius: 0.5rem 0 0 0.5rem;
 }
 
-.randomise-input {
+.randomise-buttons-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.randomise-buttons-container span {
+    justify-content: center;
+    align-items: center;
+    user-select: none;
     box-sizing: border-box;
     width: var(--input-height);
     height: var(--input-height);
     border: 0;
     padding: 0;
-    margin: 0.1rem 0 0 0;
     background-color: var(--background-tertiary-color);
     color: var(--text-secondary-color);
-    border-radius: 0 0.5rem 0.5rem 0;
     font-size: var(--input-font-size);
 }
 
-.randomise-input:active {
-    filter: brightness(0.75);
+.randomise-now-button {
+    display: none;
+    font-size: 1.5rem !important;
+}
+
+.randomise-input-toggle {
+    display: flex;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.randomise-input-toggle::before {
+    content: '🎲';
+}
+
+.randomise-buttons-container.randomise-off > .randomise-now-button {
+    display: flex;
+}
+
+.randomise-buttons-container.randomise-off > .randomise-input-toggle::before {
+    content: '🔒';
+}
+
+.randomise-buttons-container.randomise-off > .randomise-input-toggle {
+    background-color: var(--background-secondary-color);
 }
 
 .run-button-wrapper {

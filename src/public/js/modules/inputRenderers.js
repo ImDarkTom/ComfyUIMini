@@ -1,7 +1,9 @@
 const createInputContainer = (id, title, inputHtml) => `
     <div class="workflow-input-container">
         <label for="${id}">${title}</label>
-        ${inputHtml}
+        <div class="inner-input-wrapper">
+            ${inputHtml}
+        </div>
     </div>
 `;
 
@@ -30,20 +32,24 @@ export function renderNumberInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
     const { default: defaultValue, step, min, max } = inputOptions;
 
+    const randomiseToggle = `
+    <div class="randomise-buttons-container" data-linked-input-id="${id}">
+        <span class="randomise-now-button">↻</span>
+        <span class="randomise-input-toggle"></span>
+    </div>`
+
     return createInputContainer(id, inputOptions.title, `
-        <div class="inner-input-wrapper">
-            <input 
-                id="${id}" 
-                type="number" 
-                placeholder="${defaultValue}" 
-                class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
-                value="${defaultValue}"
-                ${step !== undefined ? `step="${step}"` : ''}
-                ${min !== undefined ? `min="${min}"` : ''} 
-                ${max !== undefined ? `max="${max}"` : ''}
-            >
-            ${hasRandomiseToggle ? `<button class="randomise-input" type="button" data-linked-input-id="${id}">🎲</button>` : ''}
-        </div>
+        <input 
+            id="${id}" 
+            type="number" 
+            placeholder="${defaultValue}" 
+            class="workflow-input ${hasRandomiseToggle ? "has-random-toggle" : ""}" 
+            value="${defaultValue}"
+            ${step !== undefined ? `step="${step}"` : ''}
+            ${min !== undefined ? `min="${min}"` : ''} 
+            ${max !== undefined ? `max="${max}"` : ''}
+        >
+        ${hasRandomiseToggle ? randomiseToggle : ''}
     `);
 }
 

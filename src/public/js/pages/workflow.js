@@ -60,8 +60,21 @@ function startEventListeners() {
 }
 
 function handleInputContainerClick(e) {
-    if (e.target.classList.contains('randomise-input')) {
-        randomiseInput(e.target.getAttribute('data-linked-input-id'));
+    if (e.target.classList.contains('randomise-input-toggle')) {
+        toggleRandomiseInput(e.target);
+    } else if (e.target.classList.contains('randomise-now-button')) (
+        randomiseInput(e.target.parentNode.getAttribute('data-linked-input-id'))
+    )
+}
+
+function toggleRandomiseInput(toggleElement) {
+    const toggleElemContainer = toggleElement.parentNode;
+    const randomiseOff = toggleElemContainer.classList.contains('randomise-off');
+
+    if (randomiseOff) {
+        toggleElemContainer.classList.remove('randomise-off');
+    } else {
+        toggleElemContainer.classList.add('randomise-off');
     }
 }
 
@@ -104,6 +117,18 @@ function fillWorkflowWithUserParams() {
     delete workflowModified["_comfyuimini_meta"];
 
     document.querySelectorAll('.workflow-input-container').forEach(inputContainer => {
+        const randomiseButtonsContainer = inputContainer.querySelector('.randomise-buttons-container');
+
+        if (randomiseButtonsContainer) {
+            if (randomiseButtonsContainer.classList.contains('randomise-off')) {
+                return;
+            }
+
+            const randomisedInputId = randomiseButtonsContainer.getAttribute('data-linked-input-id');
+
+            randomiseInput(randomisedInputId);
+        }
+
         const inputElem = inputContainer.querySelector('.workflow-input');
 
         const [_, nodeId, nodeInputName] = inputElem.id.split('-');
