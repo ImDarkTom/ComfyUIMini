@@ -9,8 +9,10 @@ router.use(cookieParser());
 router.use(themeMiddleware);
 router.use(express.json());
 
+const appVersion = require('../../package.json').version;
+
 router.get('/', (req, res) => {
-    res.render('pages/index', { serverWorkflows: global.serverWorkflowFilenames, theme: req.theme });
+    res.render('pages/index', { serverWorkflows: global.serverWorkflowFilenames, appVersion: appVersion, theme: req.theme });
 });
 
 router.get('/import', (req, res) => {
