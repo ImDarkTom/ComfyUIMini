@@ -7,11 +7,21 @@ const fs = require('fs');
 const path = require('path');
 
 const clientId = crypto.randomUUID();
+const appVersion = require('../../package.json').version;
+
+const comfyuiAxios = axios.create({
+    baseURL: global.config.comfyui_url,
+    timeout: 10000,
+    headers: {
+        'User-Agent': `ComfyUIMini/${appVersion}`
+    }
+});
+
 
 async function queuePrompt(workflowPrompt, clientId) {
     const postContents = { 'prompt': workflowPrompt, client_id: clientId };
 
-    const response = await axios.post(`${global.config.comfyui_url}/prompt`, postContents, {
+    const response = await comfyuiAxios.post('/prompt', postContents, {
         headers: {
             'Content-Type': 'application/json'
         }
@@ -25,7 +35,7 @@ async function getImage(filename, subfolder, type) {
     const params = new URLSearchParams({ filename, subfolder, type });
 
     try {
-        const response = await axios.get(`${global.config.comfyui_url}/view?${params.toString()}`, { responseType: 'arraybuffer' });
+        const response = await comfyuiAxios.get(`/view?${params.toString()}`, { responseType: 'arraybuffer' });
 
         return response;
     } catch (err) {
@@ -54,13 +64,13 @@ async function generateProxiedImageUrl(filename, subfolder, folderType) {
 }
 
 async function getHistory(promptId) {
-    const response = await axios.get(`${global.config.comfyui_url}/history/${promptId}`);
+    const response = await axios.get(`/history/${promptId}`);
 
     return response.data;
 }
 
 async function getQueue() {
-    const response = await axios.get(`${global.config.comfyui_url}/queue`);
+    const response = await axios.get('/queue');
 
     return response.data;
 }
@@ -194,7 +204,7 @@ async function checkForComfyUI() {
             200: "ComfyUI is running."
         };
 
-        const request = await axios.get(global.config.comfyui_url);
+        const request = await comfyuiAxios.get('/');
         const status = request.status;
 
         logSuccess(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
@@ -210,7 +220,7 @@ async function checkForComfyUI() {
 }
 
 async function interruptGeneration() {
-    const response = await axios.post(`${global.config.comfyui_url}/interrupt`);
+    const response = await axios.post('/interrupt');
 
     return response.data;
 }
