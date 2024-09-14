@@ -58,13 +58,16 @@
     font-size: 1.5rem;
     word-wrap: normal;
     overflow-x: auto;
-    height: 65%;
     width: 100%;
     box-sizing: border-box;
     padding: 0.5ch;
     color: var(--text-primary-color);
 }
 
+.workflow-description {
+    color: var(--text-secondary-color);
+    padding: 0.5ch;
+}
 
 .workflow-import-text {
     font-size: 1.5rem;

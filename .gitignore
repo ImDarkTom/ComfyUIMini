@@ -1,5 +1,6 @@
 node_modules/
 workflows/*
+data/
 !/workflows/converted_workflows_here
 /model_dirs.json
 /config.json

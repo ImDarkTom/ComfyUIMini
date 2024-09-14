@@ -4,7 +4,8 @@
     "comfyui_ws_url": "ws://127.0.0.1:8188",
     "optional_log": {
         "generation_finish": true,
-        "queue_image": false
+        "queue_image": false,
+        "cache": false
     },
     "use_log_emojis": false,
     "output_dir": "path/to/comfyui/output/folder"

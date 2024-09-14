@@ -14,9 +14,9 @@
                     <span class="workflow-import-text">Import workflow from JSON</span>
                 </div>
             </a>
-            <% serverWorkflows.forEach(function(item) { %>
-                <%- include('../partials/workflow-grid-item', { title: item }) %>
-            <% }); %>
+            <% for (const [filename, name] of Object.entries(serverWorkflowNames)) { %>
+                <%- include('../partials/workflow-grid-item', { name, filename }) %>
+            <% }; %>
         </div>
     </div>
     <a href="https://www.buymeacoffee.com/ImDarkTom" target="_blank" class="bmac-link"><img class="bmac-link-img" src="/img/bmac-yellow-button.png" alt="Buy Me A Coffee"></a>

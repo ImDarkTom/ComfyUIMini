@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { logInfo, logWarning } = require('./logger');
+const { checkWorkflowCache } = require('./workflowCache');
 
 function checkForWorkflowsFolder() {
     const workflowsFilepath = path.join(__dirname, '..', '..', 'workflows');
@@ -15,13 +16,12 @@ function checkForWorkflowsFolder() {
     try {
         const filesList = fs.readdirSync(workflowsFilepath);
         const listJsonFiles = filesList.filter(file => path.extname(file).toLowerCase() === ".json");
-
-        global.serverWorkflowFilenames = listJsonFiles;
-
         logInfo(`Found ${listJsonFiles.length} workflows in the workflow folder.`);
+
+        checkWorkflowCache(workflowsFilepath, listJsonFiles);
         return;
     } catch (err) {
-        console.err('Error reading workflows folder: ', err);
+        console.error('Error reading workflows folder: ', err);
         return;
     }
 }
