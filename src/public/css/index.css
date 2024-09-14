@@ -1,14 +1,12 @@
 .main-container {
-    height: calc(100vh - (2rem + 5rem + 1rem + 5vh));
     overflow-y: auto;
+    height: auto;
 }
 
 .workflow-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    align-items: start;
-    justify-items: start;
 }
 
 .workflow-grid-link {
@@ -18,13 +16,15 @@
 
 .workflow-grid-item {
     border-radius: 0.5rem;
-    --calculated-size: calc(50vw - 0.5rem - 0.25rem);
     padding: 0.5rem;
-    width: var(--calculated-size);
-    height: var(--calculated-size);
+    width: 100%;
+    height: 16vh;
     box-sizing: border-box;
     background-color: var(--background-secondary-color);
     user-select: none;
+    display: flex;
+    flex-direction: row;
+    position: relative;
 }
 
 .workflow-item-icons {
@@ -35,8 +35,10 @@
 }
 
 .workflow-icon-container {
-    width: 50%;
     height: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    aspect-ratio: 1/1;
 }
 
 .workflow-icon {
@@ -45,12 +47,19 @@
 }
 
 .workflow-menu-icon {
-    width: 50%;
-    height: 100%;
-    font-size: 2rem;
-    text-align: end;
-    box-sizing: border-box;
     padding: 1rem;
+    font-size: 2rem;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.workflow-text-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 0 0.5rem;
 }
 
 .workflow-title {
@@ -60,13 +69,14 @@
     overflow-x: auto;
     width: 100%;
     box-sizing: border-box;
-    padding: 0.5ch;
     color: var(--text-primary-color);
+    padding: 0.5ch 0;
 }
 
 .workflow-description {
     color: var(--text-secondary-color);
-    padding: 0.5ch;
+    padding: 0.5ch 0;
+    font-style: italic;
 }
 
 .workflow-import-text {
@@ -91,4 +101,37 @@
 .bmac-link-img {
     height: 100%;
     width: auto;
+}
+
+.nav-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin: 0.5rem 0.5rem 0 0.5rem;
+	padding: 0.5rem;
+	box-sizing: border-box;
+	background-color: var(--background-secondary-color);
+	border-radius: 0.5rem;
+}
+
+.nav-buttons {
+	display: flex;
+	flex-direction: row;
+}
+
+.icon-container {
+	display: flex;
+	flex-direction: row;
+}
+
+.nav-icon {
+    height: 5rem;
+	width: 5rem;
+}
+
+.version-text {
+	display: flex;
+	align-items: end;
+	padding: 0;
+	box-sizing: border-box;
 }

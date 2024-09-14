@@ -6,20 +6,28 @@
     <script src="/js/pages/index.js" defer></script>
 </head>
 <body>
-    <%- include('../partials/nav', { appVersion }) %>
+    <div class="nav-container">
+        <div class="icon-container">
+            <img src="/img/android-chrome-icon.png" alt="ComfyUI Mini Icon" class="nav-icon">
+            <span class="version-text">v<%= appVersion %></span>
+        </div>
+    </div>
     <div class="main-container">
         <div class="workflow-grid">
-            <a href="/import" class="workflow-grid-link">
-                <div class="workflow-grid-item import-workflow-item">
-                    <span class="workflow-import-text">Import workflow from JSON</span>
-                </div>
-            </a>
             <% for (const [filename, name] of Object.entries(serverWorkflowNames)) { %>
                 <%- include('../partials/workflow-grid-item', { name, filename }) %>
             <% }; %>
         </div>
     </div>
-    <a href="https://www.buymeacoffee.com/ImDarkTom" target="_blank" class="bmac-link"><img class="bmac-link-img" src="/img/bmac-yellow-button.png" alt="Buy Me A Coffee"></a>
     <%- include('../partials/actionSheet') %>
+    <%- include('../partials/actionBar', { 
+        actions: [
+            { href: "/", icon: "home", text: "Home" },
+            { href: "/#search", icon: "home", text: "Search" },
+            { href: "/import", icon: "import", text: "Import",}, // main button
+            { href: "/gallery", icon: "gallery", text: "Gallery" },
+            { href: "/settings", icon: "settings", text: "Settings" }
+        ] 
+    }) %>
 </body>
 </html>

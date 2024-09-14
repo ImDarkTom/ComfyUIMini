@@ -98,13 +98,14 @@ function loadLocalWorkflows() {
         const gridItemHtml = `
         <a href="/workflow/local/${title}" class="workflow-grid-link">
             <div class="workflow-grid-item">
-                    <div class="workflow-item-icons">
-                        <div class="workflow-icon-container">
-                            <div class="icon phone workflow-icon"></div>
-                        </div>
-                        <span class="workflow-menu-icon" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'>☰</span>
-                    </div>
+                <div class="workflow-icon-container">
+                    <div class="icon phone workflow-icon"></div>
+                </div>
+                <div class="workflow-text-info">
                     <span class="workflow-title">${title}</span>
+                    <span class="workflow-description">Local</span>
+                </div>
+                <span class="workflow-menu-icon" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'>⚙</span>
             </div>
         </a>
         `;

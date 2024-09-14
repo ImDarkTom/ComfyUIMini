@@ -1,12 +1,12 @@
 <a href="/workflow/server/<%= filename %>" class="workflow-grid-link">
     <div class="workflow-grid-item">
-        <div class="workflow-item-icons">
-            <div class="workflow-icon-container">
-                <div class="icon server workflow-icon"></div>
-            </div>
-            <span class="workflow-menu-icon" onclick='loadBottomSheet([{icon: "✏", text: "Edit", function: "editWorkflow", functionParams: ["server", "<%= filename %>"]}], event)'>☰</span>
+        <div class="workflow-icon-container">
+            <div class="icon server workflow-icon"></div>
         </div>
-        <span class="workflow-title"><%= name %></span>
-        <span class="workflow-description"><%= filename %></span>
+        <div class="workflow-text-info">
+            <span class="workflow-title"><%= name %></span>
+            <span class="workflow-description"><%= filename %></span>
+        </div>
+        <span class="workflow-menu-icon" onclick='loadBottomSheet([{icon: "✏", text: "Edit", function: "editWorkflow", functionParams: ["server", "<%= filename %>"]}], event)'>⚙</span>
     </div>
 </a>
