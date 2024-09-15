@@ -64,13 +64,13 @@ async function generateProxiedImageUrl(filename, subfolder, folderType) {
 }
 
 async function getHistory(promptId) {
-    const response = await axios.get(`/history/${promptId}`);
+    const response = await comfyuiAxios.get(`/history/${promptId}`);
 
     return response.data;
 }
 
 async function getQueue() {
-    const response = await axios.get('/queue');
+    const response = await comfyuiAxios.get('/queue');
 
     return response.data;
 }
@@ -220,7 +220,7 @@ async function checkForComfyUI() {
 }
 
 async function interruptGeneration() {
-    const response = await axios.post('/interrupt');
+    const response = await comfyuiAxios.post('/interrupt');
 
     return response.data;
 }
