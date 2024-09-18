@@ -10,7 +10,9 @@ const currentImageProgressInnerElem = document.querySelector('.current-image-pro
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
-let workflow = workflowFromEjs;
+const workflowData = workflowDataFromEjs;
+workflowData["json"] = workflowData.json ? workflowData.json : await fetchLocalWorkflow();
+
 let totalImageCount = 0;
 let completedImageCount = 0;
 
@@ -18,9 +20,7 @@ const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onopen = () => console.log("Connected to WebSocket client");
 
 async function loadWorkflow() {
-    workflow = workflowFromEjs ? workflowFromEjs : await fetchLocalWorkflow();
-
-    const workflowInputs = workflow["_comfyuimini_meta"].input_options;
+    const workflowInputs = workflowData.json["_comfyuimini_meta"].input_options;
     await renderInputs(workflowInputs);
 
     startEventListeners();
@@ -28,7 +28,7 @@ async function loadWorkflow() {
 
 async function fetchLocalWorkflow() {
     try {
-        return getLocalWorkflow(workflowTitleFromEjs);
+        return getLocalWorkflow(workflowData.identifier);
     } catch (error) {
         handleError(error);
     }
@@ -112,7 +112,7 @@ function setProgressBar(type, percentage) {
 }
 
 function fillWorkflowWithUserParams() {
-    const workflowModified = workflow;
+    const workflowModified = workflowData.json;
     // ComfyUI can't process the workflow if it contains the additional metadata.
     delete workflowModified["_comfyuimini_meta"];
 
@@ -140,7 +140,7 @@ function fillWorkflowWithUserParams() {
     return workflowModified;
 }
 
-async function runWorkflow() {
+export async function runWorkflow() {
     setProgressBar("current", "0%");
     setProgressBar("total", "0%");
 
@@ -238,7 +238,7 @@ function urlToImageElem(imageUrl) {
     return `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" class="output-image"></a>`;
 }
 
-function cancelRun() {
+export function cancelRun() {
     if (cancelGenerationButtonElem.classList.contains('disabled')) {
         return;
     }

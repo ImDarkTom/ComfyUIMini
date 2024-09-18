@@ -21,12 +21,12 @@
     </div>
     <%- include('../partials/actionSheet') %>
     <%- include('../partials/actionBar', { 
-        actions: [
-            { href: "/", icon: "home", text: "Home" },
-            { href: "/#search", icon: "home", text: "Search" },
-            { href: "/import", icon: "import", text: "Import",}, // main button
-            { href: "/gallery", icon: "gallery", text: "Gallery" },
-            { href: "/settings", icon: "settings", text: "Settings" }
+        buttons: [
+            { action: "/", icon: "home", text: "Home", type: "link" },
+            { action: "/#search", icon: "search", text: "Search (TBA)", type: "link" },
+            { action: "/import", icon: "import", text: "Import", type: "link"}, // main button
+            { action: "/gallery", icon: "gallery", text: "Gallery", type: "link" },
+            { action: "/settings", icon: "settings", text: "Settings", type: "link" }
         ] 
     }) %>
 </body>

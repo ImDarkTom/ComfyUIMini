@@ -81,6 +81,7 @@ button {
 .main-container {
     box-sizing: border-box;
     padding: 0.5rem;
+	margin-bottom: 10vh; /* adjust for action bar height */
 }
 
 /* popup */

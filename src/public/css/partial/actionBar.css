@@ -8,6 +8,8 @@
     flex-direction: row;
     justify-content: space-evenly;
     background-color: var(--background-tertiary-color);
+    box-shadow: 0px -2px 4px 0px var(--background-primary-color);
+    z-index: 1;
 }
 
 .action-bar-button {
@@ -20,6 +22,9 @@
     text-decoration: none;
     width: 20vw;
     gap: 0.25rem;
+    text-align: center;
+    background-color: transparent;
+    border: none;
 }
 
 .action-bar-button .icon {

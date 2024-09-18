@@ -1,23 +1,18 @@
 <div class="action-bar">
     <link rel="stylesheet" href="/css/partial/actionBar.css">
-    <a class="action-bar-button" href="<%= actions[0].href %>">
-        <span class="icon <%= actions[0].icon %>"></span>
-        <span><%= actions[0].text %></span>
-    </a>
-    <a class="action-bar-button" href="<%= actions[1].href %>">
-        <span class="icon <%= actions[1].icon %>"></span>
-        <span><%= actions[1].text %></span>
-    </a>
-    <a class="action-bar-button action-bar-main-button" href="<%= actions[2].href %>">
-        <span class="icon <%= actions[2].icon %>"></span>
-        <span><%= actions[2].text %></span>
-    </a>
-    <a class="action-bar-button" href="<%= actions[3].href %>">
-        <span class="icon <%= actions[3].icon %>"></span>
-        <span><%= actions[3].text %></span>
-    </a>
-    <a class="action-bar-button" href="<%= actions[4].href %>">
-        <span class="icon <%= actions[4].icon %>"></span>
-        <span><%= actions[4].text %></span>
-    </a>
+    <script src="/js/common/actionBar.js" defer type="module"></script>
+
+    <% buttons.forEach((button, index) => { %>
+        <% if (button.type === "link") { %>
+            <a class="action-bar-button <%= index === 2 ? "action-bar-main-button" : "" %>" href="<%= button.action %>">
+                <span class="icon <%= button.icon %>"></span>
+                <span><%= button.text %></span>
+            </a>
+        <% } else if (button.type === "button") { %>
+            <button class="action-bar-button <%= index === 2 ? "action-bar-main-button" : "" %>" data-action="<%= button.action %>">
+                <span class="icon <%= button.icon %>"></span>
+                <span><%= button.text %></span>
+            </button>
+        <% } %>
+    <% }); %>
 </div>

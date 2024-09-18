@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('../partials/head', { title: workflowTitle, theme }) %>
+    <%- include('../partials/head', { title: workflow.title, theme }) %>
     <link rel="stylesheet" href="/css/workflow.css">
     <script src="/js/pages/workflow.js" defer type="module"></script>
     <script src="/js/common/popupWindow.js" defer></script>
 </head>
 <body>
-    <%- include('../partials/page-title', { title: workflowTitle }) %>
     <div class="main-container">
         <h2 class="category-title">Inputs</h2>
         <div class="inputs-container"></div>
@@ -23,10 +22,18 @@
         </div>
         <h2 class="category-title">Output</h2>
         <div class="output-images-container"></div>
+        <%- include('../partials/actionBar', {
+            buttons: [
+                { action: "/", icon: "home", text: "Home", type: "link" },
+                { action: "cancelRun()", icon: "x", text: "Cancel", type: "button" },
+                { action: "runWorkflow()", icon: "generate", text: "Generate", type: "button" },
+                { action: `/edit/${workflow.type}/${workflow.identifier}`, icon: "edit", text: "Edit", type: "link" },
+                { action: "/settings", icon: "settings", text: "Settings", type: "link" },
+            ] 
+        }) %>
     </div>
     <script>
-            const workflowFromEjs = <%- JSON.stringify(workflowJson) || "null" %>;
-            const workflowTitleFromEjs = '<%= workflowTitle %>';
+            const workflowDataFromEjs = <%- JSON.stringify(workflow) %>;
     </script>
 </body>
 </html>

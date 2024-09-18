@@ -50,6 +50,7 @@
     box-sizing: border-box;
     padding: 0.5rem 0.5rem 0 0.5rem;
     transition: transform 0.3s ease-in-out;
+    z-index: 2;
 }
 
 .bottom-sheet-container.slide-down {
