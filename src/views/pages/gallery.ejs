@@ -11,9 +11,9 @@
         <div class="pagination-container">
             <div class="pagination-controls">
                 <a href="?page=0" class="pagination-button"><span class="icon arrow-double-left"></span></a>
-                <a href="?page=<%= pageInfo.prevPage %>" class="pagination-button"><span class="icon arrow-left"></span></a>
+                <a href="?page=<%= pageInfo.currentPage === 0 ? 0 : pageInfo.currentPage -1 %>" class="pagination-button"><span class="icon arrow-left"></span></a>
                 <input type="number" id="page-input" class="pagination-button" placeholder="<%= pageInfo.currentPage %>" value="<%= pageInfo.currentPage %>">
-                <a href="?page=<%= pageInfo.nextPage %>" class="pagination-button"><span class="icon arrow-right"></span></a>
+                <a href="?page=<%= pageInfo.currentPage === pageInfo.totalPages ? pageInfo.totalPages : pageInfo.currentPage + 1 %>" class="pagination-button"><span class="icon arrow-right"></span></a>
                 <a href="?page=<%= pageInfo.totalPages %>" class="pagination-button"><span class="icon arrow-double-right"></span></a>
             </div>
         </div>

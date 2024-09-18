@@ -36,11 +36,35 @@ function getRelativeTimeText(timestamp) {
     return `${yearsAgo} year(s) ago`;
 }
 
-function getGalleryPageData(req) {
-    const page = Number(req.query.page) || 0;
-    const subfolder = req.params.subfolder || "";
-    const itemsPerPage = Number(req.query.itemsPerPage) || 20;
+/**
+ * @typedef {object} GalleryImageData
+ * @property {string} path - The ComfyUIMini url path for the image file.
+ * @property {number} time - Latest file modification time in ms since Unix epoch.
+ * @property {string} timeText - Human-readable relative time since last image mofification, e.g. '2 hour(s) ago'. 
+ */
 
+/**
+ * @typedef {object} GalleryPageData
+ * @property {Object} scanned - List of images and available subfolders.
+ * @property {GalleryImageData[]} scanned.images - List of image data.
+ * @property {string[]} scanned.subfolders - List of subfolders in the currently opened subfolder.
+ * @property {Object} pageInfo - Info around current page index.
+ * @property {number} pageInfo.prevPage - Previous page number.
+ * @property {number} pageInfo.currentPage - Current page number.
+ * @property {number} pageInfo.nextPage - Next page number.
+ * @property {number} pageInfo.totalPages - Total number of pages.
+ */
+
+/**
+ * Gets a list of images at the page.
+ * 
+ * Returns images in the range `(page * itemsPerPage)` to `(page * itemsPerPage) + itemsPerPage`
+ * @param {number} page - Page number to retreive.
+ * @param {string} subfolder - Subfolder within gallery directory.
+ * @param {number} itemsPerPage - Images sent per page.
+ * @returns {GalleryPageData} - Object containing paginated images and additional page info.
+ */
+function getGalleryPageData(page = 0, subfolder = "", itemsPerPage = 20) {
     const imageOutputPath = global.config.output_dir;
 
     const targetPath = path.join(imageOutputPath, subfolder);
@@ -74,11 +98,16 @@ function getGalleryPageData(req) {
 
     const paginatedFiles = filteredFiles.slice(startIndex, endIndex);
 
-    const subfolders = fs.readdirSync(imageOutputPath).filter(item =>
-        fs.statSync(path.join(imageOutputPath, item)).isDirectory()
-    );
-
-    const totalPages = Math.floor(filteredFiles.length / itemsPerPage);
+    let subfolders;
+    try {
+        subfolders = fs.readdirSync(imageOutputPath).filter(item =>
+            fs.statSync(path.join(imageOutputPath, item)).isDirectory()
+        );
+    } catch (error) {
+        subfolders = [];
+    }
+    
+    const totalPages = Math.floor(filteredFiles.length / itemsPerPage) - 1;
     const prevPage = page - 1 >= 0 ? page - 1 : 0;
     const nextPage = page + 1 <= totalPages ? page + 1 : totalPages;
 

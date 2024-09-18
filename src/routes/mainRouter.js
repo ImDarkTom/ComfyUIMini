@@ -98,7 +98,11 @@ router.get('/workflow/:type/:identifier', (req, res) => {
 });
 
 router.get('/gallery/:subfolder?', (req, res) => {
-    const pageData = getGalleryPageData(req, res);
+    const page = Number(req.query.page) || 0;
+    const subfolder = req.params.subfolder || "";
+    const itemsPerPage = Number(req.query.itemsPerPage) || 20;
+
+    const pageData = getGalleryPageData(page, subfolder, itemsPerPage);
 
     if (pageData?.error) {
         res.status(500).send("Internal Server Error");
