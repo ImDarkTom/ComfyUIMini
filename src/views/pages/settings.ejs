@@ -6,7 +6,6 @@
     <script src="/js/pages/settings.js" defer></script>
 </head>
 <body>
-    <%- include('../partials/page-title', { title: "Settings" }) %>
     <div class="main-container">
         <div class="option-container">
             <label for="select-theme">Theme</label>
@@ -28,5 +27,14 @@
             <input type="button" value="Reload select lists/model lists" onclick="reloadModelsList()">
         </div>
     </div>
+    <%- include('../partials/actionBar', {
+        buttons: [
+            { action: "/", icon: "home", text: "Home", type: "link" },
+            { action: "#", icon: "blank", text: "...", type: "link" },
+            { action: "#", icon: "blank", text: "...", type: "link" },
+            { action: "#", icon: "blank", text: "...", type: "link" },
+            { action: "/settings", icon: "settings", text: "Settings", type: "link" },
+        ] 
+    }) %>
 </body>
 </html>

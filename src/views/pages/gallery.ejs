@@ -6,17 +6,7 @@
     <script src="/js/pages/gallery.js" type="module" defer></script>
 </head>
 <body>
-    <%- include('../partials/page-title', { title: "Gallery" }) %>
     <div class="main-container">
-        <div class="pagination-container">
-            <div class="pagination-controls">
-                <a href="?page=0" class="pagination-button"><span class="icon arrow-double-left"></span></a>
-                <a href="?page=<%= pageInfo.currentPage === 0 ? 0 : pageInfo.currentPage -1 %>" class="pagination-button"><span class="icon arrow-left"></span></a>
-                <input type="number" id="page-input" class="pagination-button" placeholder="<%= pageInfo.currentPage %>" value="<%= pageInfo.currentPage %>">
-                <a href="?page=<%= pageInfo.currentPage === pageInfo.totalPages ? pageInfo.totalPages : pageInfo.currentPage + 1 %>" class="pagination-button"><span class="icon arrow-right"></span></a>
-                <a href="?page=<%= pageInfo.totalPages %>" class="pagination-button"><span class="icon arrow-double-right"></span></a>
-            </div>
-        </div>
         <div id="subfolders-list">
             <a href="/gallery" class="subfolder-link">(Default)</a>
             <% for (const subfolder of scanned.subfolders) { %>
@@ -31,6 +21,24 @@
                 </div>
             <% } %>
         </div>
+        <div class="pagination-container">
+            <div class="pagination-controls">
+                <a href="?page=0" class="pagination-button"><span class="icon arrow-double-left"></span></a>
+                <a href="?page=<%= pageInfo.currentPage === 0 ? 0 : pageInfo.currentPage -1 %>" class="pagination-button"><span class="icon arrow-left"></span></a>
+                <input type="number" id="page-input" class="pagination-button" placeholder="<%= pageInfo.currentPage %>" value="<%= pageInfo.currentPage %>">
+                <a href="?page=<%= pageInfo.currentPage === pageInfo.totalPages ? pageInfo.totalPages : pageInfo.currentPage + 1 %>" class="pagination-button"><span class="icon arrow-right"></span></a>
+                <a href="?page=<%= pageInfo.totalPages %>" class="pagination-button"><span class="icon arrow-double-right"></span></a>
+            </div>
+        </div>
     </div>
+    <%- include('../partials/actionBar', {
+        buttons: [
+            { action: "/", icon: "home", text: "Home", type: "link" },
+            { action: ["/js/common/scroll.js", "scrollToBottom"], icon: "arrow-down", text: "Bottom", type: "function" },
+            { action: "/", icon: "blank", text: "...", type: "link" },
+            { action: ["/js/common/scroll.js", "scrollToTop"], icon: "arrow-up", text: "Top", type: "function" },
+            { action: "/settings", icon: "settings", text: "Settings", type: "link" },
+        ] 
+    }) %>
 </body>
 </html>

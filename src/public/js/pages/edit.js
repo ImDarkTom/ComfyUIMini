@@ -27,7 +27,7 @@ function loadWorkflow() {
     }
 }
 
-document.getElementById('save').addEventListener('click', async () => {
+export async function saveWorkflow() {
     if (workflowType === "local") {
         const newJson = updateJsonWithUserInput();
 
@@ -73,6 +73,8 @@ document.getElementById('save').addEventListener('click', async () => {
     } else {
         alert("An error occured when saving this workflow: Invalid workflow type.")
     }
-});
+}
+
+document.getElementById('save').addEventListener('click', async () => saveWorkflow());
 
 loadWorkflow();

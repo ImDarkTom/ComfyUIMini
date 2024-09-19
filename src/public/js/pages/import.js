@@ -82,3 +82,9 @@ document.getElementById('download-workflow').addEventListener('click', () => {
 
     document.body.removeChild(link);
 });
+
+export function scrollToSaveButtons() {
+    const saveButtons = document.querySelector('.export-buttons');
+
+    saveButtons.scrollIntoView({ behavior: 'smooth' });
+}

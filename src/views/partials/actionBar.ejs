@@ -8,8 +8,8 @@
                 <span class="icon <%= button.icon %>"></span>
                 <span><%= button.text %></span>
             </a>
-        <% } else if (button.type === "button") { %>
-            <button class="action-bar-button <%= index === 2 ? "action-bar-main-button" : "" %>" data-action="<%= button.action %>">
+        <% } else if (button.type === "function") { %>
+            <button class="action-bar-button <%= index === 2 ? "action-bar-main-button" : "" %>" data-action="<%= JSON.stringify(button.action) %>">
                 <span class="icon <%= button.icon %>"></span>
                 <span><%= button.text %></span>
             </button>

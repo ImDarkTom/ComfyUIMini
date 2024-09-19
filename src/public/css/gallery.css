@@ -30,7 +30,7 @@
     width: 100%;
     padding: 1rem;
     position: fixed;
-    bottom: 0;
+    bottom: 10vh;
     left: 0;
     z-index: 1;
 }

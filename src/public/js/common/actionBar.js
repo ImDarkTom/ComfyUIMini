@@ -5,21 +5,12 @@ actionBarButtons.forEach(button => {
 });
 
 async function handleActionButtonClick(e) {
-    const action = e.target.closest('[data-action]').getAttribute('data-action');
+    const actionData = e.target.closest('[data-action]').getAttribute('data-action');
+    
+    const [functionFile, functionName] = JSON.parse(actionData);
 
-    const workflowPageJs = await import('/js/pages/workflow.js');
+    const moduleFromFile = await import(functionFile);
+    const functionToCall = moduleFromFile[functionName];
 
-    switch (action) {
-        case 'runWorkflow()':
-            workflowPageJs.runWorkflow();
-            break;
-
-        case 'cancelRun()':
-            workflowPageJs.cancelRun();
-            break;
-
-        default:
-            console.error(`Unknown action: ${action}`);
-            break;
-    }
+    functionToCall();
 }
