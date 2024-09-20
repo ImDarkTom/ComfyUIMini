@@ -22,4 +22,21 @@ router.get('/theme', async (req, res) => {
     }
 });
 
+router.get('/galleryitemsperpage', async (req, res) => {
+    const requestCount = Number(req.query.count);
+    
+    if (isNaN(requestCount) || requestCount < 1) {
+        return res.status(400).send({error: "Invalid number, must be a valid integer greater than 0."});
+    }
+
+    res.cookie('galleryItemsPerPage', requestCount, {
+        maxAge: 1000 * 60 * 60 * 24 * 365,
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Lax'
+    });
+
+    res.json({message: `Set gallery items per page to ${requestCount}`});
+});
+
 module.exports = router;

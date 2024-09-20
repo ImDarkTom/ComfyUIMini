@@ -5,7 +5,7 @@ async function reloadModelsList() {
     
     const responseText = await response.text();
 
-    alert(responseText);
+    openPopupWindow(responseText);
 }
 
 async function changeTheme(selectElement) {
@@ -18,6 +18,15 @@ async function changeTheme(selectElement) {
     if (response.status === 200) {
         location.reload()
     } else {
-        alert(responseText);
+        openPopupWindow(responseText);
     }
+}
+
+async function setGalleryItemsPerPage(inputElement) {
+    const galleryItemsPerPage = inputElement.value;
+
+    const response = await fetch(`/setsetting/galleryitemsperpage?count=${galleryItemsPerPage}`);
+    const responseJson = await response.json();
+
+    openPopupWindow(responseJson.message);
 }

@@ -4,6 +4,7 @@
     <%- include('../partials/head', { title: "Settings", theme }) %>
     <link rel="stylesheet" href="/css/settings.css">
     <script src="/js/pages/settings.js" defer></script>
+    <script src="/js/common/popupWindow.js" defer></script>
 </head>
 <body>
     <div class="main-container">
@@ -22,7 +23,11 @@
                     </optgroup>
             </select>
         </div>
-        <hr>
+        <div class="option-container">
+            <label for="gallery-items-per-page">Gallery items per page</label>
+            <input type="number" id="gallery-items-per-page" min="1" max="100" value="20">
+            <input type="button" value="Set gallery items per page" onclick="setGalleryItemsPerPage(document.getElementById('gallery-items-per-page'))">
+        </div>
         <div class="option-container">
             <input type="button" value="Reload select lists/model lists" onclick="reloadModelsList()">
         </div>
