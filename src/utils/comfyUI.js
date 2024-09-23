@@ -1,7 +1,6 @@
 const { default: axios } = require('axios');
 const WebSocket = require('ws');
-const { optionalLog, logWarning } = require('./logger');
-const { logSuccess } = require('./logger');
+const logger = require('./logger');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -112,7 +111,7 @@ async function generateImage(workflowPrompt, wsClient) {
             const promptData = await queuePrompt(workflowPrompt);
             const promptId = promptData.prompt_id;
 
-            optionalLog(global.config.optional_log.queue_image, "Queued image.");
+            logger.logOptional("queue_image", "Queued image.");
 
             const queueJson = await getQueue();
             let totalImages;
@@ -120,7 +119,7 @@ async function generateImage(workflowPrompt, wsClient) {
             if (queueJson["queue_running"][0] === undefined) {
                 // Exact workflow was ran before and was cached by ComfyUI.
                 const cachedImages = await getOutputImages(promptId);
-                optionalLog(global.config.optional_log.generation_finish, "Using cached generation result.");
+                logger.logOptional("generation_finish", "Using cached generation result.");
 
                 wsClient.send(JSON.stringify({ type: 'completed', data: cachedImages }));
                 
@@ -136,7 +135,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
                     if (message.type === "status") {
                         if (message.data.status.exec_info.queue_remaining == 0) {
-                            optionalLog(global.config.optional_log.generation_finish, "Image generation finished.");
+                            logger.logOptional("generation_finish", "Image generation finished.");
                             wsServer.close();
                         }
                     } else if (message.type === "progress") {
@@ -188,7 +187,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
     wsServer.on('error', (error) => {
         if (error.code === "ECONNREFUSED") {
-            logWarning(`Could not connect to ComfyUI when attempting to generate image: ${error}`);
+            logger.warn(`Could not connect to ComfyUI when attempting to generate image: ${error}`);
             wsClient.send(JSON.stringify({ type: 'error', message: 'Could not connect to ComfyUI. Check console for more information.' }));
         } else {
             console.error("WebSocket error when generating image:", error);
@@ -207,7 +206,7 @@ async function checkForComfyUI() {
         const request = await comfyuiAxios.get('/');
         const status = request.status;
 
-        logSuccess(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
+        logger.success(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
     } catch (err) {
         const errorCode = err.code;
 
@@ -215,7 +214,7 @@ async function checkForComfyUI() {
             "ECONNREFUSED": "Make sure ComfyUI is running and is accessible at the URL in the config.json file."
         }
 
-        logWarning(`${errorCode}: ${errorMeaning[errorCode] || err}`)
+        logger.warn(`${errorCode}: ${errorMeaning[errorCode] || err}`)
     }
 }
 

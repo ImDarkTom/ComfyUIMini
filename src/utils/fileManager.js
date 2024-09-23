@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { logInfo, logWarning } = require('./logger');
+const logger = require('./logger');
 const { checkWorkflowCache } = require('./workflowCache');
 
 function checkForWorkflowsFolder() {
@@ -9,14 +9,14 @@ function checkForWorkflowsFolder() {
     if (!fs.existsSync(workflowsFilepath)) {
         fs.mkdirSync(workflowsFilepath);
 
-        logInfo(`Workflow folder not found, creating...`);
+        logger.info(`Workflow folder not found, creating...`);
         return;
     }
 
     try {
         const filesList = fs.readdirSync(workflowsFilepath);
         const listJsonFiles = filesList.filter(file => path.extname(file).toLowerCase() === ".json");
-        logInfo(`Found ${listJsonFiles.length} workflows in the workflow folder.`);
+        logger.info(`Found ${listJsonFiles.length} workflows in the workflow folder.`);
 
         checkWorkflowCache(workflowsFilepath, listJsonFiles);
         return;
@@ -61,7 +61,7 @@ function loadModelTypes() {
     const modelDirsConfigJson = JSON.parse(fs.readFileSync(modelDirsConfigPath));
 
     if (!modelDirsConfigJson.checkpoint || modelDirsConfigJson.checkpoint.folder_path == "path/to/checkpoints/folder") {
-        logWarning("model_dirs.json not configured, you will be unable to select models until it is set.")
+        logger.warn("model_dirs.json not configured, you will be unable to select models until it is set.")
         return {};
     }
 
@@ -76,7 +76,7 @@ function loadModelTypes() {
             models[modelTypeName] = fileList;
         } catch (err) {
             if (err.code == "ENOENT") {
-                logWarning(`Invalid directory for ${modelTypeName} in model_dirs.json`);
+                logger.warn(`Invalid directory for ${modelTypeName} in model_dirs.json`);
                 continue;
             }
     
@@ -84,7 +84,7 @@ function loadModelTypes() {
         }
     }
 
-    logInfo(`Loaded ${Object.keys(models).length} model types.`);
+    logger.info(`Loaded ${Object.keys(models).length} model types.`);
 
     return models;
 }

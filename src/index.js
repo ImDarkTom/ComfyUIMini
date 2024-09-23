@@ -4,7 +4,7 @@ const path = require('path');
 
 global.config = require('../config.json');
 
-const { logSuccess } = require("./utils/logger");
+const logger = require("./utils/logger");
 const { handleUpgrade } = require("./routes/wsRouter");
 
 const mainRouter = require('./routes/mainRouter');
@@ -33,5 +33,5 @@ checkForWorkflowsFolder();
 loadSelectOptions();
 
 server.listen(global.config.app_port, '0.0.0.0', () => {
-    logSuccess(`Running on http://${getLocalIp()}:${config.app_port}`);
+    logger.success(`Running on http://${getLocalIp()}:${config.app_port}`);
 });

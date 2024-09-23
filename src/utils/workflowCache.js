@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { optionalLog, logWarning } = require('./logger');
+const logger = require('./logger');
 
 const dataDirPath = path.join(__dirname, '..', '..', 'data');
 const cacheFilePath = path.join(dataDirPath, 'workflowNamesCache.json');
@@ -9,14 +9,14 @@ let workflowNamesCacheJson = {};
 
 function checkDataDirectoryExists() {
     if (!fs.existsSync(dataDirPath)) {
-        optionalLog(global.config.optional_log.cache, "Creating data directory...");
+        logger.logOptional("cache", "Creating data directory...");
         fs.mkdirSync(dataDirPath);
     }
 }
 
 function checkCacheFileExists() {
     if (!fs.existsSync(cacheFilePath)) {
-        optionalLog(global.config.optional_log.cache, "Creating cache file...");
+        logger.logOptional("cache", "Creating cache file...");
         fs.writeFileSync(cacheFilePath, '');
     }
 }
@@ -30,11 +30,11 @@ function checkWorkflowCache(workflowsFolder, jsonFileList) {
     let cacheJson = {};
     try {
         cacheJson = JSON.parse(cache);
-        optionalLog(global.config.optional_log.cache, `Loaded ${Object.keys(cacheJson).length} cached workflow names.`);
+        logger.logOptional("cache", `Loaded ${Object.keys(cacheJson).length} cached workflow names.`);
     } catch (err) {
         if (err.type === "SyntaxError") {
             cacheJson = {};
-            optionalLog(global.config.optional_log.cache, "Creating empty cache file...");
+            logger.logOptional("cache", "Creating empty cache file...");
         }
     }
 
@@ -50,7 +50,7 @@ function checkWorkflowCache(workflowsFolder, jsonFileList) {
         const parsedWorkflowFileContents = JSON.parse(workflowFileContents);
 
         if (!parsedWorkflowFileContents["_comfyuimini_meta"]) {
-            logWarning(`${jsonWorkflowFilename} does not have any attached ComfyUIMini metadata, skipping...`);
+            logger.warn(`${jsonWorkflowFilename} does not have any attached ComfyUIMini metadata, skipping...`);
             continue;
         }
 
@@ -66,10 +66,10 @@ function checkWorkflowCache(workflowsFolder, jsonFileList) {
     }
 
     if (cacheModified) {
-        optionalLog(global.config.optional_log.cache, `Cache modified, total entries: ${cacheJson.length}`);
+        logger.logOptional("cache", `Cache modified, total entries: ${cacheJson.length}`);
         workflowNamesCacheJson = cacheJson;
         fs.writeFileSync(cacheFilePath, JSON.stringify(cacheJson, null, 2));
-        optionalLog(global.config.optional_log.cache, "Saved cache.");
+        logger.logOptional("cache", "Saved cache.");
     }
 
     global.serverWorkflowMetadata = cacheJson;
