@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { optionalLog } = require('./logger');
+const { optionalLog, logWarning } = require('./logger');
 
 const dataDirPath = path.join(__dirname, '..', '..', 'data');
 const cacheFilePath = path.join(dataDirPath, 'workflowNamesCache.json');
@@ -47,10 +47,21 @@ function checkWorkflowCache(workflowsFolder, jsonFileList) {
         }
 
         const workflowFileContents = fs.readFileSync(path.join(workflowsFolder, jsonWorkflowFilename));
+        const parsedWorkflowFileContents = JSON.parse(workflowFileContents);
 
-        const workflowName = JSON.parse(workflowFileContents)["_comfyuimini_meta"].title;
+        if (!parsedWorkflowFileContents["_comfyuimini_meta"]) {
+            logWarning(`${jsonWorkflowFilename} does not have any attached ComfyUIMini metadata, skipping...`);
+            continue;
+        }
 
-        cacheJson[jsonWorkflowFilename] = workflowName;
+        const workflowMetadata = JSON.parse(workflowFileContents)["_comfyuimini_meta"];
+
+        cacheJson[jsonWorkflowFilename] = {
+            title: workflowMetadata.title,
+            filename: jsonWorkflowFilename,
+            description: workflowMetadata.description
+        };
+        
         cacheModified = true;
     }
 
@@ -61,7 +72,7 @@ function checkWorkflowCache(workflowsFolder, jsonFileList) {
         optionalLog(global.config.optional_log.cache, "Saved cache.");
     }
 
-    global.serverWorkflowNames = cacheJson;
+    global.serverWorkflowMetadata = cacheJson;
 }
 
 module.exports = {

@@ -77,6 +77,8 @@
     color: var(--text-secondary-color);
     padding: 0.5ch 0;
     font-style: italic;
+    width: 80%;
+    overflow-y: auto;
 }
 
 .workflow-import-text {

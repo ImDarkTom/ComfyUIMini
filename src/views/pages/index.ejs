@@ -14,8 +14,8 @@
     </div>
     <div class="main-container">
         <div class="workflow-grid">
-            <% for (const [filename, name] of Object.entries(serverWorkflowNames)) { %>
-                <%- include('../partials/workflow-grid-item', { name, filename }) %>
+            <% for (const workflowMetadata of serverWorkflowMetadata) { %>
+                <%- include('../partials/workflow-grid-item', { workflowMetadata }) %>
             <% }; %>
         </div>
     </div>
