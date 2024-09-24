@@ -113,10 +113,14 @@ async function renderInput(inputData) {
         vae_name: "select"
     }
 
+    if (!inputData.type) {
+        inputData.type = assumedTypes[inputName] || "";
+    }
+
     const selectedInputType = inputType || assumedTypes[inputName] || "";
 
     const generateInputOptions = () => ["text", "integer", "float", "select"].map(
-        type => `<option value="${type}" ${type === selectedInputType ? "selected" : ""}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`
+        type => `<option value="${type}" ${type === selectedInputType ? "selected" : ""}>${type === "select" ? "Select (from model list or builtin)" : type.charAt(0).toUpperCase() + type.slice(1)}</option>`
     ).join('');
 
     const html = `
@@ -124,7 +128,7 @@ async function renderInput(inputData) {
         <div class="options-container">
             <div class="input-top-container">
                 <span class="input-counter">${inputCount}.</span>
-                <div class="icon eye hide-input-button" id="hide-button-${inputNodeId}-${inputName}" onclick="hideInput(this)"></div>
+                <div class="icon eye hide-input-button" id="hide-button-${inputNodeId}-${inputName}"></div>
                 <select class="input-type-select">
                     <option value="" disabled ${selectedInputType === "" ? "selected" : ""}>(Choose input type)</option>
                     ${generateInputOptions()}
@@ -151,6 +155,8 @@ async function renderInput(inputData) {
 }
 
 async function renderAdditionalOptions(data) {
+    console.log(data);
+
     switch (data.type) {
         case "text":
             return "";
