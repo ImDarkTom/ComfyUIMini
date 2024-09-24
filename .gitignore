@@ -1,6 +1,8 @@
 node_modules/
+
 workflows/*
-data/
 !/workflows/converted_workflows_here
+!/workflows/default_comfyui_workflow.json
+
 /model_dirs.json
 /config.json
