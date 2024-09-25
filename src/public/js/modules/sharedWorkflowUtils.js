@@ -155,8 +155,6 @@ async function renderInput(inputData) {
 }
 
 async function renderAdditionalOptions(data) {
-    console.log(data);
-
     switch (data.type) {
         case "text":
             return "";
