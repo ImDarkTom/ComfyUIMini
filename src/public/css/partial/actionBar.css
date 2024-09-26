@@ -8,7 +8,7 @@
     flex-direction: row;
     justify-content: space-evenly;
     background-color: var(--background-tertiary-color);
-    box-shadow: 0px -2px 4px 0px var(--background-primary-color);
+    box-shadow: 0px 4px 4px 4px var(--text-primary-color);
     z-index: 1;
 }
 
@@ -26,6 +26,7 @@
     background-color: transparent;
     border: none;
     font-size: 0.75rem;
+    cursor: pointer;
 }
 
 .action-bar-button .icon {
@@ -42,6 +43,7 @@
     border-radius: 50%;
     margin: 0.5vh 0;
     gap: 0;
+    box-shadow: 0px 0px 4px 0px var(--text-primary-color);
 }
 
 .action-bar-main-button .icon {

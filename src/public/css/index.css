@@ -38,7 +38,7 @@
     height: 100%;
     box-sizing: border-box;
     padding: 0.5rem;
-    aspect-ratio: 1/1;
+    width: 25%;
 }
 
 .workflow-icon {
@@ -47,7 +47,7 @@
 }
 
 .workflow-menu-icon {
-    padding: 1rem;
+    margin: 1rem;
     font-size: 2rem;
     position: absolute;
     bottom: 0;
@@ -55,29 +55,33 @@
 }
 
 .workflow-text-info {
-    width: 100%;
+    width: 75%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0 0 0 0.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
 }
 
 .workflow-title {
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     word-wrap: normal;
     overflow-x: auto;
     width: 100%;
     box-sizing: border-box;
     color: var(--text-primary-color);
     padding: 0.5ch 0;
+    overflow-x: hidden;
+    font-weight: bold;
+    text-overflow: ellipsis;
 }
 
 .workflow-description {
     color: var(--text-secondary-color);
     padding: 0.5ch 0;
     font-style: italic;
-    width: 80%;
+    width: 85%;
     overflow-y: auto;
 }
 
