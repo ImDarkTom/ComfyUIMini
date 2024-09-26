@@ -25,6 +25,7 @@
     text-align: center;
     background-color: transparent;
     border: none;
+    font-size: 0.75rem;
 }
 
 .action-bar-button .icon {
@@ -39,7 +40,6 @@
     box-sizing: border-box;
     padding: 0.5rem;
     border-radius: 50%;
-    font-size: 1rem;
     margin: 0.5vh 0;
     gap: 0;
 }
