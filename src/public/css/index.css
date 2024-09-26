@@ -27,13 +27,6 @@
     position: relative;
 }
 
-.workflow-item-icons {
-    width: 100%;
-    height: 50%;
-    display: flex;
-    flex-direction: row;
-}
-
 .workflow-icon-container {
     height: 100%;
     box-sizing: border-box;
@@ -46,7 +39,7 @@
     height: 100%;
 }
 
-.workflow-menu-icon {
+.workflow-settings-icon {
     margin: 1rem;
     font-size: 2rem;
     position: absolute;
@@ -80,64 +73,27 @@
 .workflow-description {
     color: var(--text-secondary-color);
     padding: 0.5ch 0;
-    font-style: italic;
     width: 85%;
     overflow-y: auto;
 }
 
-.workflow-import-text {
-    font-size: 1.5rem;
-    text-align: center;
-    align-content: center;
-    width: 100%;
-    height: 100%;
-    display: block;
-    text-decoration: none;
-    color: var(--text-primary-color);
-}
-
-.bmac-link {
-    height: 6vh;
-    display: block;
-    padding-left: 0.5rem;
-    box-sizing: border-box;
-    width: 50%;
-}
-
-.bmac-link-img {
-    height: 100%;
-    width: auto;
-}
-
-.nav-container {
+.header {
 	display: flex;
+    position: relative;
 	flex-direction: row;
-	justify-content: space-between;
+    justify-content: left;
 	margin: 0.5rem 0.5rem 0 0.5rem;
-	padding: 0.5rem;
 	box-sizing: border-box;
-	background-color: var(--background-secondary-color);
-	border-radius: 0.5rem;
 }
 
-.nav-buttons {
-	display: flex;
-	flex-direction: row;
-}
-
-.icon-container {
-	display: flex;
-	flex-direction: row;
-}
-
-.nav-icon {
-    height: 5rem;
-	width: 5rem;
+.header-icon {
+    height: 3rem;
+	width: 3rem;
 }
 
 .version-text {
+    color: var(--text-secondary-color);
+    font-size: 1rem;
 	display: flex;
-	align-items: end;
-	padding: 0;
-	box-sizing: border-box;
+	align-items: start;
 }

@@ -7,6 +7,6 @@
             <span class="workflow-title"><%= workflowMetadata.title %></span>
             <span class="workflow-description"><%= workflowMetadata.description %></span>
         </div>
-        <span class="workflow-menu-icon icon settings" onclick='loadBottomSheet([{icon: "✏", text: "Edit", function: "editWorkflow", functionParams: ["server", "<%= workflowMetadata.filename %>"]}], event)'></span>
+        <span class="workflow-settings-icon icon settings" onclick='loadBottomSheet([{icon: "✏", text: "Edit", function: "editWorkflow", functionParams: ["server", "<%= workflowMetadata.filename %>"]}], event)'></span>
     </div>
 </a>

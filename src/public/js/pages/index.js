@@ -105,7 +105,7 @@ function loadLocalWorkflows() {
                     <span class="workflow-title">${title}</span>
                     <span class="workflow-description">${workflowJson["_comfyuimini_meta"].description}</span>
                 </div>
-                <span class="workflow-menu-icon icon settings" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'></span>
+                <span class="workflow-settings-icon icon settings" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'></span>
             </div>
         </a>
         `;
