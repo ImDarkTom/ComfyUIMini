@@ -8,5 +8,6 @@
         "cache": false
     },
     "use_log_emojis": false,
+    "auto_convert_comfyui_workflows": true,
     "output_dir": "path/to/comfyui/output/folder"
 }
