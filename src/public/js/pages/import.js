@@ -1,4 +1,4 @@
-import { renderWorkflow, updateJsonWithUserInput, workflowJson } from "../modules/sharedWorkflowUtils.js";
+import { InputRenderer } from "../modules/sharedWorkflowUtils.js";
 
 const workflowFileInput = document.getElementById('file-input');
 const workflowInputLabel = document.querySelector('.file-input-label');
@@ -33,8 +33,10 @@ workflowFileInput.addEventListener('change', () => {
             openPopupWindow("<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>");
             return;
         }
+
+        const inputRenderer = new InputRenderer(inputsContainer, importingWorkflowJson);
         
-        renderWorkflow(importingWorkflowJson, inputsContainer, titleInput, descriptionInput);
+        inputRenderer.renderWorkflow(titleInput, descriptionInput);
     });
 });
 
