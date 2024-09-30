@@ -5,20 +5,31 @@ export class InputRenderer {
      * 
      * @param {HTMLElement} containerElem The container element in which all of the inputs will be renderered.
      * @param {object} workflowObject The workflow object to render
+     * @param {HTMLInputElement} titleInput The title input element.
+     * @param {HTMLTextAreaElement} descriptionInput The description input element.
      */
-    constructor(containerElem, workflowObject) {
+    constructor(containerElem, workflowObject, titleInput, descriptionInput) {
         this.containerElem = containerElem;
         this.workflowObject = workflowObject;
+        this.titleInput = titleInput;
+        this.descriptionInput = descriptionInput;
         this.inputCount = 0;
     }
 
     /**
-     * Renders the workflow inputs.
      * 
-     * @param {HTMLInputElement} titleInput The title input element.
-     * @param {HTMLTextAreaElement} descriptionInput The description input element.
+     * @param {object} newWorkflowObject The new workflow object to set.
      */
-    async renderWorkflow(titleInput, descriptionInput) {
+    setWorkflowObject(newWorkflowObject) {
+        this.workflowObject = newWorkflowObject;
+    }
+
+    /**
+     * Renders the workflow inputs.
+     */
+    async renderWorkflow() {
+        this.inputCount = 0;
+
         const blankMetadata = {
             "title": "My Workflow",
             "description": ""
@@ -26,11 +37,11 @@ export class InputRenderer {
 
         const jsonMetadata = this.workflowObject["_comfyuimini_meta"]|| blankMetadata;
     
-        titleInput.removeAttribute('disabled');
-        titleInput.value = jsonMetadata.title || "My Workflow";
+        this.titleInput.removeAttribute('disabled');
+        this.titleInput.value = jsonMetadata.title || "My Workflow";
 
-        descriptionInput.removeAttribute('disabled');
-        descriptionInput.value = jsonMetadata.description || "";
+        this.descriptionInput.removeAttribute('disabled');
+        this.descriptionInput.value = jsonMetadata.description || "";
     
         this.containerElem.innerHTML = "";
         await this.renderAllInputs();
@@ -403,6 +414,119 @@ export class InputRenderer {
             }
         });
     }
+
+    /**
+     * Updates a workflow object with data from the inputs.
+     * 
+     * @returns {object} The exported workflow object.
+     */
+    updateJsonWithUserInput() {
+        const inputOptionsList = [];
+    
+        const allInputs = this.containerElem.querySelectorAll('.input-item');
+    
+        for (const inputContainer of allInputs) {
+            const inputNodeId = inputContainer.getAttribute("data-node-id");
+            const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
+    
+            let inputOptions = {};
+            inputOptions["node_id"] = inputNodeId;
+            inputOptions["input_name_in_node"] = inputNameInNode;
+    
+            if (inputContainer.classList.contains('disabled')) {
+                inputOptions["disabled"] = true;
+                inputOptionsList.push(inputOptions);
+                continue;
+            }
+    
+            const inputTitleElement = /** @type {HTMLInputElement} */ (inputContainer.querySelector('.workflow-input-title'));
+
+            if (!inputTitleElement) {
+                alert(`Error while saving workflow, input title element not found for ${inputNameInNode}`);
+                return "";
+            }
+
+            const defaultValueElement = /** @type {HTMLInputElement} */ (inputContainer.querySelector('.workflow-input-default'));
+
+            if (!defaultValueElement) {
+                alert(`Error while saving workflow, default value element not found for ${inputNameInNode}`);
+                return "";
+            }
+    
+            inputOptions["title"] = inputTitleElement.value;
+            inputOptions["default"] = defaultValueElement.value;
+    
+            const inputTypeSelect = /** @type {HTMLSelectElement} */ (inputContainer.querySelector('.input-type-select'));
+
+            if (!inputTypeSelect) {
+                alert(`Error while saving workflow, input type select not found for ${inputNameInNode}`);
+                return "";
+            }
+
+            const inputType = inputTypeSelect.value;
+    
+            if (inputType == "") {
+                alert(`Input type for "${inputTitleElement.value}" not selected.`);
+                return "";
+            }
+    
+            if (inputType == "integer" || inputType == "float") {
+                if (isNaN(Number(defaultValueElement.value))) {
+                    alert(`Default value for "${inputTitleElement.value}" is not a number.`);
+                    return "";
+                }
+            } 
+            
+            if (inputType == "integer") {
+                if (Number.isInteger(defaultValueElement.value)) {
+                    alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
+                    return "";
+                }
+            }
+    
+            inputOptions["type"] = inputType;
+    
+    
+            /** @type {NodeListOf<HTMLInputElement|HTMLInputElement>} */
+            const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-input-option");
+    
+            for (const additionalInputOption of additionalInputOptions) {
+    
+                const additionalInputOptionValue = additionalInputOption.value;
+                const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
+                const additionalInputType = additionalInputOption.type;
+    
+                if (additionalInputOptionValue === null || additionalInputOptionValue === "") {
+                    continue;
+                }
+    
+                if (additionalInputType === "checkbox" && !additionalInputOption.checked) {
+                    continue;
+                }
+    
+                if (additionalInputOption.type === "checkbox") {
+                    // We have already skipped if checkbox value is false, therefore it can only be true
+                    inputOptions[additionalInputOptionKey] = true;
+                    continue;
+                }
+    
+                inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
+            }
+    
+            inputOptionsList.push(inputOptions);
+        };
+
+        const modifiedWorkflow = this.workflowObject;
+    
+        modifiedWorkflow["_comfyuimini_meta"] = {};
+        modifiedWorkflow["_comfyuimini_meta"]["title"] = this.titleInput.value || "Unnamed Workflow";
+        modifiedWorkflow["_comfyuimini_meta"]["description"] = this.descriptionInput.value || "";
+        modifiedWorkflow["_comfyuimini_meta"]["format_version"] = "1";
+    
+        modifiedWorkflow["_comfyuimini_meta"]["input_options"] = inputOptionsList;
+    
+        return modifiedWorkflow;
+    }
 }
 
 // -------
@@ -410,8 +534,9 @@ export class InputRenderer {
 // -------
 
 /**
+ * Move an input up.
  * 
- * @param {HTMLElement} item 
+ * @param {HTMLElement} item The input container.
  */
 function moveUp(item) {
     if (!item.parentNode) {
@@ -426,8 +551,9 @@ function moveUp(item) {
 }
 
 /**
+ * Move an input down.
  * 
- * @param {HTMLElement} item 
+ * @param {HTMLElement} item The input container.
  */
 function moveDown(item) {
     if (!item.parentNode) {
@@ -439,96 +565,4 @@ function moveDown(item) {
     if (nextItem) {
         item.parentNode.insertBefore(nextItem, item);
     }
-}
-
-// ---------
-// Exporting
-// ---------
-
-export function updateJsonWithUserInput() {
-    const inputOptionsList = [];
-
-    const allInputs = inputsContainerElem.querySelectorAll('.input-item');
-
-    for (const inputContainer of allInputs) {
-        const inputNodeId = inputContainer.getAttribute("data-node-id");
-        const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
-
-        let inputOptions = {};
-        inputOptions["node_id"] = inputNodeId;
-        inputOptions["input_name_in_node"] = inputNameInNode;
-
-        if (inputContainer.classList.contains('disabled')) {
-            inputOptions["disabled"] = true;
-            inputOptionsList.push(inputOptions);
-            continue;
-        }
-
-        const inputTitleElement = inputContainer.querySelector('.workflow-input-title');
-        const defaultValueElement = inputContainer.querySelector('.workflow-input-default');
-
-        inputOptions["title"] = inputTitleElement.value;
-        inputOptions["default"] = defaultValueElement.value;
-
-        const inputTypeSelect = inputContainer.querySelector('.input-type-select');
-        const inputType = inputTypeSelect.value;
-
-        if (inputType == "") {
-            alert(`Input type for "${inputTitleElement.value}" not selected.`);
-            return "";
-        }
-
-        if (inputType == "integer" || inputType == "float") {
-            if (isNaN(defaultValueElement.value)) {
-                alert(`Default value for "${inputTitleElement.value}" is not a number.`);
-                return "";
-            }
-        } 
-        
-        if (inputType == "integer") {
-            if (Number.isInteger(defaultValueElement.value)) {
-                alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
-                return "";
-            }
-        }
-
-        inputOptions["type"] = inputType;
-
-
-        const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-input-option");
-
-        for (const additionalInputOption of additionalInputOptions) {
-
-            const additionalInputOptionValue = additionalInputOption.value;
-            const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
-            const additionalInputType = additionalInputOption.type;
-
-            if (additionalInputOptionValue === null || additionalInputOptionValue === "") {
-                continue;
-            }
-
-            if (additionalInputType === "checkbox" && !additionalInputOption.checked) {
-                continue;
-            }
-
-            if (additionalInputOption.type === "checkbox") {
-                // We have already skipped if checkbox value is false, therefore it can only be true
-                inputOptions[additionalInputOptionKey] = true;
-                continue;
-            }
-
-            inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
-        }
-
-        inputOptionsList.push(inputOptions);
-    };
-
-    workflowJson["_comfyuimini_meta"] = {};
-    workflowJson["_comfyuimini_meta"]["title"] = document.getElementById('title-input').value || "Unnamed";
-    workflowJson["_comfyuimini_meta"]["description"] = document.getElementById('description-input').value || "";
-    workflowJson["_comfyuimini_meta"]["format_version"] = "1";
-
-    workflowJson["_comfyuimini_meta"]["input_options"] = inputOptionsList;
-
-    return workflowJson;
 }
