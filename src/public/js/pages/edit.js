@@ -1,67 +1,60 @@
 import { handleError } from "../common/errorHandler.js";
 import { getLocalWorkflow } from "../modules/getLocalWorkflow.js";
-import { renderWorkflow, updateJsonWithUserInput } from "../modules/sharedWorkflowUtils.js";
+import { InputRenderer } from "../modules/sharedWorkflowUtils.js";
 
 const inputsContainer = document.querySelector('.inputs-container');
 const titleInput = document.getElementById('title-input');
 const descriptionInput = document.getElementById('description-input');
 
 const workflowTextAttrib = document.body.getAttribute('data-workflow-text');
-const workflowTitle = document.body.getAttribute('data-workflow-title');
+const workflowOriginalTitle = document.body.getAttribute('data-workflow-title');
 const workflowType = document.body.getAttribute('data-workflow-type');
 const workflowFilename = document.body.getAttribute('data-workflow-filename') || "";
 
-function loadWorkflow() {
-    let workflowJson;
+const saveButton = document.getElementById('save');
 
+const inputRenderer = new InputRenderer(inputsContainer, {}, titleInput, descriptionInput);
+
+function loadWorkflow() {
     try {
         if (workflowTextAttrib == "") {
-            workflowJson = getLocalWorkflow(workflowTitle);
+            inputRenderer.setWorkflowObject(getLocalWorkflow(workflowOriginalTitle));
         } else {
-            workflowJson = JSON.parse(workflowTextAttrib);
+            inputRenderer.setWorkflowObject(JSON.parse(workflowTextAttrib));
         }
     
-        renderWorkflow(workflowJson, inputsContainer, titleInput, descriptionInput);
+        inputRenderer.renderWorkflow();
     } catch (error) { 
         handleError(error);
     }
 }
 
 export async function saveWorkflow() {
-    if (workflowType === "local") {
-        const newJson = updateJsonWithUserInput();
+    const updatedWorkflowObject = inputRenderer.updateJsonWithUserInput();
 
-        if (newJson == "") {
-            return;
-        }
-        
+    if (workflowType === "local") {
         const workflows = JSON.parse(localStorage.getItem("workflows")) || [];
 
-        const currentWorkflowIndex = workflows.findIndex(workflow => JSON.parse(workflow)["_comfyuimini_meta"].title === workflowTitle);
+        const currentWorkflowIndex = workflows.findIndex(workflow => JSON.parse(workflow)["_comfyuimini_meta"].title === workflowOriginalTitle);
 
         if (currentWorkflowIndex == -1) {
-            alert("An error occured when saving this workflow: Workflow not found in index.");
+            alert("An error occured when saving this workflow: Workflow not found in saved workflows.");
             return;
         }
 
-        workflows[currentWorkflowIndex] = JSON.stringify(newJson);
+        workflows[currentWorkflowIndex] = JSON.stringify(updatedWorkflowObject);
 
         localStorage.setItem("workflows", JSON.stringify(workflows));
 
         location.href = "/";
+
     } else if (workflowType === "server") {
-        const newJson = updateJsonWithUserInput();
-
-        if (newJson == "") {
-            return;
-        }
-
         const response = await fetch(`/edit/${workflowFilename}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(newJson)
+            body: JSON.stringify(updatedWorkflowObject)
         });
 
         if (response.status !== 200) {
@@ -75,6 +68,6 @@ export async function saveWorkflow() {
     }
 }
 
-document.getElementById('save').addEventListener('click', async () => saveWorkflow());
+saveButton.addEventListener('click', async () => saveWorkflow());
 
 loadWorkflow();
