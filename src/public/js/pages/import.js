@@ -1,14 +1,34 @@
-import { renderWorkflow, updateJsonWithUserInput, workflowJson } from "../modules/sharedWorkflowUtils.js";
+import { InputRenderer } from "../modules/sharedWorkflowUtils.js";
 
-const workflowFileInput = document.getElementById('file-input');
-const workflowInputLabel = document.querySelector('.file-input-label');
+/**
+ * 
+ * @param {string} selector The CSS selector of the element to get.
+ * @returns {HTMLInputElement|HTMLTextAreaElement} The element found by the selector.
+ */
+function getElementOrThrow(selector) {
+    const element = document.querySelector(selector);
 
-const inputsContainer = document.querySelector('.inputs-container')
+    if (!element) {
+        throw new Error(`Element not found: ${selector}`);
+    }
+
+    return element;
+}
+
+const workflowFileInput = getElementOrThrow('#file-input');
+const workflowInputLabel = getElementOrThrow('.file-input-label');
+
+const inputsContainer = getElementOrThrow('.inputs-container');
+
+const titleInput = getElementOrThrow('#title-input');
+const descriptionInput = getElementOrThrow('#description-input');
+
+const saveToBrowserButton = getElementOrThrow('#save-to-browser');
+const downloadWorkflowButton = getElementOrThrow('#download-workflow');
+
+const inputRenderer = new InputRenderer(inputsContainer, {}, titleInput, descriptionInput);
 
 workflowFileInput.addEventListener('change', () => {
-    const titleInput = document.getElementById('title-input');
-    const descriptionInput = document.getElementById('description-input');
-
     const file = workflowFileInput.files[0];
 
     if (!file) {
@@ -25,25 +45,31 @@ workflowFileInput.addEventListener('change', () => {
     reader.readAsText(file);
 
     reader.addEventListener('load', () => {
-        const workflowText = reader.result;
+        const resultText = String(reader.result);
 
-        const importingWorkflowJson = JSON.parse(workflowText);
+        const importingWorkflowJson = JSON.parse(resultText);
 
         if (importingWorkflowJson.version !== undefined) {
             openPopupWindow("<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>");
             return;
         }
+
+        inputRenderer.setWorkflowObject(importingWorkflowJson);
         
-        renderWorkflow(importingWorkflowJson, inputsContainer, titleInput, descriptionInput);
+        inputRenderer.renderWorkflow();
     });
 });
 
-document.getElementById('save-to-browser').addEventListener('click', () => {
-    if (!workflowJson) {
-        return alert("No file selected.")
+function isFileSelected() {
+    return workflowFileInput.files.length > 0;
+}
+
+saveToBrowserButton.addEventListener('click', () => {
+    if (!isFileSelected()) {
+        return alert("No file selected.")   
     }
 
-    const newJson = updateJsonWithUserInput();
+    const newJson = inputRenderer.updateJsonWithUserInput();
 
     if (newJson == "") {
         return;
@@ -57,12 +83,12 @@ document.getElementById('save-to-browser').addEventListener('click', () => {
     location.href = "/";
 });
 
-document.getElementById('download-workflow').addEventListener('click', () => {
-    if (!workflowJson) {
+downloadWorkflowButton.addEventListener('click', () => {
+    if (!isFileSelected) {
         return alert("No file selected.")
     }
     
-    const newJson = updateJsonWithUserInput();
+    const newJson = inputRenderer.updateJsonWithUserInput();
 
     if (newJson == "") {
         return;
@@ -84,7 +110,7 @@ document.getElementById('download-workflow').addEventListener('click', () => {
 });
 
 export function scrollToSaveButtons() {
-    const saveButtons = document.querySelector('.export-buttons');
+    const saveButtons = getElementOrThrow('.export-buttons');
 
     saveButtons.scrollIntoView({ behavior: 'smooth' });
 }

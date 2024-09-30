@@ -1,42 +1,143 @@
-// ---------
-// Rendering
-// ---------
+//@ts-check
 
-const blankMetadata = {
-    "title": "My Workflow",
-    "description": ""
-}
-
-export let workflowJson = null;
-
-let inputsContainerElem;
-
-export async function renderWorkflow(passedWorkflowJson, inputsContainer, titleInput, descriptionInput) {
-    inputsContainerElem = inputsContainer;
-
-    try {
-        workflowJson = passedWorkflowJson;
-    } catch (err) {
-        return alert("Invalid JSON content.");
+export class InputRenderer {
+    /**
+     * 
+     * @param {HTMLElement} containerElem The container element in which all of the inputs will be renderered.
+     * @param {object} workflowObject The workflow object to render
+     * @param {HTMLInputElement} titleInput The title input element.
+     * @param {HTMLTextAreaElement} descriptionInput The description input element.
+     */
+    constructor(containerElem, workflowObject, titleInput, descriptionInput) {
+        this.containerElem = containerElem;
+        this.workflowObject = workflowObject;
+        this.titleInput = titleInput;
+        this.descriptionInput = descriptionInput;
+        this.inputCount = 0;
     }
 
-    const jsonMetadata = workflowJson["_comfyuimini_meta"] || blankMetadata;
+    /**
+     * 
+     * @param {object} newWorkflowObject The new workflow object to set.
+     */
+    setWorkflowObject(newWorkflowObject) {
+        this.workflowObject = newWorkflowObject;
+    }
 
-    titleInput.removeAttribute('disabled');
-    titleInput.value = jsonMetadata.title;
+    /**
+     * Renders the workflow inputs.
+     */
+    async renderWorkflow() {
+        this.inputCount = 0;
 
-    descriptionInput.removeAttribute('disabled');
-    descriptionInput.value = jsonMetadata.description;
+        const blankMetadata = {
+            "title": "My Workflow",
+            "description": ""
+        }
 
-    inputsContainerElem.innerHTML = "";
-    inputCount = 0;
+        const jsonMetadata = this.workflowObject["_comfyuimini_meta"]|| blankMetadata;
+    
+        this.titleInput.removeAttribute('disabled');
+        this.titleInput.value = jsonMetadata.title || "My Workflow";
 
-    renderAllInputs(workflowJson);
-}
+        this.descriptionInput.removeAttribute('disabled');
+        this.descriptionInput.value = jsonMetadata.description || "";
+    
+        this.containerElem.innerHTML = "";
+        await this.renderAllInputs();
+    }
 
-async function renderAllInputs(workflowJson) {
-    function getInputConfig(nodeId, inputName) {
-        const cuiMiniMetadata = workflowJson["_comfyuimini_meta"];
+    /**
+     * Loops through every node and renders each input.
+     */
+    async renderAllInputs() {
+        if (this.workflowObject.version !== undefined) {
+            return null;
+        }
+        
+        for (const [nodeId, node] of Object.entries(this.workflowObject)) {
+            this.renderNodeInputs(nodeId, node);
+        }
+    
+        this.startInputEventListeners();
+    }
+    
+    /**
+     * Loop through each input in a node and render it.
+     * 
+     * @param {string} nodeId The ID of the node in the workflow.
+     * @param {object} node The node object.
+     */
+    async renderNodeInputs(nodeId, node) {
+        if (nodeId.charAt(0) == "_") {
+            return;
+        }
+
+        for (const [inputName, inputValue] of Object.entries(node.inputs)) {
+            if (Array.isArray(inputValue)) {
+                // Inputs that come from other nodes come as an array
+                continue;
+            }
+
+            const inputConfig = this.getInputOptionConfig(nodeId, inputName);
+            const renderConfig = this.buildRenderConfig(inputConfig, inputValue, nodeId, inputName);
+
+            await this.renderInput(renderConfig);
+        }
+    }
+
+    /**
+     * Create a config to pass to renderInput, any values in inputConfig will override the other arguments here.
+     * 
+     * @param {object} inputConfig A input's config from the ComfyUIMini metadata object.
+     * @param {string} defaultValue The default value of the input.
+     * @param {string} nodeId The ID of the node in the workflow.
+     * @param {string} inputName The name of the input in the node.
+     * @returns {InputConfig} A config object to pass to renderInput.
+     */
+    buildRenderConfig(inputConfig, defaultValue, nodeId, inputName) {
+        const predictedTypes = {
+            seed: "integer",
+            steps: "integer",
+            cfg: "float",
+            sampler_name: "select",
+            scheduler: "select",
+            denoise: "float",
+            ckpt_name: "select",
+            width: "integer",
+            height: "integer",
+            batch_size: "integer",
+            text: "text",
+            filename_prefix: "text",
+            vae_name: "select"
+        }
+
+        const generatedConfig = {
+            nodeId: nodeId,
+            inputName: inputName,
+            title: inputName,
+            type: null,
+            default: defaultValue,
+            disabled: false,
+            ...inputConfig
+        };
+
+        if (!generatedConfig.type) {
+            generatedConfig.type = predictedTypes[inputName] || "";
+        }
+
+        return generatedConfig;
+    }
+
+    /**
+     * Attempts to get any associated metadata for an input from the ComfyUIMini metadata object.
+     * 
+     * @param {string} nodeId The ID of the node in the workflow.
+     * @param {string} inputName The name of the input in the node.
+     * @returns {object} Returns an empty object if no metadata is found, otherwise returns said additional metadata.
+     */
+    getInputOptionConfig(nodeId, inputName) {
+        const cuiMiniMetadata = this.workflowObject["_comfyuimini_meta"];
 
         if (!cuiMiniMetadata) {
             return null;
@@ -53,164 +154,378 @@ async function renderAllInputs(workflowJson) {
                 return option;
             }
         }
+    }   
 
-        return null;
+    generateInputOptions(selectedInputType) {
+        const options = ["text", "integer", "float", "select"];
+
+        return options.map(
+            type => `<option value="${type}" ${type === selectedInputType ? "selected" : ""}>${type === "select" ? "Select (from model list or builtin)" : type.charAt(0).toUpperCase() + type.slice(1)}</option>`
+        ).join('');
     }
 
-    if (workflowJson.version !== undefined) {
-        return null;
-    }
-    
-    for (const [nodeId, node] of Object.entries(workflowJson)) {
-        if (nodeId.charAt(0) == "_") {
-            continue;
+    /**
+     * @typedef {object} InputConfig 
+     * The minimum config required to render an input.
+     * 
+     * @property {string} nodeId The ID of the node in the workflow.
+     * @property {string} inputName The name of the input in the node.
+     * @property {string} title The title of the input.
+     * @property {string} type The type of the input.
+     * @property {string} default The default value of the input.
+     * @property {boolean} disabled Whether the input is disabled.
+     */
+
+    /**
+     * @typedef {object} ExpandedInputConfig
+     * Any additional properties that may come with an input config.
+     * 
+     * @property {string} nodeId The ID of the node in the workflow.
+     * @property {string} inputName The name of the input in the node.
+     * @property {string} title The title of the input.
+     * @property {string} type The type of the input.
+     * @property {string} default The default value of the input.
+     * @property {boolean} disabled Whether the input is disabled.
+     * 
+     * @property {boolean} show_randomise_toggle Whether to show the randomise toggle for the input.
+     * @property {string} select_list The name of the list to get select options from.
+     * @property {number} min The minimum value for the input.
+     * @property {number} max The maximum value for the input.
+     * @property {number} step The step value for the input.
+     */
+
+
+
+    /**
+     * Renders an input based off an input config.
+     * 
+     * @param {InputConfig} inputConfig The config for the input to render.
+     */
+    async renderInput(inputConfig) {
+        this.inputCount += 1;
+
+        const nodeId = inputConfig.nodeId;
+        const inputNameInNode = inputConfig.inputName;
+        const inputTitle = inputConfig.title;
+        const inputType = inputConfig.type || "";
+        const inputDefault = inputConfig.default || "";
+
+        const idPrefix = `${nodeId}-${inputNameInNode}`;
+
+        const html = `
+            <div class="input-item" data-node-id="${nodeId}" data-node-input-name="${inputNameInNode}">
+                <div class="options-container">
+                    <div class="input-top-container">
+                        <span class="input-counter">${this.inputCount}.</span>
+                        <div class="icon eye hide-input-button" id="hide-button-${idPrefix}"></div>
+                        <select class="input-type-select">
+                            <option value="" disabled ${inputType === "" ? "selected" : ""}>(Choose input type)</option>
+                            ${this.generateInputOptions(inputType)}
+                        </select>
+                    </div>
+                    <label for="${idPrefix}-title">Title</label>
+                    <input type="text" id="${idPrefix}-title" placeholder="${inputTitle}" value="${inputTitle}" class="workflow-input workflow-input-title">
+                    <label for="${idPrefix}-default">Default value</label>
+                    <input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
+                    <div class="additional-input-options">${
+                        //@ts-ignore
+                        await this.renderAdditionalOptions(inputConfig)
+                    }</div>
+                </div>
+                <div class="move-arrows-container">
+                    <span class="move-arrow-up">&#x25B2;</span>
+                    <span class="move-arrow-down">&#x25BC;</span>
+                </div>
+            </div>
+        `;
+
+        this.containerElem.innerHTML += html;
+
+        if (inputConfig.disabled) {
+            const hideButtonElement = this.containerElem.querySelector(`#hide-button-${idPrefix}`);
+
+            if (!hideButtonElement) {
+                return;
+            }
+
+            this.hideInput(hideButtonElement);
         }
+    }
 
-        for (let [key, value] of Object.entries(node.inputs)) {
-            if (Array.isArray(value)) {
-                // Inputs that come from other nodes come as an array
+    /**
+     * Renders a number input in the additional input options.
+     * 
+     * @param {string} label The label for the additional input option.
+     * @param {string} id The ID of the additional input option.
+     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `min, max, step`
+     * @param {number|null} defaultValue The default value for the additional input option.
+     * @returns {string} The HTML for the number input.
+     */
+    createNumberInput(label, id, key, defaultValue = null) {
+        return `
+        <div class="additional-option-wrapper">
+            <label for="${id}">${label}</label>
+            <input type="number" id="${id}" data-key="${key}" class="additional-input-option" value="${defaultValue}">
+        </div>
+        `;
+    }
+
+    /**
+     * Renders a checkbox input in the additional input options.
+     * 
+     * @param {string} label The label for the additional input option.
+     * @param {string} id The ID of the additional input option.
+     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `show_randomise_toggle` 
+     * @param {boolean} checked If the checkbox should be checked or not when rendered.
+     * @returns {string} The HTML for the checkbox input.
+     */
+    createCheckboxInput(label, id, key, checked = false) {
+        return `
+        <div class="additional-option-wrapper">
+            <label for="${id}">${label}</label>
+            <input type="checkbox" id="${id}" data-key="${key}" class="additional-input-option" ${checked ? "checked" : ""}> 
+        </div>
+        `;
+    }
+
+    /**
+     * Renders a select input in the additional input options.
+     * 
+     * @param {string} label The label for the additional input option.
+     * @param {string} id The ID of the additional input option.
+     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `select_list`
+     * @param {string[]} options The list of options to select from.
+     * @param {string} selected The default selected option.
+     * @returns {string} The HTML for the select input.
+     */
+    createSelectInput(label, id, key, options, selected = "") {
+        return `
+        <div class="additional-option-wrapper">
+            <label for="${id}">${label}</label>
+            <select id="${id}" data-key="${key}" class="additional-input-option">
+                ${options.map(option => `<option value="${option}" ${option === selected ? "selected" : ""}>${option}</option>`).join('')}
+            </select>
+        </div>
+
+        `;
+    }
+
+    /**
+     * 
+     * @param {ExpandedInputConfig} workflowInputConfig 
+     * @returns 
+     */
+    async renderAdditionalOptions(workflowInputConfig) {
+        switch (workflowInputConfig.type) {
+            case "text":
+                return "";
+
+            case "integer": 
+                return this.createNumberInput("Min", "min-value", "min", workflowInputConfig.min) +
+                    this.createNumberInput("Max", "max-value", "max", workflowInputConfig.max) +
+                    this.createCheckboxInput("Show randomise toggle?", "show-random-toggle-value", "show_randomise_toggle", workflowInputConfig.show_randomise_toggle);
+
+            case "float":
+                return this.createNumberInput("Min", "min-value", "min", workflowInputConfig.min) +
+                    this.createNumberInput("Max", "max-value", "max", workflowInputConfig.max) +
+                    this.createNumberInput("Step", "step-value", "step", workflowInputConfig.step);
+
+            case "select":
+                const response = await fetch("/comfyui/modeltypes");
+                const modelTypesList = await response.json();
+
+                return this.createSelectInput("Model list", "model-list-value", "select_list", modelTypesList, workflowInputConfig.select_list);
+
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Hides an input after the eye icon is clicked.
+     * 
+     * @param {Element} hideButtonElement The hide button element.
+     */
+    hideInput(hideButtonElement) {
+        if (hideButtonElement.classList.contains("hide")) {
+            hideButtonElement.classList.add("eye");
+            hideButtonElement.classList.remove("hide");
+    
+            const inputOptionsContainer = hideButtonElement.closest('.input-item');
+
+            if (!inputOptionsContainer) {
+                return;
+            }
+
+            inputOptionsContainer.classList.remove("disabled");
+    
+            const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
+            subInputsForInput.forEach(element => {
+                element.removeAttribute("disabled");
+            });
+        } else {
+            hideButtonElement.classList.remove("eye");
+            hideButtonElement.classList.add("hide");
+    
+            const inputOptionsContainer = hideButtonElement.closest('.input-item');
+
+            if (!inputOptionsContainer) {
+                return;
+            }
+
+            inputOptionsContainer.classList.add("disabled");
+    
+            const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
+            subInputsForInput.forEach(element => {
+                element.setAttribute("disabled", "disabled");
+            })
+        }
+    }
+
+    startInputEventListeners() {
+        document.querySelectorAll('.input-type-select').forEach(function (selectInput) {
+            selectInput.addEventListener('change', async (e) => {
+                // @ts-ignore
+                const changedTo = e.target.value;
+    
+                // @ts-ignore
+                const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
+    
+                additionalInputOptionsContainer.innerHTML = await this.renderAdditionalOptions({type: changedTo});
+            })
+        });
+    
+        this.containerElem.addEventListener('click', (e) => {
+            // @ts-ignore
+            const targetHasClass = (/** @type {string} */ className) => e.target.classList.contains(className);
+    
+            if (targetHasClass('move-arrow-up')) {
+                // @ts-ignore
+                moveUp(e.target.closest('.input-item'));
+    
+            } else if (targetHasClass('move-arrow-down')) {
+                // @ts-ignore
+                moveDown(e.target.closest('.input-item'));
+    
+            } else if (targetHasClass('hide-input-button')) {
+                // @ts-ignore
+                this.hideInput(e.target); 
+    
+            }
+        });
+    }
+
+    /**
+     * Updates a workflow object with data from the inputs.
+     * 
+     * @returns {object} The exported workflow object.
+     */
+    updateJsonWithUserInput() {
+        const inputOptionsList = [];
+    
+        const allInputs = this.containerElem.querySelectorAll('.input-item');
+    
+        for (const inputContainer of allInputs) {
+            const inputNodeId = inputContainer.getAttribute("data-node-id");
+            const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
+    
+            let inputOptions = {};
+            inputOptions["node_id"] = inputNodeId;
+            inputOptions["input_name_in_node"] = inputNameInNode;
+    
+            if (inputContainer.classList.contains('disabled')) {
+                inputOptions["disabled"] = true;
+                inputOptionsList.push(inputOptions);
                 continue;
             }
-
-            const inputConfig = getInputConfig(nodeId, key);
-
-            if (inputConfig && !inputConfig.disabled) {
-                await renderInput({...inputConfig, inputName: key, nodeId: nodeId});
-            } else {
-                await renderInput({...inputConfig, title: `${nodeId}_${key}`, default: value, nodeId: nodeId, inputName: key});
-            }
-        }
-    }
-
-    startInputEventListeners();
-}
-
-
-let inputCount = 0;
-async function renderInput(inputData) {
-    // title, defaultValue, nodeId, inputName, type
-    inputCount += 1;
-
-    const inputName = inputData.inputName;
-    const inputType = inputData.type;
     
-    const inputNodeId = inputData.nodeId;
+            const inputTitleElement = /** @type {HTMLInputElement} */ (inputContainer.querySelector('.workflow-input-title'));
 
-    // Add predicted type fill to options later
-    const assumedTypes = {
-        seed: "integer",
-        steps: "integer",
-        cfg: "float",
-        sampler_name: "select",
-        scheduler: "select",
-        denoise: "float",
-        ckpt_name: "select",
-        width: "integer",
-        height: "integer",
-        batch_size: "integer",
-        text: "text",
-        filename_prefix: "text",
-        vae_name: "select"
-    }
-
-    if (!inputData.type) {
-        inputData.type = assumedTypes[inputName] || "";
-    }
-
-    const selectedInputType = inputType || assumedTypes[inputName] || "";
-
-    const generateInputOptions = () => ["text", "integer", "float", "select"].map(
-        type => `<option value="${type}" ${type === selectedInputType ? "selected" : ""}>${type === "select" ? "Select (from model list or builtin)" : type.charAt(0).toUpperCase() + type.slice(1)}</option>`
-    ).join('');
-
-    const html = `
-    <div class="input-item" data-node-id="${inputNodeId}" data-node-input-name="${inputName}">
-        <div class="options-container">
-            <div class="input-top-container">
-                <span class="input-counter">${inputCount}.</span>
-                <div class="icon eye hide-input-button" id="hide-button-${inputNodeId}-${inputName}"></div>
-                <select class="input-type-select">
-                    <option value="" disabled ${selectedInputType === "" ? "selected" : ""}>(Choose input type)</option>
-                    ${generateInputOptions()}
-                </select>
-            </div>
-            <label for="${inputNodeId}-${inputName}-title">Title</label>
-            <input type="text" id="${inputNodeId}-${inputName}-title" placeholder="${inputData.title}" value="${inputData.title}" class="workflow-input workflow-input-title">
-            <label for="${inputNodeId}-${inputName}-default">Default value</label>
-            <input type="text" id="${inputNodeId}-${inputName}-default" placeholder="${inputData.default}" value="${inputData.default}" class="workflow-input workflow-input-default">
-            <div class="additional-input-options">${await renderAdditionalOptions(inputData)}</div>
-        </div>
-        <div class="move-arrows-container">
-            <span class="move-arrow-up">&#x25B2;</span>
-            <span class="move-arrow-down">&#x25BC;</span>
-        </div>
-    </div>
-    `;
-
-    inputsContainerElem.innerHTML += html;
-
-    if (inputData.disabled) {
-        hideInput(inputsContainerElem.querySelector(`#hide-button-${inputNodeId}-${inputData.inputName}`));
-    }
-}
-
-async function renderAdditionalOptions(data) {
-    switch (data.type) {
-        case "text":
-            return "";
-        case "integer": 
-            const showRandomiseChecked = data.show_randomise_toggle === "on" || data.show_randomise_toggle === true ? "checked" : "" || "";
-
-            return `
-            <div class="additional-option-wrapper">
-                <label for="min-value">Min</label>
-                <input type="number" id="min-value" data-key="min" class="additional-input-option" value="${data.min || ""}">
-            </div>
-            <div class="additional-option-wrapper">
-                <label for="max-value">Max</label>
-                <input type="number" id="max-value" data-key="max" class="additional-input-option" value="${data.max || ""}">
-            </div>
-            <div class="additional-option-wrapper">
-                <label for="show-random-toggle-value">Show randomise toggle?</label>
-                <input type="checkbox" id="show-random-toggle-value" data-key="show_randomise_toggle" class="additional-input-option" ${showRandomiseChecked}>
-            </div>
-            `;
-        case "float":
-            return `
-            <div class="additional-option-wrapper">
-                <label for="min-value">Min</label>
-                <input type="number" id="min-value" data-key="min" class="additional-input-option" value="${data.min || ""}">
-            </div>
-            <div class="additional-option-wrapper">
-                <label for="max-value">Max</label>
-                <input type="number" id="max-value" data-key="max" class="additional-input-option" value="${data.max || ""}">
-            </div>
-            <div class="additional-option-wrapper">
-                <label for="step-value">Step</label>
-                <input type="number" id="step-value" data-key="step" class="additional-input-option" value="${data.step || ""}">
-            </div>
-            `;
-        case "select":
-            const response = await fetch("/comfyui/modeltypes");
-            const modelTypesList = await response.json();
-
-            let html = `
-            <div class="additional-option-wrapper">
-                <label for="model-list-value">Model list</label>
-                <select id="model-list-value" data-key="select_list" class="additional-input-option">`;
-
-            const isSelected = (listType) => data.select_list == listType ? "selected" : "";
-
-            for (const type of modelTypesList) {
-                html += `<option value="${type}" ${isSelected(type)}>${type}</option>`;
+            if (!inputTitleElement) {
+                alert(`Error while saving workflow, input title element not found for ${inputNameInNode}`);
+                return "";
             }
 
-            html += `</select>
-            </div>`;
+            const defaultValueElement = /** @type {HTMLInputElement} */ (inputContainer.querySelector('.workflow-input-default'));
 
-            return html;
-        default:
-            return "";
+            if (!defaultValueElement) {
+                alert(`Error while saving workflow, default value element not found for ${inputNameInNode}`);
+                return "";
+            }
+    
+            inputOptions["title"] = inputTitleElement.value;
+            inputOptions["default"] = defaultValueElement.value;
+    
+            const inputTypeSelect = /** @type {HTMLSelectElement} */ (inputContainer.querySelector('.input-type-select'));
+
+            if (!inputTypeSelect) {
+                alert(`Error while saving workflow, input type select not found for ${inputNameInNode}`);
+                return "";
+            }
+
+            const inputType = inputTypeSelect.value;
+    
+            if (inputType == "") {
+                alert(`Input type for "${inputTitleElement.value}" not selected.`);
+                return "";
+            }
+    
+            if (inputType == "integer" || inputType == "float") {
+                if (isNaN(Number(defaultValueElement.value))) {
+                    alert(`Default value for "${inputTitleElement.value}" is not a number.`);
+                    return "";
+                }
+            } 
+            
+            if (inputType == "integer") {
+                if (Number.isInteger(defaultValueElement.value)) {
+                    alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
+                    return "";
+                }
+            }
+    
+            inputOptions["type"] = inputType;
+    
+    
+            /** @type {NodeListOf<HTMLInputElement|HTMLInputElement>} */
+            const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-input-option");
+    
+            for (const additionalInputOption of additionalInputOptions) {
+    
+                const additionalInputOptionValue = additionalInputOption.value;
+                const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
+                const additionalInputType = additionalInputOption.type;
+    
+                if (additionalInputOptionValue === null || additionalInputOptionValue === "") {
+                    continue;
+                }
+    
+                if (additionalInputType === "checkbox" && !additionalInputOption.checked) {
+                    continue;
+                }
+    
+                if (additionalInputOption.type === "checkbox") {
+                    // We have already skipped if checkbox value is false, therefore it can only be true
+                    inputOptions[additionalInputOptionKey] = true;
+                    continue;
+                }
+    
+                inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
+            }
+    
+            inputOptionsList.push(inputOptions);
+        };
+
+        const modifiedWorkflow = this.workflowObject;
+    
+        modifiedWorkflow["_comfyuimini_meta"] = {};
+        modifiedWorkflow["_comfyuimini_meta"]["title"] = this.titleInput.value || "Unnamed Workflow";
+        modifiedWorkflow["_comfyuimini_meta"]["description"] = this.descriptionInput.value || "";
+        modifiedWorkflow["_comfyuimini_meta"]["format_version"] = "1";
+    
+        modifiedWorkflow["_comfyuimini_meta"]["input_options"] = inputOptionsList;
+    
+        return modifiedWorkflow;
     }
 }
 
@@ -218,34 +533,16 @@ async function renderAdditionalOptions(data) {
 // Editing
 // -------
 
-function startInputEventListeners() {
-    document.querySelectorAll('.input-type-select').forEach(function (inputTypeInput) {
-        inputTypeInput.addEventListener('change', async (e) => {
-            const changedTo = e.target.value;
-
-            const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
-
-            additionalInputOptionsContainer.innerHTML = await renderAdditionalOptions({type: changedTo});
-        })
-    });
-
-    inputsContainerElem.addEventListener('click', (e) => {
-        const targetHasClass = (className) => e.target.classList.contains(className);
-
-        if (targetHasClass('move-arrow-up')) {
-            moveUp(e.target.closest('.input-item'));
-
-        } else if (targetHasClass('move-arrow-down')) {
-            moveDown(e.target.closest('.input-item'));
-
-        } else if (targetHasClass('hide-input-button')) {
-            hideInput(e.target); 
-
-        }
-    });
-}
-
+/**
+ * Move an input up.
+ * 
+ * @param {HTMLElement} item The input container.
+ */
 function moveUp(item) {
+    if (!item.parentNode) {
+        return;
+    }
+
     const previousItem = item.previousElementSibling;
 
     if (previousItem) {
@@ -253,128 +550,19 @@ function moveUp(item) {
     }
 }
 
+/**
+ * Move an input down.
+ * 
+ * @param {HTMLElement} item The input container.
+ */
 function moveDown(item) {
+    if (!item.parentNode) {
+        return;
+    }
+
     const nextItem = item.nextElementSibling;
 
     if (nextItem) {
         item.parentNode.insertBefore(nextItem, item);
     }
-}
-
-function hideInput(hideButtonElement) {
-    if (hideButtonElement.classList.contains("hide")) {
-        hideButtonElement.classList.add("eye");
-        hideButtonElement.classList.remove("hide");
-
-        const inputOptionsContainer = hideButtonElement.closest('.input-item');
-        inputOptionsContainer.classList.remove("disabled");
-
-        const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
-        subInputsForInput.forEach(element => {
-            element.removeAttribute("disabled");
-        });
-    } else {
-        hideButtonElement.classList.remove("eye");
-        hideButtonElement.classList.add("hide");
-
-        const inputOptionsContainer = hideButtonElement.closest('.input-item');
-        inputOptionsContainer.classList.add("disabled");
-
-        const subInputsForInput = inputOptionsContainer.querySelectorAll("input, select");
-        subInputsForInput.forEach(element => {
-            element.setAttribute("disabled", true);
-        })
-    }
-}
-
-// ---------
-// Exporting
-// ---------
-
-export function updateJsonWithUserInput() {
-    const inputOptionsList = [];
-
-    const allInputs = inputsContainerElem.querySelectorAll('.input-item');
-
-    for (const inputContainer of allInputs) {
-        const inputNodeId = inputContainer.getAttribute("data-node-id");
-        const inputNameInNode = inputContainer.getAttribute("data-node-input-name");
-
-        let inputOptions = {};
-        inputOptions["node_id"] = inputNodeId;
-        inputOptions["input_name_in_node"] = inputNameInNode;
-
-        if (inputContainer.classList.contains('disabled')) {
-            inputOptions["disabled"] = true;
-            inputOptionsList.push(inputOptions);
-            continue;
-        }
-
-        const inputTitleElement = inputContainer.querySelector('.workflow-input-title');
-        const defaultValueElement = inputContainer.querySelector('.workflow-input-default');
-
-        inputOptions["title"] = inputTitleElement.value;
-        inputOptions["default"] = defaultValueElement.value;
-
-        const inputTypeSelect = inputContainer.querySelector('.input-type-select');
-        const inputType = inputTypeSelect.value;
-
-        if (inputType == "") {
-            alert(`Input type for "${inputTitleElement.value}" not selected.`);
-            return "";
-        }
-
-        if (inputType == "integer" || inputType == "float") {
-            if (isNaN(defaultValueElement.value)) {
-                alert(`Default value for "${inputTitleElement.value}" is not a number.`);
-                return "";
-            }
-        } 
-        
-        if (inputType == "integer") {
-            if (Number.isInteger(defaultValueElement.value)) {
-                alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
-                return "";
-            }
-        }
-
-        inputOptions["type"] = inputType;
-
-
-        const additionalInputOptions = inputContainer.querySelectorAll(".additional-input-options .additional-input-option");
-
-        for (const additionalInputOption of additionalInputOptions) {
-
-            const additionalInputOptionValue = additionalInputOption.value;
-            const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
-            const additionalInputType = additionalInputOption.type;
-
-            if (additionalInputOptionValue === null || additionalInputOptionValue === "") {
-                continue;
-            }
-
-            if (additionalInputType === "checkbox" && !additionalInputOption.checked) {
-                continue;
-            }
-
-            if (additionalInputOption.type === "checkbox") {
-                // We have already skipped if checkbox value is false, therefore it can only be true
-                inputOptions[additionalInputOptionKey] = true;
-                continue;
-            }
-
-            inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
-        }
-
-        inputOptionsList.push(inputOptions);
-    };
-
-    workflowJson["_comfyuimini_meta"] = {};
-    workflowJson["_comfyuimini_meta"]["title"] = document.getElementById('title-input').value || "Unnamed";
-    workflowJson["_comfyuimini_meta"]["description"] = document.getElementById('description-input').value || "";
-    workflowJson["_comfyuimini_meta"]["format_version"] = "1";
-
-    workflowJson["_comfyuimini_meta"]["input_options"] = inputOptionsList;
-
-    return workflowJson;
 }

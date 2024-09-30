@@ -56,6 +56,12 @@ async function getImage(filename, subfolder, type) {
     }
 }
 
+async function getModelTypesList() {
+    const response = await comfyuiAxios.get('/models');
+
+    return response.data;
+}
+
 async function generateProxiedImageUrl(filename, subfolder, folderType) {
     const params = new URLSearchParams({ filename, subfolder, type: folderType });
 
