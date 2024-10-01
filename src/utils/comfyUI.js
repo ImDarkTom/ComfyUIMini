@@ -203,25 +203,82 @@ async function generateImage(workflowPrompt, wsClient) {
 
 }
 
-async function checkForComfyUI() {
+/**
+ * Formats a ComfyUI version string to a semver-compatible version string.
+ * 
+ * E.g. `v0.2.2-84-gd1cdf51` becomes `0.2.2.84`.
+ * 
+ * @param {string} versionString The input ComfyUI version string.
+ * @returns {string} The output semver-compatible version string.
+ */
+function formatVersion(versionString) {
+    return versionString.replace('v', '')
+        .replace(/-[a-z0-9]+$/, '')
+        .replace(/-/g, '.');
+}
+
+/**
+ * Compares a passed `comfyui_version` string with a requirement version string.
+ * 
+ * @param {string} version The string version for comfyui_version. E.g. `v0.2.2-84-gd1cdf51`
+ * @param {string} versionRequirement The version to check against. Commit hash is not included in comparison. E.g. `0.2.2-49`
+ * @returns {boolean} If the version is greater than or equal to the requirement version.
+ */
+function versionCheck(version, versionRequirement) {
+    const versionSplit = formatVersion(version).split(".");
+    const versionRequirementSplit = formatVersion(versionRequirement).split(".");
+
+    for (const versionPart in versionSplit) {
+        if (parseInt(versionSplit[versionPart]) > parseInt(versionRequirementSplit[versionPart])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Check if ComfyUI is running and meets minimum required versio
+ * @returns
+ */
+async function comfyUICheck() {
+    let comfyUIVersion = null;
+    let comfyUIVersionRequirement = false;
+
     try {
-        const responseCodeMeaning = {
-            200: "ComfyUI is running."
-        };
+        await comfyuiAxios.get('/');
 
-        const request = await comfyuiAxios.get('/');
-        const status = request.status;
+        logger.success(`ComfyUI is running.`);
+    } catch (error) {
+        const errorCode = error.code;
 
-        logger.success(`${status}: ${responseCodeMeaning[status] || "Unknown response."}`);
-    } catch (err) {
-        const errorCode = err.code;
+        if (errorCode === "ECONNREFUSED") {
+            logger.warn(`Could not connect to ComfyUI, make sure it is running and accessible at the url in the config.json file.`);
+        } else {
+            logger.warn(`Unknown error when checking for ComfyUI: ${error}`);
+        }
+    }
 
-        const errorMeaning = {
-            "ECONNREFUSED": "Make sure ComfyUI is running and is accessible at the URL in the config.json file."
+    try {
+        const infoRequest = await comfyuiAxios.get('/system_stats');
+
+        comfyUIVersion = infoRequest.data.system.comfyui_version;
+
+        if (comfyUIVersion === undefined || comfyUIVersion === null) {
+            comfyUIVersion = ">=0.2.0";
         }
 
-        logger.warn(`${errorCode}: ${errorMeaning[errorCode] || err}`)
+        comfyUIVersionRequirement = versionCheck(comfyUIVersion, global.minComfyUIVersion);
+    } catch (error) {
+        logger.warn(`Could not check ComfyUI version: ${error}`);
     }
+
+    if (!comfyUIVersionRequirement) {
+        logger.warn(`Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${global.minComfyUIVersion}). ComfyUIMini may not behave as exptected.`);
+        return;
+    }
+
+    logger.success(`ComfyUI version: ${comfyUIVersion}`);
 }
 
 async function interruptGeneration() {
@@ -234,7 +291,7 @@ module.exports = {
     generateImage,
     getQueue,
     getHistory,
-    checkForComfyUI,
+    comfyUICheck,
     interruptGeneration,
     getImage
 };

@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 
 global.config = require('../config.json');
+global.minComfyUIVersion = 'v0.2.2-50-7183fd1';
 
 const logger = require("./utils/logger");
 const { handleUpgrade } = require("./routes/wsRouter");
@@ -25,10 +26,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 server.on('upgrade', handleUpgrade);
 
 const { checkForWorkflowsFolder, loadSelectOptions } = require('./utils/fileManager');
-const { checkForComfyUI } = require('./utils/comfyUi');
+const { comfyUICheck } = require('./utils/comfyUi');
 const getLocalIp = require('./utils/localIp');
 
-checkForComfyUI();
+comfyUICheck();
 checkForWorkflowsFolder();
 loadSelectOptions();
 
