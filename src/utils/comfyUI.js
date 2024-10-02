@@ -206,6 +206,10 @@ async function generateImage(workflowPrompt, wsClient) {
 /**
  * Formats a ComfyUI version string to a semver-compatible version string.
  * 
+ * The part after the first '-' indicates how many commits since the downloaded release, 
+ * we can just use this as another part of the version as `major > minor > patch > commit` 
+ * in order to be able to check if a feature from a certain commit is available in ComfyUI.
+ * 
  * E.g. `v0.2.2-84-gd1cdf51` becomes `0.2.2.84`.
  * 
  * @param {string} versionString The input ComfyUI version string.
