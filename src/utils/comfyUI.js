@@ -238,7 +238,7 @@ function versionCheck(version, versionRequirement) {
 }
 
 /**
- * Check if ComfyUI is running and meets minimum required versio
+ * Check if ComfyUI is running and meets minimum required version
  * @returns
  */
 async function comfyUICheck() {
@@ -254,6 +254,7 @@ async function comfyUICheck() {
 
         if (errorCode === "ECONNREFUSED") {
             logger.warn(`Could not connect to ComfyUI, make sure it is running and accessible at the url in the config.json file.`);
+            return;
         } else {
             logger.warn(`Unknown error when checking for ComfyUI: ${error}`);
         }
