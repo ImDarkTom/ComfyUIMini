@@ -56,7 +56,7 @@ export class WorkflowEditor {
         }
 
         for (const [nodeId, node] of Object.entries(this.workflowObject)) {
-            this.renderNodeInputs(nodeId, node);
+            await this.renderNodeInputs(nodeId, node);
         }
 
         this.startInputEventListeners();
@@ -313,7 +313,7 @@ export class WorkflowEditor {
 
     /**
      *
-     * @param {ExpandedInputConfig} workflowInputConfig
+     * @param {ExpandedInputConfig|object} workflowInputConfig
      * @returns
      */
     async renderAdditionalOptions(workflowInputConfig) {
@@ -399,14 +399,16 @@ export class WorkflowEditor {
     }
 
     startInputEventListeners() {
-        document.querySelectorAll('.input-type-select').forEach(function (selectInput) {
+        document.querySelectorAll('.input-type-select').forEach((selectInput) => {
             selectInput.addEventListener('change', async (e) => {
                 // @ts-ignore
                 const changedTo = e.target.value;
 
-                const additionalInputOptionsContainer =
+                // @ts-ignore
+                const additionalInputOptionsContainer = e.target
                     // @ts-ignore
-                    e.target.parentNode.parentNode.querySelector('.additional-input-options');
+                    .closest('.options-container')
+                    .querySelector('.additional-input-options');
 
                 additionalInputOptionsContainer.innerHTML = await this.renderAdditionalOptions({ type: changedTo });
             });
