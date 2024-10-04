@@ -1,6 +1,7 @@
 const express = require('express');
+const config = require('config');
 const { loadModelTypes } = require('../utils/fileManager');
-const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyUi');
+const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyUI');
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/image', async (req, res) => {
 });
 
 router.get('/modeltypes', (req, res) => {
-    const modelTypesList = Object.keys(global.selectOptions);
+    const modelTypesList = Object.keys(config.selectOptions);
 
     res.json(modelTypesList);
 });
@@ -37,7 +38,7 @@ router.get('/modeltypes', (req, res) => {
 router.get('/listmodels/:modelType', (req, res) => {
     const modelType = req.params.modelType;
 
-    const modelTypeInfo = global.selectOptions[modelType];
+    const modelTypeInfo = config.selectOptions[modelType];
 
     if (!modelTypeInfo) {
         res.send('Model config not found for ' + modelType).status(400);

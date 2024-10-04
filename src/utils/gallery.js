@@ -65,7 +65,7 @@ function getRelativeTimeText(timestamp) {
  * @returns {GalleryPageData} - Object containing paginated images and additional page info.
  */
 function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
-    const imageOutputPath = global.config.output_dir;
+    const imageOutputPath = config.output_dir;
 
     const targetPath = path.join(imageOutputPath, subfolder);
 

@@ -1,5 +1,5 @@
 const winston = require('winston');
-const config = require('../../config.json');
+const config = require('config');
 
 const customLevels = {
     levels: {

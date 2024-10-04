@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const config = require('config');
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
 const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/fileManager');
@@ -13,7 +14,7 @@ const appVersion = require('../../package.json').version;
 
 router.get('/', (req, res) => {
     res.render('pages/index', {
-        serverWorkflowMetadata: Object.values(global.serverWorkflowMetadata),
+        serverWorkflowMetadata: Object.values(config.serverWorkflowMetadata),
         appVersion: appVersion,
         theme: req.theme,
     });

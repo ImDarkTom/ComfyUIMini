@@ -4,12 +4,13 @@ const logger = require('./logger');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const config = require('config');
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
 
 const comfyuiAxios = axios.create({
-    baseURL: global.config.comfyui_url,
+    baseURL: config.comfyui_url,
     timeout: 10000,
     headers: {
         'User-Agent': `ComfyUIMini/${appVersion}`,
@@ -39,7 +40,7 @@ async function getImage(filename, subfolder, type) {
         if (err.code === 'ECONNREFUSED') {
             // Fallback if ComfyUI is unavailable
             if (type === 'output') {
-                const readFile = fs.readFileSync(path.join(global.config.output_dir, subfolder, filename));
+                const readFile = fs.readFileSync(path.join(config.output_dir, subfolder, filename));
 
                 return {
                     data: readFile,
@@ -109,7 +110,7 @@ function bufferIsText(buffer) {
 }
 
 async function generateImage(workflowPrompt, wsClient) {
-    const wsServer = new WebSocket(`${global.config.comfyui_ws_url}/ws?clientId=${clientId}`);
+    const wsServer = new WebSocket(`${config.comfyui_ws_url}/ws?clientId=${clientId}`);
 
     wsServer.on('open', async () => {
         try {
@@ -266,6 +267,8 @@ async function comfyUICheck() {
     let comfyUIVersion = null;
     let comfyUIVersionRequirement = false;
 
+    const minComfyUIVersion = config.developer.min_comfyui_version;
+
     try {
         await comfyuiAxios.get('/');
 
@@ -292,14 +295,14 @@ async function comfyUICheck() {
             comfyUIVersion = '>=0.2.0';
         }
 
-        comfyUIVersionRequirement = versionCheck(comfyUIVersion, global.minComfyUIVersion);
+        comfyUIVersionRequirement = versionCheck(comfyUIVersion, minComfyUIVersion);
     } catch (error) {
         logger.warn(`Could not check ComfyUI version: ${error}`);
     }
 
     if (!comfyUIVersionRequirement) {
         logger.warn(
-            `Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${global.minComfyUIVersion}). ComfyUIMini may not behave as exptected.`
+            `Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${minComfyUIVersion}). ComfyUIMini may not behave as exptected.`
         );
         return;
     }

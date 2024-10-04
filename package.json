@@ -17,6 +17,7 @@
     "license": "AGPL-3.0",
     "dependencies": {
         "axios": "^1.7.2",
+        "config": "^3.3.12",
         "cookie-parser": "^1.4.6",
         "ejs": "^3.1.10",
         "express": "^4.18.2",

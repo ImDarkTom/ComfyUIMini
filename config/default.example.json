@@ -4,10 +4,11 @@
     "comfyui_ws_url": "ws://127.0.0.1:8188",
     "optional_log": {
         "generation_finish": true,
-        "queue_image": false,
-        "cache": false
+        "queue_image": false
     },
-    "use_log_emojis": false,
     "auto_convert_comfyui_workflows": true,
-    "output_dir": "path/to/comfyui/output/folder"
+    "output_dir": "path/to/comfyui/output/folder",
+    "developer": {
+        "min_comfyui_version": "v0.2.2-50-7183fd1"
+    }
 }

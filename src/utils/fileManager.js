@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
+const config = require('config');
 
 function checkForWorkflowsFolder() {
     const workflowsFilepath = path.join(__dirname, '..', '..', 'workflows');
@@ -38,7 +39,7 @@ function loadServerWorkflowMetadata(workflowsFolder, jsonFileList) {
         const jsonMetadata = parsedJsonContents['_comfyuimini_meta'];
 
         if (!jsonMetadata) {
-            if (global.config.auto_convert_comfyui_workflows === false) {
+            if (config.auto_convert_comfyui_workflows === false) {
                 continue;
             }
 
@@ -71,7 +72,7 @@ function loadServerWorkflowMetadata(workflowsFolder, jsonFileList) {
 
     logger.info(`Found ${Object.keys(serverWorkflowMetadata).length} valid workflows in the workflow folder.`);
 
-    global.serverWorkflowMetadata = serverWorkflowMetadata;
+    config.serverWorkflowMetadata = serverWorkflowMetadata;
 }
 
 /**
@@ -276,10 +277,10 @@ function loadSelectOptions() {
 
     const modelSelects = loadModelTypes();
 
-    // Merge selectsFromFile into modelSelects, then set global var to that
+    // Merge selectsFromFile into modelSelects, then set config var to that
     Object.assign(modelSelects, selectsFromFile);
 
-    global.selectOptions = modelSelects;
+    config.selectOptions = modelSelects;
 }
 
 // Workflows
