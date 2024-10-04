@@ -1,6 +1,6 @@
 //@ts-check
 
-export class InputRenderer {
+export class WorkflowEditor {
     /**
      * 
      * @param {HTMLElement} containerElem The container element in which all of the inputs will be renderered.

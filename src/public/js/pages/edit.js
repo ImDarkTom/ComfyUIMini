@@ -1,6 +1,6 @@
 import { handleError } from "../common/errorHandler.js";
 import { getLocalWorkflow } from "../modules/getLocalWorkflow.js";
-import { InputRenderer } from "../modules/sharedWorkflowUtils.js";
+import { WorkflowEditor } from "../modules/sharedWorkflowUtils.js";
 
 const inputsContainer = document.querySelector('.inputs-container');
 const titleInput = document.getElementById('title-input');
@@ -13,24 +13,24 @@ const workflowFilename = document.body.getAttribute('data-workflow-filename') ||
 
 const saveButton = document.getElementById('save');
 
-const inputRenderer = new InputRenderer(inputsContainer, {}, titleInput, descriptionInput);
+const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
 
 function loadWorkflow() {
     try {
         if (workflowTextAttrib == "") {
-            inputRenderer.setWorkflowObject(getLocalWorkflow(workflowOriginalTitle));
+            workflowEditor.setWorkflowObject(getLocalWorkflow(workflowOriginalTitle));
         } else {
-            inputRenderer.setWorkflowObject(JSON.parse(workflowTextAttrib));
+            workflowEditor.setWorkflowObject(JSON.parse(workflowTextAttrib));
         }
     
-        inputRenderer.renderWorkflow();
+        workflowEditor.renderWorkflow();
     } catch (error) { 
         handleError(error);
     }
 }
 
 export async function saveWorkflow() {
-    const updatedWorkflowObject = inputRenderer.updateJsonWithUserInput();
+    const updatedWorkflowObject = workflowEditor.updateJsonWithUserInput();
 
     if (workflowType === "local") {
         const workflows = JSON.parse(localStorage.getItem("workflows")) || [];

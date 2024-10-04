@@ -1,4 +1,4 @@
-import { InputRenderer } from "../modules/sharedWorkflowUtils.js";
+import { WorkflowEditor } from "../modules/sharedWorkflowUtils.js";
 
 /**
  * 
@@ -26,7 +26,7 @@ const descriptionInput = getElementOrThrow('#description-input');
 const saveToBrowserButton = getElementOrThrow('#save-to-browser');
 const downloadWorkflowButton = getElementOrThrow('#download-workflow');
 
-const inputRenderer = new InputRenderer(inputsContainer, {}, titleInput, descriptionInput);
+const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
 
 workflowFileInput.addEventListener('change', () => {
     const file = workflowFileInput.files[0];
@@ -54,9 +54,9 @@ workflowFileInput.addEventListener('change', () => {
             return;
         }
 
-        inputRenderer.setWorkflowObject(importingWorkflowJson);
+        workflowEditor.setWorkflowObject(importingWorkflowJson);
         
-        inputRenderer.renderWorkflow();
+        workflowEditor.renderWorkflow();
     });
 });
 
@@ -69,7 +69,7 @@ saveToBrowserButton.addEventListener('click', () => {
         return alert("No file selected.")   
     }
 
-    const newJson = inputRenderer.updateJsonWithUserInput();
+    const newJson = workflowEditor.updateJsonWithUserInput();
 
     if (newJson == "") {
         return;
@@ -88,7 +88,7 @@ downloadWorkflowButton.addEventListener('click', () => {
         return alert("No file selected.")
     }
     
-    const newJson = inputRenderer.updateJsonWithUserInput();
+    const newJson = workflowEditor.updateJsonWithUserInput();
 
     if (newJson == "") {
         return;
