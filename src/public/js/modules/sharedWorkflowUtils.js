@@ -404,8 +404,9 @@ export class WorkflowEditor {
                 // @ts-ignore
                 const changedTo = e.target.value;
 
-                // @ts-ignore
-                const additionalInputOptionsContainer = e.target.parentNode.parentNode.querySelector('.additional-input-options');
+                const additionalInputOptionsContainer =
+                    // @ts-ignore
+                    e.target.parentNode.parentNode.querySelector('.additional-input-options');
 
                 additionalInputOptionsContainer.innerHTML = await this.renderAdditionalOptions({ type: changedTo });
             });
