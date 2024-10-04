@@ -9,7 +9,8 @@
     padding-left: 1rem;
 }
 
-.option-container select, input {
+.option-container select,
+input {
     background-color: var(--background-secondary-color);
     color: var(--text-primary-color);
     border: 0;

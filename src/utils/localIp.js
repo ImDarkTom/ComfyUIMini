@@ -3,9 +3,9 @@ const os = require('os');
 function getLocalIp() {
     function isVirtualNetwork(interfaceName) {
         const commonVirtualNetworkNames = ['vmnet', 'vboxnet', 'vethernet', 'virtualbox', 'vmware'];
-        return commonVirtualNetworkNames.some(virtualNet => interfaceName.toLowerCase().startsWith(virtualNet));
+        return commonVirtualNetworkNames.some((virtualNet) => interfaceName.toLowerCase().startsWith(virtualNet));
     }
-    
+
     const networkInterfaces = os.networkInterfaces();
     for (const interfaceName in networkInterfaces) {
         const addresses = networkInterfaces[interfaceName];

@@ -23,19 +23,6 @@
         "uni_pc",
         "uni_pc_bh2"
     ],
-    "scheduler": [
-        "normal",
-        "karras",
-        "exponential",
-        "sgm_uniform",
-        "simple",
-        "ddim_uniform"
-    ],
-    "upscale_method": [
-        "nearest-exact",
-        "bilinear",
-        "area",
-        "bicubic",
-        "lanczos"
-    ]
+    "scheduler": ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"],
+    "upscale_method": ["nearest-exact", "bilinear", "area", "bicubic", "lanczos"]
 }

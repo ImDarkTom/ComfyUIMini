@@ -12,23 +12,21 @@ const comfyuiAxios = axios.create({
     baseURL: global.config.comfyui_url,
     timeout: 10000,
     headers: {
-        'User-Agent': `ComfyUIMini/${appVersion}`
-    }
+        'User-Agent': `ComfyUIMini/${appVersion}`,
+    },
 });
 
-
 async function queuePrompt(workflowPrompt, clientId) {
-    const postContents = { 'prompt': workflowPrompt, client_id: clientId };
+    const postContents = { prompt: workflowPrompt, client_id: clientId };
 
     const response = await comfyuiAxios.post('/prompt', postContents, {
         headers: {
-            'Content-Type': 'application/json'
-        }
+            'Content-Type': 'application/json',
+        },
     });
 
     return response.data;
 }
-
 
 async function getImage(filename, subfolder, type) {
     const params = new URLSearchParams({ filename, subfolder, type });
@@ -38,18 +36,17 @@ async function getImage(filename, subfolder, type) {
 
         return response;
     } catch (err) {
-        if (err.code === "ECONNREFUSED") {
-
+        if (err.code === 'ECONNREFUSED') {
             // Fallback if ComfyUI is unavailable
-            if (type === "output") {
+            if (type === 'output') {
                 const readFile = fs.readFileSync(path.join(global.config.output_dir, subfolder, filename));
 
                 return {
                     data: readFile,
                     headers: {
                         'Content-Type': 'image/png',
-                        'Content-Length': readFile.length
-                    }
+                        'Content-Length': readFile.length,
+                    },
                 };
             }
         }
@@ -89,9 +86,11 @@ async function getOutputImages(promptId) {
     for (const nodeId in historyOutputs) {
         const nodeOutput = historyOutputs[nodeId];
         if (nodeOutput.images) {
-            const imageUrls = await Promise.all(nodeOutput.images.map(async (image) => {
-                return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
-            }));
+            const imageUrls = await Promise.all(
+                nodeOutput.images.map(async (image) => {
+                    return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
+                })
+            );
             outputImages[nodeId] = imageUrls;
         }
     }
@@ -117,39 +116,36 @@ async function generateImage(workflowPrompt, wsClient) {
             const promptData = await queuePrompt(workflowPrompt);
             const promptId = promptData.prompt_id;
 
-            logger.logOptional("queue_image", "Queued image.");
+            logger.logOptional('queue_image', 'Queued image.');
 
             const queueJson = await getQueue();
             let totalImages;
 
-            if (queueJson["queue_running"][0] === undefined) {
+            if (queueJson['queue_running'][0] === undefined) {
                 // Exact workflow was ran before and was cached by ComfyUI.
                 const cachedImages = await getOutputImages(promptId);
-                logger.logOptional("generation_finish", "Using cached generation result.");
+                logger.logOptional('generation_finish', 'Using cached generation result.');
 
                 wsClient.send(JSON.stringify({ type: 'completed', data: cachedImages }));
-                
             } else {
-                totalImages = queueJson["queue_running"][0][4].length;
+                totalImages = queueJson['queue_running'][0][4].length;
             }
 
-            wsClient.send(JSON.stringify({type: "total_images", data: totalImages}));
+            wsClient.send(JSON.stringify({ type: 'total_images', data: totalImages }));
 
             wsServer.on('message', async (data) => {
                 if (bufferIsText(data)) {
                     const message = JSON.parse(data.toString());
 
-                    if (message.type === "status") {
+                    if (message.type === 'status') {
                         if (message.data.status.exec_info.queue_remaining == 0) {
-                            logger.logOptional("generation_finish", "Image generation finished.");
+                            logger.logOptional('generation_finish', 'Image generation finished.');
                             wsServer.close();
                         }
-                    } else if (message.type === "progress") {
+                    } else if (message.type === 'progress') {
                         wsClient.send(JSON.stringify(message));
                     }
-                    
                 } else {
-
                     // Handle image buffers like ComfyUI client
                     const imageType = data.readUInt32BE(0);
                     let imageMime;
@@ -157,10 +153,10 @@ async function generateImage(workflowPrompt, wsClient) {
                     switch (imageType) {
                         case 1:
                         default:
-                            imageMime = 'image/jpeg'
-                            break
+                            imageMime = 'image/jpeg';
+                            break;
                         case 2:
-                            imageMime = 'image/png'
+                            imageMime = 'image/png';
                     }
 
                     const imageBlob = data.slice(8);
@@ -168,7 +164,7 @@ async function generateImage(workflowPrompt, wsClient) {
 
                     const jsonPayload = {
                         type: 'preview',
-                        data: { image: base64Image, mimetype: imageMime }
+                        data: { image: base64Image, mimetype: imageMime },
                     };
 
                     wsClient.send(JSON.stringify(jsonPayload));
@@ -181,56 +177,77 @@ async function generateImage(workflowPrompt, wsClient) {
                 wsClient.send(JSON.stringify({ type: 'completed', data: outputImages }));
             });
         } catch (error) {
-            if (error.code === "ERR_BAD_REQUEST") {
-                wsClient.send(JSON.stringify({ type: 'error', message: "Bad Request error when sending workflow request. This can happen if you have disabled extensions that are required to run the workflow." }));
+            if (error.code === 'ERR_BAD_REQUEST') {
+                wsClient.send(
+                    JSON.stringify({
+                        type: 'error',
+                        message:
+                            'Bad Request error when sending workflow request. This can happen if you have disabled extensions that are required to run the workflow.',
+                    })
+                );
                 return;
             }
 
-            console.error("Unknown error when generating image:", error);
-            wsClient.send(JSON.stringify({ type: 'error', message: "Unknown error when generating image. Check console for more information." }));
+            console.error('Unknown error when generating image:', error);
+            wsClient.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Unknown error when generating image. Check console for more information.',
+                })
+            );
         }
     });
 
     wsServer.on('error', (error) => {
-        if (error.code === "ECONNREFUSED") {
+        if (error.code === 'ECONNREFUSED') {
             logger.warn(`Could not connect to ComfyUI when attempting to generate image: ${error}`);
-            wsClient.send(JSON.stringify({ type: 'error', message: 'Could not connect to ComfyUI. Check console for more information.' }));
+            wsClient.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Could not connect to ComfyUI. Check console for more information.',
+                })
+            );
         } else {
-            console.error("WebSocket error when generating image:", error);
-            wsClient.send(JSON.stringify({ type: 'error', message: 'Unknown WebSocket error when generating image. Check console for more information.' }));
+            console.error('WebSocket error when generating image:', error);
+            wsClient.send(
+                JSON.stringify({
+                    type: 'error',
+                    message: 'Unknown WebSocket error when generating image. Check console for more information.',
+                })
+            );
         }
-    })
-
+    });
 }
 
 /**
  * Formats a ComfyUI version string to a semver-compatible version string.
- * 
- * The part after the first '-' indicates how many commits since the downloaded release, 
- * we can just use this as another part of the version as `major > minor > patch > commit` 
+ *
+ * The part after the first '-' indicates how many commits since the downloaded release,
+ * we can just use this as another part of the version as `major > minor > patch > commit`
  * in order to be able to check if a feature from a certain commit is available in ComfyUI.
- * 
+ *
  * E.g. `v0.2.2-84-gd1cdf51` becomes `0.2.2.84`.
- * 
+ *
  * @param {string} versionString The input ComfyUI version string.
  * @returns {string} The output semver-compatible version string.
  */
 function formatVersion(versionString) {
-    return versionString.replace('v', '')
+    return versionString
+        .replace('v', '')
         .replace(/-[a-z0-9]+$/, '')
         .replace(/-/g, '.');
 }
 
 /**
  * Compares a passed `comfyui_version` string with a requirement version string.
- * 
+ *
  * @param {string} version The string version for comfyui_version. E.g. `v0.2.2-84-gd1cdf51`
  * @param {string} versionRequirement The version to check against. Commit hash is not included in comparison. E.g. `0.2.2-49`
  * @returns {boolean} If the version is greater than or equal to the requirement version.
  */
 function versionCheck(version, versionRequirement) {
-    const versionSplit = formatVersion(version).split(".");
-    const versionRequirementSplit = formatVersion(versionRequirement).split(".");
+    const versionSplit = formatVersion(version).split('.');
+    const versionRequirementSplit = formatVersion(versionRequirement).split('.');
 
     for (const versionPart in versionSplit) {
         if (parseInt(versionSplit[versionPart]) > parseInt(versionRequirementSplit[versionPart])) {
@@ -256,8 +273,10 @@ async function comfyUICheck() {
     } catch (error) {
         const errorCode = error.code;
 
-        if (errorCode === "ECONNREFUSED") {
-            logger.warn(`Could not connect to ComfyUI, make sure it is running and accessible at the url in the config.json file.`);
+        if (errorCode === 'ECONNREFUSED') {
+            logger.warn(
+                `Could not connect to ComfyUI, make sure it is running and accessible at the url in the config.json file.`
+            );
             return;
         } else {
             logger.warn(`Unknown error when checking for ComfyUI: ${error}`);
@@ -270,7 +289,7 @@ async function comfyUICheck() {
         comfyUIVersion = infoRequest.data.system.comfyui_version;
 
         if (comfyUIVersion === undefined || comfyUIVersion === null) {
-            comfyUIVersion = ">=0.2.0";
+            comfyUIVersion = '>=0.2.0';
         }
 
         comfyUIVersionRequirement = versionCheck(comfyUIVersion, global.minComfyUIVersion);
@@ -279,7 +298,9 @@ async function comfyUICheck() {
     }
 
     if (!comfyUIVersionRequirement) {
-        logger.warn(`Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${global.minComfyUIVersion}). ComfyUIMini may not behave as exptected.`);
+        logger.warn(
+            `Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${global.minComfyUIVersion}). ComfyUIMini may not behave as exptected.`
+        );
         return;
     }
 
@@ -298,5 +319,5 @@ module.exports = {
     getHistory,
     comfyUICheck,
     interruptGeneration,
-    getImage
+    getImage,
 };

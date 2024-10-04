@@ -3,7 +3,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    padding-bottom: 5rem;  /* so navbar doesnt cut off bottom image */
+    padding-bottom: 5rem; /* so navbar doesnt cut off bottom image */
 }
 
 .image-item {
@@ -63,7 +63,7 @@
 #page-input {
     border: none;
     text-align: center;
-    width: 4rem;;
+    width: 4rem;
 }
 
 #subfolders-list {

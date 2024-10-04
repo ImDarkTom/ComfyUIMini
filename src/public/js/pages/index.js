@@ -3,18 +3,17 @@ function editWorkflow(type, title) {
 }
 
 function renameWorkflow(name) {
-    const workflowsList = JSON.parse(localStorage.getItem("workflows")) || [];
+    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
 
     const workflowNames = workflowsList.map((workflow) => {
-        return JSON.parse(workflow)["_comfyuimini_meta"].title;
+        return JSON.parse(workflow)['_comfyuimini_meta'].title;
     });
 
     if (!workflowNames.includes(name)) {
         return;
     }
 
-    
-    const newName = prompt("Rename workflow: ", name);
+    const newName = prompt('Rename workflow: ', name);
 
     if (!newName || newName == null || newName == undefined) {
         return;
@@ -24,9 +23,9 @@ function renameWorkflow(name) {
         return JSON.parse(workflow);
     });
 
-    const selectedWorkflow = workflowListJson.find(workflow => workflow["_comfyuimini_meta"].title === name);
+    const selectedWorkflow = workflowListJson.find((workflow) => workflow['_comfyuimini_meta'].title === name);
 
-    selectedWorkflow["_comfyuimini_meta"].title = newName;
+    selectedWorkflow['_comfyuimini_meta'].title = newName;
 
     const updatedWorkflowsList = workflowListJson.map((workflow) => {
         return JSON.stringify(workflow);
@@ -38,11 +37,11 @@ function renameWorkflow(name) {
 }
 
 function deleteWorkflow(name) {
-    const workflowsList = JSON.parse(localStorage.getItem("workflows")) || [];
+    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
 
-    const selectedWorkflowIndex = workflowsList.findIndex(workflowText => {
+    const selectedWorkflowIndex = workflowsList.findIndex((workflowText) => {
         const workflow = JSON.parse(workflowText);
-        return workflow["_comfyuimini_meta"].title === name;
+        return workflow['_comfyuimini_meta'].title === name;
     });
 
     if (selectedWorkflowIndex === -1) {
@@ -61,38 +60,38 @@ function deleteWorkflow(name) {
 function loadLocalWorkflows() {
     const workflowsGridElem = document.querySelector('.workflow-grid');
 
-    const workflowsList = JSON.parse(localStorage.getItem("workflows")) || [];
+    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
 
     for (const workflowText of workflowsList) {
         const workflowJson = JSON.parse(workflowText);
 
-        const title = workflowJson["_comfyuimini_meta"].title;
+        const title = workflowJson['_comfyuimini_meta'].title;
 
         const bottomSheetOptions = [
             {
-                icon: "🏷️",
-                text: "Rename",
+                icon: '🏷️',
+                text: 'Rename',
                 function: `renameWorkflow`,
-                functionParams: [title]
+                functionParams: [title],
             },
             {
-                icon: "✏",
-                text: "Edit",
-                function: "editWorkflow",
-                functionParams: ["local", title]
+                icon: '✏',
+                text: 'Edit',
+                function: 'editWorkflow',
+                functionParams: ['local', title],
             },
             {
-                icon: "💾",
-                text: "Download",
-                function: "downloadWorkflow",
-                functionParams: [title]
+                icon: '💾',
+                text: 'Download',
+                function: 'downloadWorkflow',
+                functionParams: [title],
             },
             {
-                icon: "❌",
-                text: "Delete workflow",
+                icon: '❌',
+                text: 'Delete workflow',
                 function: `deleteWorkflow`,
-                functionParams: [title]
-            }
+                functionParams: [title],
+            },
         ];
 
         const gridItemHtml = `
@@ -103,7 +102,7 @@ function loadLocalWorkflows() {
                 </div>
                 <div class="workflow-text-info">
                     <span class="workflow-title">${title}</span>
-                    <span class="workflow-description">${workflowJson["_comfyuimini_meta"].description}</span>
+                    <span class="workflow-description">${workflowJson['_comfyuimini_meta'].description}</span>
                 </div>
                 <span class="workflow-settings-icon icon settings" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'></span>
             </div>
@@ -119,15 +118,15 @@ function downloadWorkflow(workflowTitle) {
         const sanitized = filename
             .replace(/[/\\?%*:|"<>]/g, '_')
             .replace(/^\s+|\s+$/g, '')
-            .replace(/\s+/g, '_')
-    
+            .replace(/\s+/g, '_');
+
         return sanitized;
     }
-    
-    const workflowsList = JSON.parse(localStorage.getItem("workflows")) || [];
+
+    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
 
     const workflowNames = workflowsList.map((workflow) => {
-        return JSON.parse(workflow)["_comfyuimini_meta"].title;
+        return JSON.parse(workflow)['_comfyuimini_meta'].title;
     });
 
     if (!workflowNames.includes(workflowTitle)) {
@@ -138,17 +137,16 @@ function downloadWorkflow(workflowTitle) {
         return JSON.parse(workflow);
     });
 
-    const selectedWorkflow = workflowListJson.find(workflow => workflow["_comfyuimini_meta"].title === workflowTitle);
-    
+    const selectedWorkflow = workflowListJson.find((workflow) => workflow['_comfyuimini_meta'].title === workflowTitle);
+
     const workflowString = JSON.stringify(selectedWorkflow, null, 2);
 
-
-    const blob = new Blob([workflowString], {type: 'application/json'});
+    const blob = new Blob([workflowString], { type: 'application/json' });
 
     const link = document.createElement('a');
 
     link.href = URL.createObjectURL(blob);
-    link.download = `${sanitizeFilename(selectedWorkflow["_comfyuimini_meta"].title)}.json`;
+    link.download = `${sanitizeFilename(selectedWorkflow['_comfyuimini_meta'].title)}.json`;
 
     link.click();
 

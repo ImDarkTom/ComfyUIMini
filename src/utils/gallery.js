@@ -1,5 +1,5 @@
-const path = require("path");
-const fs = require("fs");
+const path = require('path');
+const fs = require('fs');
 
 function getRelativeTimeText(timestamp) {
     const now = Date.now();
@@ -40,7 +40,7 @@ function getRelativeTimeText(timestamp) {
  * @typedef {object} GalleryImageData
  * @property {string} path - The ComfyUIMini url path for the image file.
  * @property {number} time - Latest file modification time in ms since Unix epoch.
- * @property {string} timeText - Human-readable relative time since last image mofification, e.g. '2 hour(s) ago'. 
+ * @property {string} timeText - Human-readable relative time since last image mofification, e.g. '2 hour(s) ago'.
  */
 
 /**
@@ -57,39 +57,41 @@ function getRelativeTimeText(timestamp) {
 
 /**
  * Gets a list of images at the page.
- * 
+ *
  * Returns images in the range `(page * itemsPerPage)` to `(page * itemsPerPage) + itemsPerPage`
  * @param {number} page - Page number to retreive.
  * @param {string} subfolder - Subfolder within gallery directory.
  * @param {number} itemsPerPage - Images sent per page.
  * @returns {GalleryPageData} - Object containing paginated images and additional page info.
  */
-function getGalleryPageData(page = 0, subfolder = "", itemsPerPage = 20) {
+function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
     const imageOutputPath = global.config.output_dir;
 
     const targetPath = path.join(imageOutputPath, subfolder);
 
     if (!fs.existsSync(targetPath)) {
-        return { error: "Invalid subfolder path." };
+        return { error: 'Invalid subfolder path.' };
     }
 
     const files = fs.readdirSync(targetPath);
 
     const filteredFiles = files
-        .filter(file => {
+        .filter((file) => {
             const ext = path.extname(file).toLowerCase();
-            const isFileImage = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.tiff', '.webp'].includes(ext);
+            const isFileImage = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.tiff', '.webp'].includes(
+                ext
+            );
 
             return isFileImage;
         })
-        .map(file => {
+        .map((file) => {
             const mtime = fs.statSync(path.join(targetPath, file)).mtime.getTime();
 
             return {
                 path: `/comfyui/image?filename=${file}&subfolder=${subfolder}&type=output`,
                 time: mtime,
-                timeText: getRelativeTimeText(mtime)
-            }
+                timeText: getRelativeTimeText(mtime),
+            };
         })
         .sort((a, b) => b.time - a.time);
 
@@ -100,18 +102,21 @@ function getGalleryPageData(page = 0, subfolder = "", itemsPerPage = 20) {
 
     let subfolders;
     try {
-        subfolders = fs.readdirSync(imageOutputPath).filter(item =>
-            fs.statSync(path.join(imageOutputPath, item)).isDirectory()
-        );
+        subfolders = fs
+            .readdirSync(imageOutputPath)
+            .filter((item) => fs.statSync(path.join(imageOutputPath, item)).isDirectory());
     } catch (error) {
         subfolders = [];
     }
-    
+
     const totalPages = Math.floor(filteredFiles.length / itemsPerPage) - 1;
     const prevPage = page - 1 >= 0 ? page - 1 : 0;
     const nextPage = page + 1 <= totalPages ? page + 1 : totalPages;
 
-    return { scanned: { subfolders: subfolders, images: paginatedFiles }, pageInfo: { prevPage: prevPage, currentPage: page, nextPage: nextPage, totalPages: totalPages } };
+    return {
+        scanned: { subfolders: subfolders, images: paginatedFiles },
+        pageInfo: { prevPage: prevPage, currentPage: page, nextPage: nextPage, totalPages: totalPages },
+    };
 }
 
 module.exports = {

@@ -40,7 +40,7 @@ textarea.workflow-input {
     flex-direction: row;
 }
 
-.workflow-input.has-random-toggle{
+.workflow-input.has-random-toggle {
     /* styles for workflow-input if there is a randomise button */
     border-radius: 0.5rem 0 0 0.5rem;
 }

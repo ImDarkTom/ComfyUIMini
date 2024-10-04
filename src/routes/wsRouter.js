@@ -24,5 +24,5 @@ const handleUpgrade = (request, socket, head) => {
 
 module.exports = {
     wss,
-    handleUpgrade
+    handleUpgrade,
 };

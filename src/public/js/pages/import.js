@@ -1,7 +1,7 @@
-import { WorkflowEditor } from "../modules/sharedWorkflowUtils.js";
+import { WorkflowEditor } from '../modules/sharedWorkflowUtils.js';
 
 /**
- * 
+ *
  * @param {string} selector The CSS selector of the element to get.
  * @returns {HTMLInputElement|HTMLTextAreaElement} The element found by the selector.
  */
@@ -32,11 +32,11 @@ workflowFileInput.addEventListener('change', () => {
     const file = workflowFileInput.files[0];
 
     if (!file) {
-        return alert("No file selected.");
+        return alert('No file selected.');
     }
 
-    if (file.type != "application/json") {
-        return alert("Please select a valid JSON file.");
+    if (file.type != 'application/json') {
+        return alert('Please select a valid JSON file.');
     }
 
     workflowInputLabel.textContent = `Selected file: ${file.name}`;
@@ -50,12 +50,14 @@ workflowFileInput.addEventListener('change', () => {
         const importingWorkflowJson = JSON.parse(resultText);
 
         if (importingWorkflowJson.version !== undefined) {
-            openPopupWindow("<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>");
+            openPopupWindow(
+                "<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>"
+            );
             return;
         }
 
         workflowEditor.setWorkflowObject(importingWorkflowJson);
-        
+
         workflowEditor.renderWorkflow();
     });
 });
@@ -66,31 +68,31 @@ function isFileSelected() {
 
 saveToBrowserButton.addEventListener('click', () => {
     if (!isFileSelected()) {
-        return alert("No file selected.")   
+        return alert('No file selected.');
     }
 
     const newJson = workflowEditor.updateJsonWithUserInput();
 
-    if (newJson == "") {
+    if (newJson == '') {
         return;
     }
-    
-    const workflows = JSON.parse(localStorage.getItem("workflows")) || [];
-    workflows.push(JSON.stringify(newJson))
 
-    localStorage.setItem("workflows", JSON.stringify(workflows));
+    const workflows = JSON.parse(localStorage.getItem('workflows')) || [];
+    workflows.push(JSON.stringify(newJson));
 
-    location.href = "/";
+    localStorage.setItem('workflows', JSON.stringify(workflows));
+
+    location.href = '/';
 });
 
 downloadWorkflowButton.addEventListener('click', () => {
     if (!isFileSelected) {
-        return alert("No file selected.")
+        return alert('No file selected.');
     }
-    
+
     const newJson = workflowEditor.updateJsonWithUserInput();
 
-    if (newJson == "") {
+    if (newJson == '') {
         return;
     }
 

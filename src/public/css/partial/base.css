@@ -55,8 +55,9 @@ body {
 
 @font-face {
     font-family: 'Futura';
-    src: url('/fonts/Futura.woff') format('woff2'),
-         url('/fonts/Futura.woff2') format('woff');
+    src: 
+        url('/fonts/Futura.woff') format('woff2'),
+        url('/fonts/Futura.woff2') format('woff');
     font-weight: normal;
     font-style: normal;
 }

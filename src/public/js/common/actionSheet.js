@@ -16,18 +16,18 @@ function closeBottomSheet() {
 }
 
 /**
- * 
- * @param {Array<icon: string, text: string, function: string, functionParams>} entriesList 
+ *
+ * @param {Array<icon: string, text: string, function: string, functionParams>} entriesList
  */
 function loadBottomSheet(entriesList, event) {
     event.preventDefault();
 
-    bottomSheetEntriesList.innerHTML = "";
+    bottomSheetEntriesList.innerHTML = '';
     for (const entry of entriesList) {
-        const functionParamsString = entry.functionParams.map(param => JSON.stringify(param)).join(',');
+        const functionParamsString = entry.functionParams.map((param) => JSON.stringify(param)).join(',');
 
         const html = `
-        <div class="bottom-sheet-entry" onclick="${entry.function}(${functionParamsString.replace(/"/g, '\`')})">
+        <div class="bottom-sheet-entry" onclick="${entry.function}(${functionParamsString.replace(/"/g, '`')})">
             <span class="bottom-sheet-entry-icon">${entry.icon}</span>
             <span class="bottom-sheet-entry-text">${entry.text}</span>
         </div>

@@ -78,22 +78,22 @@
 }
 
 .header {
-	display: flex;
+    display: flex;
     position: relative;
-	flex-direction: row;
+    flex-direction: row;
     justify-content: left;
-	margin: 0.5rem 0.5rem 0 0.5rem;
-	box-sizing: border-box;
+    margin: 0.5rem 0.5rem 0 0.5rem;
+    box-sizing: border-box;
 }
 
 .header-icon {
     height: 3rem;
-	width: 3rem;
+    width: 3rem;
 }
 
 .version-text {
     color: var(--text-secondary-color);
     font-size: 1rem;
-	display: flex;
-	align-items: start;
+    display: flex;
+    align-items: start;
 }

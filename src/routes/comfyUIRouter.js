@@ -10,7 +10,7 @@ router.get('/history/:promptId', async (req, res) => {
     const promptId = req.params.promptId;
 
     if (!promptId) {
-        res.send("Prompt id cannot be undefined").status(400);
+        res.send('Prompt id cannot be undefined').status(400);
     }
 
     const promptHistory = getHistory();
@@ -20,7 +20,7 @@ router.get('/history/:promptId', async (req, res) => {
 
 router.get('/image', async (req, res) => {
     const queries = req.query;
-    
+
     const imageResponse = await getImage(queries.filename, queries.subfolder, queries.type);
 
     res.set('Content-Type', imageResponse.headers['content-type']);
@@ -40,7 +40,7 @@ router.get('/listmodels/:modelType', (req, res) => {
     const modelTypeInfo = global.selectOptions[modelType];
 
     if (!modelTypeInfo) {
-        res.send("Model config not found for " + modelType).status(400);
+        res.send('Model config not found for ' + modelType).status(400);
         return;
     }
 
@@ -50,10 +50,10 @@ router.get('/listmodels/:modelType', (req, res) => {
 router.post('/reloadmodels', (req, res) => {
     try {
         loadModelTypes();
-        res.send("Refreshed model list").status(200);
+        res.send('Refreshed model list').status(200);
     } catch (err) {
-        res.send("Internal Server Error").send(500);
-        console.error("Error when refreshing models list: ", err);
+        res.send('Internal Server Error').send(500);
+        console.error('Error when refreshing models list: ', err);
     }
 });
 

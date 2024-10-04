@@ -12,7 +12,11 @@ router.use(express.json());
 const appVersion = require('../../package.json').version;
 
 router.get('/', (req, res) => {
-    res.render('pages/index', { serverWorkflowMetadata: Object.values(global.serverWorkflowMetadata), appVersion: appVersion, theme: req.theme });
+    res.render('pages/index', {
+        serverWorkflowMetadata: Object.values(global.serverWorkflowMetadata),
+        appVersion: appVersion,
+        theme: req.theme,
+    });
 });
 
 router.get('/import', (req, res) => {
@@ -24,31 +28,39 @@ router.get('/edit/:type/:identifier', (req, res) => {
     const workflowIdentifier = req.params.identifier;
 
     switch (workflowType) {
-        case "local":
-            res.render('pages/edit', { workflowTitle: workflowIdentifier, workflowText: "", workflowType: "local", workflowFilename: "", theme: req.theme });
+        case 'local':
+            res.render('pages/edit', {
+                workflowTitle: workflowIdentifier,
+                workflowText: '',
+                workflowType: 'local',
+                workflowFilename: '',
+                theme: req.theme,
+            });
             break;
-        
-        case "server":
+
+        case 'server':
             const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
 
-            if (workflowFileJson === "invalid") {
-                res.status(400).send("Invalid workflow filename.");
+            if (workflowFileJson === 'invalid') {
+                res.status(400).send('Invalid workflow filename.');
                 break;
-            } else if (workflowFileJson === "error") {
-                res.status(500).send("Internal Server Error");
+            } else if (workflowFileJson === 'error') {
+                res.status(500).send('Internal Server Error');
                 break;
             }
 
-            const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
+            const workflowTitle = workflowFileJson['_comfyuimini_meta'].title;
 
-            res.render('pages/edit', { workflowTitle: workflowTitle, 
-                workflowText: JSON.stringify(workflowFileJson), 
-                workflowType: "server", 
-                workflowFilename: workflowIdentifier, 
-                theme: req.theme });
+            res.render('pages/edit', {
+                workflowTitle: workflowTitle,
+                workflowText: JSON.stringify(workflowFileJson),
+                workflowType: 'server',
+                workflowFilename: workflowIdentifier,
+                theme: req.theme,
+            });
             break;
         default:
-            res.status(400).send("Invalid workflow type");
+            res.status(400).send('Invalid workflow type');
             break;
     }
 });
@@ -60,9 +72,9 @@ router.put('/edit/:fileName', (req, res) => {
     const finishedSuccessfully = writeToWorkflowFile(workflowFilename, workflowJson);
 
     if (finishedSuccessfully) {
-        res.status(200).send("Successfully saved edited workflow.")
+        res.status(200).send('Successfully saved edited workflow.');
     } else {
-        res.status(500).send("Internal Server Error. Check logs for more info.");
+        res.status(500).send('Internal Server Error. Check logs for more info.');
     }
 });
 
@@ -71,58 +83,60 @@ router.get('/workflow/:type/:identifier', (req, res) => {
     const workflowIdentifier = req.params.identifier;
 
     switch (workflowType) {
-        case "local":
-            res.render('pages/workflow', { 
+        case 'local':
+            res.render('pages/workflow', {
                 workflow: {
-                    title: workflowIdentifier, 
-                    type: "local", 
+                    title: workflowIdentifier,
+                    type: 'local',
                     identifier: workflowIdentifier,
                     json: null,
                 },
-                theme: req.theme });
+                theme: req.theme,
+            });
             break;
 
-        case "server":
+        case 'server':
             const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
 
-            if (workflowFileJson === "invalid") {
-                res.status(400).send("Invalid workflow filename.");
+            if (workflowFileJson === 'invalid') {
+                res.status(400).send('Invalid workflow filename.');
                 break;
-            } else if (workflowFileJson === "error") {
-                res.status(500).send("Internal Server Error");
+            } else if (workflowFileJson === 'error') {
+                res.status(500).send('Internal Server Error');
                 break;
             }
 
-            const workflowTitle = workflowFileJson["_comfyuimini_meta"].title;
+            const workflowTitle = workflowFileJson['_comfyuimini_meta'].title;
 
-            res.render('pages/workflow', { 
+            res.render('pages/workflow', {
                 workflow: {
-                    title: workflowTitle, 
-                    type: "server", 
+                    title: workflowTitle,
+                    type: 'server',
                     identifier: workflowIdentifier,
-                    json: workflowFileJson
+                    json: workflowFileJson,
                 },
-                theme: req.theme });
+                theme: req.theme,
+            });
             break;
-        
+
         default:
-            res.status(400).send("Invalid workflow type");
+            res.status(400).send('Invalid workflow type');
             break;
     }
 });
 
 router.get('/gallery/:subfolder?', (req, res) => {
     const page = Number(req.query.page) || 0;
-    const subfolder = req.params.subfolder || "";
-    const itemsPerPage = Number(req.cookies["galleryItemsPerPage"]) || 20;
+    const subfolder = req.params.subfolder || '';
+    const itemsPerPage = Number(req.cookies['galleryItemsPerPage']) || 20;
 
     const pageData = getGalleryPageData(page, subfolder, itemsPerPage);
 
     if (pageData?.error) {
-        res.status(500).send("Internal Server Error");
+        res.status(500).send('Internal Server Error');
     }
 
-    res.render('pages/gallery', {theme: req.theme, ...pageData});
+    res.render('pages/gallery', { theme: req.theme, ...pageData });
 });
 
 router.get('/settings', (req, res) => {
