@@ -80,12 +80,12 @@ function getSelectOptionCategory(selectType) {
  * @returns {String[]} The list of items for the select type.
  */
 async function getItemsForSelectType(selectType) {
-    const selectOptionCategory = getSelectOptionCategory(selectType);
-
     // Backwards compatibility
     if (selectType == "checkpoint") {
         selectType = "checkpoints";
     }
+
+    const selectOptionCategory = getSelectOptionCategory(selectType);
 
     if (selectOptionCategory === "selects") {
         return selectOptionsObject[selectType];
