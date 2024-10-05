@@ -1,189 +1,216 @@
 {
-    "3": {
-        "inputs": {
-            "seed": 156680208700286,
-            "steps": 20,
-            "cfg": 8,
-            "sampler_name": "euler",
-            "scheduler": "normal",
-            "denoise": 1,
-            "model": ["4", 0],
-            "positive": ["6", 0],
-            "negative": ["7", 0],
-            "latent_image": ["5", 0]
-        },
-        "class_type": "KSampler",
-        "_meta": {
-            "title": "KSampler"
-        }
+  "3": {
+    "inputs": {
+      "seed": 156680208700286,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
     },
-    "4": {
-        "inputs": {
-            "ckpt_name": "v1-5-pruned.ckpt"
-        },
-        "class_type": "CheckpointLoaderSimple",
-        "_meta": {
-            "title": "Load Checkpoint"
-        }
-    },
-    "5": {
-        "inputs": {
-            "width": 512,
-            "height": 512,
-            "batch_size": 1
-        },
-        "class_type": "EmptyLatentImage",
-        "_meta": {
-            "title": "Empty Latent Image"
-        }
-    },
-    "6": {
-        "inputs": {
-            "text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
-            "clip": ["4", 1]
-        },
-        "class_type": "CLIPTextEncode",
-        "_meta": {
-            "title": "CLIP Text Encode (Prompt)"
-        }
-    },
-    "7": {
-        "inputs": {
-            "text": "text, watermark",
-            "clip": ["4", 1]
-        },
-        "class_type": "CLIPTextEncode",
-        "_meta": {
-            "title": "CLIP Text Encode (Prompt)"
-        }
-    },
-    "8": {
-        "inputs": {
-            "samples": ["3", 0],
-            "vae": ["4", 2]
-        },
-        "class_type": "VAEDecode",
-        "_meta": {
-            "title": "VAE Decode"
-        }
-    },
-    "9": {
-        "inputs": {
-            "filename_prefix": "ComfyUI",
-            "images": ["8", 0]
-        },
-        "class_type": "SaveImage",
-        "_meta": {
-            "title": "Save Image"
-        }
-    },
-    "_comfyuimini_meta": {
-        "title": "Default ComfyUI Workflow",
-        "description": "The default ComfyUI workflow for SD 1.5 models, imported through ComfyUIMini.",
-        "format_version": "1",
-        "input_options": [
-            {
-                "node_id": "3",
-                "input_name_in_node": "seed",
-                "title": "Seed",
-                "default": "156680208700286",
-                "type": "integer",
-                "show_randomise_toggle": true
-            },
-            {
-                "node_id": "3",
-                "input_name_in_node": "steps",
-                "title": "Steps",
-                "default": "20",
-                "type": "integer",
-                "min": "0",
-                "max": "100"
-            },
-            {
-                "node_id": "3",
-                "input_name_in_node": "cfg",
-                "title": "CFG Scale",
-                "default": "8",
-                "type": "float",
-                "min": "0",
-                "max": "15",
-                "step": "0.5"
-            },
-            {
-                "node_id": "3",
-                "input_name_in_node": "sampler_name",
-                "title": "Sampler Name",
-                "default": "euler",
-                "type": "select",
-                "select_list": "sampler"
-            },
-            {
-                "node_id": "3",
-                "input_name_in_node": "scheduler",
-                "title": "Scheduler",
-                "default": "normal",
-                "type": "select",
-                "select_list": "scheduler"
-            },
-            {
-                "node_id": "3",
-                "input_name_in_node": "denoise",
-                "disabled": true
-            },
-            {
-                "node_id": "4",
-                "input_name_in_node": "ckpt_name",
-                "title": "Checkpoint",
-                "default": "v1-5-pruned.ckpt",
-                "type": "select",
-                "select_list": "checkpoint"
-            },
-            {
-                "node_id": "5",
-                "input_name_in_node": "width",
-                "title": "Width",
-                "default": "512",
-                "type": "integer",
-                "min": "0",
-                "max": "1024"
-            },
-            {
-                "node_id": "5",
-                "input_name_in_node": "height",
-                "title": "Height",
-                "default": "512",
-                "type": "integer",
-                "min": "0",
-                "max": "1024"
-            },
-            {
-                "node_id": "5",
-                "input_name_in_node": "batch_size",
-                "title": "Batch Size",
-                "default": "1",
-                "type": "integer",
-                "min": "1",
-                "max": "20"
-            },
-            {
-                "node_id": "6",
-                "input_name_in_node": "text",
-                "title": "Prompt",
-                "default": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
-                "type": "text"
-            },
-            {
-                "node_id": "7",
-                "input_name_in_node": "text",
-                "title": "Negative Prompt",
-                "default": "text, watermark",
-                "type": "text"
-            },
-            {
-                "node_id": "9",
-                "input_name_in_node": "filename_prefix",
-                "disabled": true
-            }
-        ]
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
     }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "v1-5-pruned.ckpt"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "text, watermark",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "_comfyuimini_meta": {
+    "title": "Default ComfyUI Workflow",
+    "description": "The default ComfyUI workflow for SD 1.5 models, imported through ComfyUIMini.",
+    "format_version": "1",
+    "input_options": [
+      {
+        "node_id": "3",
+        "input_name_in_node": "seed",
+        "title": "Seed",
+        "default": "156680208700286",
+        "type": "integer",
+        "show_randomise_toggle": true
+      },
+      {
+        "node_id": "3",
+        "input_name_in_node": "steps",
+        "title": "Steps",
+        "default": "20",
+        "type": "integer",
+        "min": "0",
+        "max": "100"
+      },
+      {
+        "node_id": "3",
+        "input_name_in_node": "cfg",
+        "title": "CFG Scale",
+        "default": "8",
+        "type": "float",
+        "min": "0",
+        "max": "15",
+        "step": "0.5"
+      },
+      {
+        "node_id": "3",
+        "input_name_in_node": "sampler_name",
+        "title": "Sampler Name",
+        "default": "euler",
+        "type": "select",
+        "select_list": "sampler"
+      },
+      {
+        "node_id": "3",
+        "input_name_in_node": "scheduler",
+        "title": "Scheduler",
+        "default": "normal",
+        "type": "select",
+        "select_list": "scheduler"
+      },
+      {
+        "node_id": "3",
+        "input_name_in_node": "denoise",
+        "disabled": true
+      },
+      {
+        "node_id": "4",
+        "input_name_in_node": "ckpt_name",
+        "title": "Checkpoint",
+        "default": "v1-5-pruned.ckpt",
+        "type": "select",
+        "select_list": "checkpoints"
+      },
+      {
+        "node_id": "5",
+        "input_name_in_node": "width",
+        "title": "Width",
+        "default": "512",
+        "type": "integer",
+        "min": "0",
+        "max": "1024"
+      },
+      {
+        "node_id": "5",
+        "input_name_in_node": "height",
+        "title": "Height",
+        "default": "512",
+        "type": "integer",
+        "min": "0",
+        "max": "1024"
+      },
+      {
+        "node_id": "5",
+        "input_name_in_node": "batch_size",
+        "title": "Batch Size",
+        "default": "1",
+        "type": "integer",
+        "min": "1",
+        "max": "20"
+      },
+      {
+        "node_id": "6",
+        "input_name_in_node": "text",
+        "title": "Prompt",
+        "default": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+        "type": "text"
+      },
+      {
+        "node_id": "7",
+        "input_name_in_node": "text",
+        "title": "Negative Prompt",
+        "default": "text, watermark",
+        "type": "text"
+      },
+      {
+        "node_id": "9",
+        "input_name_in_node": "filename_prefix",
+        "disabled": true
+      }
+    ]
+  }
 }
