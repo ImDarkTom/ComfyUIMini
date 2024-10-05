@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const config = require('config');
+const { selectOptionsObject } = require('./selectOptionManager');
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
@@ -54,8 +55,69 @@ async function getImage(filename, subfolder, type) {
     }
 }
 
+/**
+ * Gets the category of a select type.
+ * 
+ * E.g. if selectType is "checkpoints", the category would be "models", 
+ * if selectType is "scheduler", the category would be "selects".
+ * @param {string} selectType The select type to get the category of.
+ * @returns {string} The category of the select type.
+ */
+function getSelectOptionCategory(selectType) {
+    const selectOptions = config.selectOptions;
+
+    for (const category in selectOptions) {
+        if (selectOptions[category].includes(selectType)) {
+            return category;
+        }
+    }
+}
+
+/**
+ * Get the list of items for a select type, this can be a list of models for a model type such as 'checkpoints', or a list of available samplers/schedulers/etc.
+ * 
+ * @param {string} selectType The select option type to get items for.
+ * @returns {String[]} The list of items for the select type.
+ */
+async function getItemsForSelectType(selectType) {
+    const selectOptionCategory = getSelectOptionCategory(selectType);
+
+    // Backwards compatibility
+    if (selectType == "checkpoint") {
+        selectType = "checkpoints";
+    }
+
+    if (selectOptionCategory === "selects") {
+        return selectOptionsObject[selectType];
+
+    } else if (selectOptionCategory === "models") {
+        return getItemsForModelType(selectType);
+
+    } else {
+        console.warn(`Unknown select option category '${selectOptionCategory}' for select type '${selectType}'.`);
+        return [];
+    }
+}
+
+/**
+ * Gets the list of available models.
+ * 
+ * @returns {Promise<string[]>} A promise that resolves to an array of strings representing the available models.
+ */
 async function getModelTypesList() {
     const response = await comfyuiAxios.get('/models');
+
+    return response.data;
+}
+
+/**
+ * Gets the list of available models for a specific model type.
+ * 
+ * @param {string} modelType The model type to get the list of available models for.
+ * @returns {Promise<string[]>} A promise that resolves to a list of strings representing the available models for the specified model type.
+ */
+async function getItemsForModelType(modelType) {
+    const response = await comfyuiAxios.get(`/models/${modelType}`);
 
     return response.data;
 }
@@ -323,4 +385,6 @@ module.exports = {
     comfyUICheck,
     interruptGeneration,
     getImage,
+    getModelTypesList,
+    getItemsForSelectType
 };

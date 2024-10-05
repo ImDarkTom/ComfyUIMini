@@ -229,9 +229,9 @@ export class WorkflowEditor {
                     <label for="${idPrefix}-default">Default value</label>
                     <input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
                     <div class="additional-input-options">${
-                        //@ts-ignore
-                        await this.renderAdditionalOptions(inputConfig)
-                    }</div>
+            //@ts-ignore
+            await this.renderAdditionalOptions(inputConfig)
+            }</div>
                 </div>
                 <div class="move-arrows-container">
                     <span class="move-arrow-up">&#x25B2;</span>
@@ -341,14 +341,16 @@ export class WorkflowEditor {
                 );
 
             case 'select':
-                const response = await fetch('/comfyui/modeltypes');
-                const modelTypesList = await response.json();
+                const response = await fetch('/comfyui/selectoptions');
+                const selectTypesList = await response.json();
+
+                const compiledSelectOptions = Object.values(selectTypesList).flat();
 
                 return this.createSelectInput(
                     'Model list',
                     'model-list-value',
                     'select_list',
-                    modelTypesList,
+                    compiledSelectOptions,
                     workflowInputConfig.select_list
                 );
 

@@ -1,7 +1,6 @@
 const express = require('express');
 const config = require('config');
-const { loadModelTypes } = require('../utils/fileManager');
-const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyUI');
+const { getHistory, getQueue, interruptGeneration, getImage, getItemsForSelectType } = require('../utils/comfyUI');
 
 const router = express.Router();
 
@@ -29,33 +28,21 @@ router.get('/image', async (req, res) => {
     res.send(imageResponse.data);
 });
 
-router.get('/modeltypes', (req, res) => {
-    const modelTypesList = Object.keys(config.selectOptions);
-
-    res.json(modelTypesList);
+router.get('/selectoptions', (req, res) => {
+    res.json(config.selectOptions);
 });
 
-router.get('/listmodels/:modelType', (req, res) => {
-    const modelType = req.params.modelType;
+router.get('/selectoption/:selectType', async (req, res) => {
+    const selectType = req.params.selectType;
 
-    const modelTypeInfo = config.selectOptions[modelType];
+    const selectTypeItems = await getItemsForSelectType(selectType);
 
-    if (!modelTypeInfo) {
-        res.send('Model config not found for ' + modelType).status(400);
+    if (selectTypeItems == []) {
+        res.send(`Select option ${selectType} is either invalid or empty.`).status(400);
         return;
     }
 
-    res.json(modelTypeInfo);
-});
-
-router.post('/reloadmodels', (req, res) => {
-    try {
-        loadModelTypes();
-        res.send('Refreshed model list').status(200);
-    } catch (err) {
-        res.send('Internal Server Error').send(500);
-        console.error('Error when refreshing models list: ', err);
-    }
+    res.json(selectTypeItems);
 });
 
 router.get('/queue', async (req, res) => {

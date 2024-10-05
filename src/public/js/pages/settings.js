@@ -1,13 +1,3 @@
-async function reloadModelsList() {
-    const response = await fetch('/comfyui/reloadmodels', {
-        method: 'POST',
-    });
-
-    const responseText = await response.text();
-
-    openPopupWindow(responseText);
-}
-
 async function changeTheme(selectElement) {
     const selectedTheme = selectElement.value;
 

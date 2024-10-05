@@ -1,3 +1,5 @@
 {
-    "ignore": ["model_dirs.json", "workflows/*"]
+    "ignore": [
+        "workflows/*"
+    ]
 }

@@ -8,7 +8,7 @@ const createInputContainer = (id, title, inputHtml) => `
 `;
 
 export async function renderSelectInput(inputOptions) {
-    const selectListResponse = await fetch(`/comfyui/listmodels/${inputOptions.select_list}`);
+    const selectListResponse = await fetch(`/comfyui/selectoption/${inputOptions.select_list}`);
     const selectListJson = await selectListResponse.json();
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;

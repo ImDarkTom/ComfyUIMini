@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
+const { getModelTypesList } = require('./comfyUI');
 const config = require('config');
 
 function checkForWorkflowsFolder() {
@@ -231,56 +232,14 @@ function recursiveFolderRead(folderPath, basePath, accepted_exts, fileList = [])
     return fileList;
 }
 
-function loadModelTypes() {
-    const modelDirsConfigPath = path.join(__dirname, '..', '..', 'model_dirs.json');
+async function loadSelectOptions() {
+    const selectsFromFileObject = require('../../selects.json');
+    const selectTypesFromFileList = Object.keys(selectsFromFileObject);
 
-    if (!fs.existsSync(modelDirsConfigPath)) {
-        fs.copyFileSync(path.join(__dirname, '..', '..', 'model_dirs.example.json'), modelDirsConfigPath);
-    }
+    const modelTypesList = await getModelTypesList();
 
-    // readFileSync is preferable here as require() wouldn't reflect changes during runtime (user changing model path)
-    const modelDirsConfigJson = JSON.parse(fs.readFileSync(modelDirsConfigPath));
-
-    if (!modelDirsConfigJson.checkpoint || modelDirsConfigJson.checkpoint.folder_path == 'path/to/checkpoints/folder') {
-        logger.warn('model_dirs.json not configured, you will be unable to select models until it is set.');
-        return {};
-    }
-
-    const models = {};
-
-    for (const [modelTypeName, modelTypeInfo] of Object.entries(modelDirsConfigJson)) {
-        try {
-            const fileList = recursiveFolderRead(
-                modelTypeInfo.folder_path,
-                modelTypeInfo.folder_path,
-                modelTypeInfo.filetypes
-            );
-
-            models[modelTypeName] = fileList;
-        } catch (err) {
-            if (err.code == 'ENOENT') {
-                logger.warn(`Invalid directory for ${modelTypeName} in model_dirs.json`);
-                continue;
-            }
-
-            console.err('Error when reading model_dirs.json: ', err);
-        }
-    }
-
-    logger.info(`Loaded ${Object.keys(models).length} model types.`);
-
-    return models;
-}
-
-function loadSelectOptions() {
-    const selectsFromFile = require('../../selects.json');
-
-    const modelSelects = loadModelTypes();
-
-    // Merge selectsFromFile into modelSelects, then set config var to that
-    Object.assign(modelSelects, selectsFromFile);
-
-    config.selectOptions = modelSelects;
+    const selectOptions = { selects: selectTypesFromFileList, models: modelTypesList };
+    config.selectOptions = selectOptions;
 }
 
 // Workflows
@@ -317,7 +276,6 @@ function writeToWorkflowFile(fileName, workflowJson) {
 module.exports = {
     checkForWorkflowsFolder,
     loadSelectOptions,
-    loadModelTypes,
     getWorkflowFromFile,
     writeToWorkflowFile,
     recursiveFolderRead,
