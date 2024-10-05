@@ -20,6 +20,7 @@
     border-radius: 0.5rem;
     height: var(--input-height);
     font-size: var(--input-font-size);
+    transition: background-color 0.25s ease;
 }
 
 .workflow-input:focus {
