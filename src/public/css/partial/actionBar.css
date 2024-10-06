@@ -45,6 +45,8 @@
     background: var(--accent-gradient);
     height: 22vw;
     width: 22vw;
+    max-width: 15vh;
+    max-height: 15vh;
     box-sizing: border-box;
     padding: 0.5rem;
     border-radius: 50%;
