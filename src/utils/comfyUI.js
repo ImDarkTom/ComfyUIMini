@@ -182,19 +182,18 @@ async function generateImage(workflowPrompt, wsClient) {
             logger.logOptional('queue_image', 'Queued image.');
 
             const queueJson = await getQueue();
-            let totalImages;
 
             if (queueJson['queue_running'][0] === undefined) {
                 // Exact workflow was ran before and was cached by ComfyUI.
                 const cachedImages = await getOutputImages(promptId);
                 logger.logOptional('generation_finish', 'Using cached generation result.');
 
+                wsClient.send(JSON.stringify({ type: 'total_images', data: Object.values(cachedImages).length }));
                 wsClient.send(JSON.stringify({ type: 'completed', data: cachedImages }));
-            } else {
-                totalImages = queueJson['queue_running'][0][4].length;
-            }
 
-            wsClient.send(JSON.stringify({ type: 'total_images', data: totalImages }));
+            } else {
+                wsClient.send(JSON.stringify({ type: 'total_images', data: queueJson['queue_running'][0][4].length }));
+            }
 
             wsServer.on('message', async (data) => {
                 if (bufferIsText(data)) {
