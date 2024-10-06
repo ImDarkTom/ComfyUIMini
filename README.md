@@ -1,23 +1,22 @@
 # ComfyUI Mini
 
-A mobile-friendly frontend to run ComfyUI workflows.
+A mobile-friendly WebUI to run ComfyUI workflows.
 
-![](https://repository-images.githubusercontent.com/681240572/8c2ca9fa-921d-4490-959d-669c543ace4c) \*_Not affiliated with ComfyUI or comfyanonymous_
-
-![](https://github.com/user-attachments/assets/f5356183-6f82-45ed-acab-82b015e22496)
+![](https://github.com/user-attachments/assets/78a52443-ac9c-498c-8df3-129acd94a48c)
 
 ## Features
 
--   Lightweight UI built for mobile devices
--   Save workflows locally on device or on your PC
--   Easy importing of workflows.
--   Generation progress info
+-   ⚡ Lightweight UI built for mobile devices
+-   💾 Workflows saved to device or PC
+-   ⏳ Progress info when generating images
+-   🤖 Automatic workflow importing
+-   🖼️ Gallery of all generated images
 
 ## Requirements
 
 #### For PC (Hosting WebUI):
 
--   **ComfyUI**: Ensure ComfyUI is installed and functional (reccomended Mar 13, 2023 release).
+-   **ComfyUI**: Ensure ComfyUI is installed and functional (minimum v0.2.2-50-7183fd1 / Sep. 18th release).
 -   **NodeJS**: Version _15.6.0_ or higher.
 -   **Package manager**: Perferrably NPM as Yarn has not been explicitly tested but should work nonetheless.
 
@@ -28,7 +27,7 @@ A mobile-friendly frontend to run ComfyUI workflows.
 
 ## Installation
 
-1. Clone github repo (or download latest release)
+1. Download latest release (more stable) or clone the repo (more up to date)
 
 ```bash
 git clone https://github.com/ImDarkTom/ComfyUIMini.git
@@ -55,9 +54,11 @@ yarn install
 node .
 ```
 
-You may change the ComfyUI url/port in the config.json folder as well as the port the app runs on.
+_Note: You may experience a crash on first launch, this should be gone after launching it again_
 
-After sucessfully running you should see text along the lines of `Running on http://<local-ip>:<port>` in the console, simply put the local address of your PC along with the port into the url bar of another device and you should be able to see the main page.
+You can change the ComfyUI url/port as well as the port the app runs on in the _/config/default.json_ file.
+
+After sucessfully running you should see text along the lines of `Running on http://<local-ip>:<port>` in the console, put this url into any device on your network and you should be able to access the UI.
 
 ## FAQ
 
