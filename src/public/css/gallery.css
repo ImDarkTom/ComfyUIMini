@@ -33,6 +33,15 @@
     bottom: 10vh;
     left: 0;
     z-index: 1;
+    transition: transform 0.3s ease-in-out;
+}
+
+.pagination-container.slide-down {
+    transform: translateY(100%);
+}
+
+.pagination-container.hidden {
+    display: none;
 }
 
 .pagination-controls {
