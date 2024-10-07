@@ -105,9 +105,14 @@ async function getItemsForSelectType(selectType) {
  * @returns {Promise<string[]>} A promise that resolves to an array of strings representing the available models.
  */
 async function getModelTypesList() {
-    const response = await comfyuiAxios.get('/models');
+    try {
+        const response = await comfyuiAxios.get('/models');
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        logger.warn('Could not get model types list from ComfyUI');
+        return [];
+    }
 }
 
 /**

@@ -1,6 +1,7 @@
 const express = require('express');
 const config = require('config');
 const { getHistory, getQueue, interruptGeneration, getImage, getItemsForSelectType } = require('../utils/comfyUI');
+const { loadSelectOptions } = require('../utils/fileManager');
 
 const router = express.Router();
 
@@ -28,7 +29,12 @@ router.get('/image', async (req, res) => {
     res.send(imageResponse.data);
 });
 
-router.get('/selectoptions', (req, res) => {
+router.get('/selectoptions', async (req, res) => {
+    if (config.selectOptions.models.length === 0) {
+        console.info('Reloading select options...')
+        await loadSelectOptions();
+    }
+
     res.json(config.selectOptions);
 });
 
