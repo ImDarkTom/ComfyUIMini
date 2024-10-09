@@ -3,8 +3,8 @@ const router = express.Router();
 const config = require('config');
 const cookieParser = require('cookie-parser');
 const themeMiddleware = require('../middleware/themeMiddleware');
-const { writeToWorkflowFile, getWorkflowFromFile } = require('../utils/fileManager');
-const { getGalleryPageData } = require('../utils/gallery');
+const { writeServerWorkflow, readServerWorkflow } = require('../utils/workflowUtils');
+const { getGalleryPageData } = require('../utils/galleryUtils');
 
 router.use(cookieParser());
 router.use(themeMiddleware);
@@ -40,7 +40,7 @@ router.get('/edit/:type/:identifier', (req, res) => {
             break;
 
         case 'server':
-            const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
+            const workflowFileJson = readServerWorkflow(workflowIdentifier);
 
             if (workflowFileJson === 'invalid') {
                 res.status(400).send('Invalid workflow filename.');
@@ -70,7 +70,7 @@ router.put('/edit/:fileName', (req, res) => {
     const workflowFilename = req.params.fileName;
     const workflowJson = req.body;
 
-    const finishedSuccessfully = writeToWorkflowFile(workflowFilename, workflowJson);
+    const finishedSuccessfully = writeServerWorkflow(workflowFilename, workflowJson);
 
     if (finishedSuccessfully) {
         res.status(200).send('Successfully saved edited workflow.');
@@ -97,7 +97,7 @@ router.get('/workflow/:type/:identifier', (req, res) => {
             break;
 
         case 'server':
-            const workflowFileJson = getWorkflowFromFile(workflowIdentifier);
+            const workflowFileJson = readServerWorkflow(workflowIdentifier);
 
             if (workflowFileJson === 'invalid') {
                 res.status(400).send('Invalid workflow filename.');

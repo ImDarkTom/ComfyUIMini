@@ -1,7 +1,7 @@
 const express = require('express');
 const config = require('config');
-const { getHistory, getQueue, interruptGeneration, getImage, getItemsForSelectType } = require('../utils/comfyUI');
-const { loadSelectOptions } = require('../utils/fileManager');
+const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyAPIUtils');
+const { getItemsForSelectType, loadSelectOptions } = require('../utils/selectOptionUtils');
 
 const router = express.Router();
 

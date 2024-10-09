@@ -26,12 +26,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 server.on('upgrade', handleUpgrade);
 
-const { checkForWorkflowsFolder, loadSelectOptions } = require('./utils/fileManager');
-const { comfyUICheck } = require('./utils/comfyUI');
+const { loadSelectOptions } = require('./utils/selectOptionUtils');
+const { comfyUICheck } = require('./utils/comfyAPIUtils');
+const { serverWorkflowsCheck } = require('./utils/workflowUtils');
 const getLocalIp = require('./utils/localIp');
 
 comfyUICheck();
-checkForWorkflowsFolder();
+serverWorkflowsCheck();
 loadSelectOptions();
 
 server.listen(config.get('app_port'), '0.0.0.0', () => {
