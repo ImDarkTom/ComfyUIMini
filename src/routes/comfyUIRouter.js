@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('config');
 const { getHistory, getQueue, interruptGeneration, getImage } = require('../utils/comfyAPIUtils');
 const { getItemsForSelectType, loadSelectOptions } = require('../utils/selectOptionUtils');
+const { inputsInfoObject } = require('../utils/objectInfoUtils');
 
 const router = express.Router();
 
@@ -61,6 +62,10 @@ router.get('/interrupt', async (req, res) => {
     const interruptionResponse = interruptGeneration();
 
     res.send(interruptionResponse.data);
+});
+
+router.get('/inputsinfo', (req, res) => {
+    res.json(inputsInfoObject);
 });
 
 module.exports = router;

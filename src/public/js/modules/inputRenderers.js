@@ -7,6 +7,7 @@ const createInputContainer = (id, title, inputHtml) => `
     </div>
 `;
 
+// { select_list, node_id, input_name_in_node, title }
 export async function renderSelectInput(inputOptions) {
     const selectListResponse = await fetch(`/comfyui/selectoption/${inputOptions.select_list}`);
     const selectListJson = await selectListResponse.json();
@@ -24,6 +25,7 @@ export async function renderSelectInput(inputOptions) {
     );
 }
 
+// { node_id, input_name_in_node, default, title }
 export function renderTextInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
@@ -34,6 +36,7 @@ export function renderTextInput(inputOptions) {
     );
 }
 
+// { node_id, input_name_in_node, show_randomise_toggle, title, defaultValue, step, min, max }
 export function renderNumberInput(inputOptions) {
     const hasRandomiseToggle =
         inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === 'on';

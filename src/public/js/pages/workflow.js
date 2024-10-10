@@ -1,6 +1,7 @@
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { inputRenderers } from '../modules/inputRenderers.js';
 import { handleError } from '../common/errorHandler.js';
+import { renderInput } from '../modules/workflowInputRenderer.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container');
@@ -20,8 +21,7 @@ const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
 async function loadWorkflow() {
-    const workflowInputs = workflowData.json['_comfyuimini_meta'].input_options;
-    await renderInputs(workflowInputs);
+    await renderInputs(workflowData);
 
     startEventListeners();
 }
@@ -34,23 +34,13 @@ async function fetchLocalWorkflow() {
     }
 }
 
-async function renderInputs(workflowInputs) {
-    const html = await Promise.all(workflowInputs.map(renderInput));
+async function renderInputs(workflowObject) {
+    const workflowEntries = Object.entries(workflowObject["json"]);
+    const html = await Promise.all(workflowEntries.map(renderInput));
     inputsContainer.innerHTML = html.join('');
 }
 
-async function renderInput(inputOptions) {
-    if (inputOptions.disabled) return '';
 
-    const renderer = inputRenderers[inputOptions.type];
-
-    if (renderer) {
-        return await renderer(inputOptions);
-    } else {
-        console.error(`Invalid input type: ${inputType}`);
-        return '';
-    }
-}
 
 function startEventListeners() {
     document.querySelector('.run-workflow').addEventListener('click', runWorkflow);
@@ -201,7 +191,7 @@ function updateProgressBars(messageData) {
 function updateImagePreview(messageData) {
     const currentSkeletonLoaderElem =
         outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[
-            totalImageCount - completedImageCount - 1
+        totalImageCount - completedImageCount - 1
         ];
 
     if (!currentSkeletonLoaderElem) {

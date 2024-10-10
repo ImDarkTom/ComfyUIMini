@@ -339,6 +339,12 @@ async function interruptGeneration() {
     return response.data;
 }
 
+async function getObjectInfo() {
+    const response = await comfyuiAxios.get('/api/object_info');
+
+    return response.data;
+}
+
 module.exports = {
     generateImage,
     getQueue,
@@ -347,5 +353,6 @@ module.exports = {
     interruptGeneration,
     getImage,
     getModelTypesList,
-    getItemsForModelType
+    getItemsForModelType,
+    getObjectInfo
 };
