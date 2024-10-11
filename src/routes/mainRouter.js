@@ -133,10 +133,6 @@ router.get('/gallery/:subfolder?', (req, res) => {
 
     const pageData = getGalleryPageData(page, subfolder, itemsPerPage);
 
-    if (pageData?.error) {
-        res.status(500).send('Internal Server Error');
-    }
-
     res.render('pages/gallery', { theme: req.theme, ...pageData });
 });
 

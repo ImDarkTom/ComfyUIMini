@@ -5,7 +5,11 @@
     <link rel="stylesheet" href="/css/gallery.css">
     <script src="/js/pages/gallery.js" type="module" defer></script>
 </head>
-<body>
+<body 
+<% if (error) { %>
+    data-error="<%= error %>"
+<% } %>
+>
     <div class="main-container">
         <div id="subfolders-list">
             <a href="/gallery" class="subfolder-link">(Default)</a>
