@@ -1,7 +1,6 @@
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
-import { inputRenderers } from '../modules/inputRenderers.js';
 import { handleError } from '../common/errorHandler.js';
-import { renderInput } from '../modules/workflowInputRenderer.js';
+import { renderNodeInputs } from '../modules/workflowInputRenderer.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container');
@@ -35,9 +34,12 @@ async function fetchLocalWorkflow() {
 }
 
 async function renderInputs(workflowObject) {
-    const workflowEntries = Object.entries(workflowObject["json"]);
-    const html = await Promise.all(workflowEntries.map(renderInput));
-    inputsContainer.innerHTML = html.join('');
+    const nodeInfoEntries = Object.entries(workflowObject['json']);
+    const inputsMetadata = workflowObject['json']['_comfyuimini_meta'].input_options;
+
+    for (const nodeInfo of nodeInfoEntries) {
+        renderNodeInputs(nodeInfo, inputsMetadata.filter(input => input.node_id == nodeInfo[0]));
+    }
 }
 
 

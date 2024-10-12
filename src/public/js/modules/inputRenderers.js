@@ -7,11 +7,16 @@ const createInputContainer = (id, title, inputHtml) => `
     </div>
 `;
 
-// { select_list, node_id, input_name_in_node, title }
-export async function renderSelectInput(inputOptions) {
-    const selectListResponse = await fetch(`/comfyui/selectoption/${inputOptions.select_list}`);
-    const selectListJson = await selectListResponse.json();
-
+/**
+ * 
+ * @param {Object} inputOptions Options for the select input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.title The title of the input.
+ * @param {string} inputOptions.data The list of options to select from.
+ * @returns {string}
+ */
+export function renderSelectInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
     const createSelectOptions = (options) => {
@@ -21,11 +26,19 @@ export async function renderSelectInput(inputOptions) {
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(selectListJson)}</select>`
+        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.data)}</select>`
     );
 }
 
-// { node_id, input_name_in_node, default, title }
+/**
+ * 
+ * @param {Object} inputOptions Options for the text input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.default The default value.
+ * @param {string} inputOptions.title The title of the input.
+ * @returns {string}
+ */
 export function renderTextInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
@@ -36,13 +49,24 @@ export function renderTextInput(inputOptions) {
     );
 }
 
-// { node_id, input_name_in_node, show_randomise_toggle, title, defaultValue, step, min, max }
+/**
+ * 
+ * @param {Object} inputOptions Options for the number input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.title The title of the input.
+ * @param {string} inputOptions.data.default The default value of the input.
+ * @param {number} inputOptions.data.step The step size of the input.
+ * @param {number} inputOptions.data.min The minimum value of the input.
+ * @param {number} inputOptions.data.max The maximum value of the input.
+ * @returns {string}
+ */
 export function renderNumberInput(inputOptions) {
     const hasRandomiseToggle =
         inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === 'on';
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
-    const { default: defaultValue, step, min, max } = inputOptions;
+    const { default: defaultValue, step, min, max } = inputOptions.data;
 
     const randomiseToggle = `
     <div class="randomise-buttons-container" data-linked-input-id="${id}">
@@ -70,8 +94,8 @@ export function renderNumberInput(inputOptions) {
 }
 
 export const inputRenderers = {
-    select: renderSelectInput,
-    text: renderTextInput,
-    integer: renderNumberInput,
-    float: renderNumberInput,
+    ARRAY: renderSelectInput,
+    STRING: renderTextInput,
+    INT: renderNumberInput,
+    FLOAT: renderNumberInput,
 };
