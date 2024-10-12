@@ -1,6 +1,6 @@
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { handleError } from '../common/errorHandler.js';
-import { renderNodeInputs } from '../modules/workflowInputRenderer.js';
+import { renderInputs } from '../modules/workflowInputRenderer.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container');
@@ -10,8 +10,9 @@ const currentImageProgressInnerElem = document.querySelector('.current-image-pro
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
-const workflowData = workflowDataFromEjs;
-workflowData['json'] = workflowData.json ? workflowData.json : await fetchLocalWorkflow();
+
+const workflowDataObject = workflowDataFromEjs;
+workflowDataObject['json'] = workflowDataObject.json ? workflowDataObject.json : await fetchLocalWorkflow();
 
 let totalImageCount = 0;
 let completedImageCount = 0;
@@ -19,29 +20,19 @@ let completedImageCount = 0;
 const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
-async function loadWorkflow() {
-    await renderInputs(workflowData);
+function loadWorkflow() {
+    renderInputs(workflowDataObject["json"]);
 
     startEventListeners();
 }
 
 async function fetchLocalWorkflow() {
     try {
-        return getLocalWorkflow(workflowData.identifier);
+        return getLocalWorkflow(workflowDataObject.identifier);
     } catch (error) {
         handleError(error);
     }
 }
-
-async function renderInputs(workflowObject) {
-    const nodeInfoEntries = Object.entries(workflowObject['json']);
-    const inputsMetadata = workflowObject['json']['_comfyuimini_meta'].input_options;
-
-    for (const nodeInfo of nodeInfoEntries) {
-        renderNodeInputs(nodeInfo, inputsMetadata.filter(input => input.node_id == nodeInfo[0]));
-    }
-}
-
 
 
 function startEventListeners() {
@@ -105,7 +96,7 @@ function setProgressBar(type, percentage) {
 }
 
 function fillWorkflowWithUserParams() {
-    const workflowModified = workflowData.json;
+    const workflowModified = workflowDataObject.json;
     // ComfyUI can't process the workflow if it contains the additional metadata.
     delete workflowModified['_comfyuimini_meta'];
 

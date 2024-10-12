@@ -13,20 +13,31 @@ const createInputContainer = (id, title, inputHtml) => `
  * @param {string} inputOptions.node_id The node id.
  * @param {string} inputOptions.input_name_in_node The name of the input in the node.
  * @param {string} inputOptions.title The title of the input.
- * @param {string} inputOptions.data The list of options to select from.
+ * @param {string} inputOptions.list The list of options to select from.
+ * @param {string} inputOptions.default The default selection option.
  * @returns {string}
  */
 export function renderSelectInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
     const createSelectOptions = (options) => {
-        return options.map((item) => `<option value="${item}">${item}</option>`).join('');
+        let optionsHtml = '';
+
+        if (!options.includes(inputOptions.default)) {
+            optionsHtml += `<option value="" disabled selected>Couldn't find '${inputOptions.default}'</option>`;
+        }
+
+        optionsHtml += options.map((item) =>
+            `<option value="${item}" ${inputOptions.default == item ? "selected" : ""} >${item}</option>`
+        ).join('');
+
+        return optionsHtml;
     };
 
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.data)}</select>`
+        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.list)}</select>`
     );
 }
 
@@ -55,10 +66,11 @@ export function renderTextInput(inputOptions) {
  * @param {string} inputOptions.node_id The node id.
  * @param {string} inputOptions.input_name_in_node The name of the input in the node.
  * @param {string} inputOptions.title The title of the input.
- * @param {string} inputOptions.data.default The default value of the input.
- * @param {number} inputOptions.data.step The step size of the input.
- * @param {number} inputOptions.data.min The minimum value of the input.
- * @param {number} inputOptions.data.max The maximum value of the input.
+ * @param {string} inputOptions.default The default value of the input.
+ * @param {number} inputOptions.step The step size of the input.
+ * @param {number} inputOptions.min The minimum value of the input.
+ * @param {number} inputOptions.max The maximum value of the input.
+ * @param {boolean} inputOptions.show_randomise_toggle Whether the input is disabled.
  * @returns {string}
  */
 export function renderNumberInput(inputOptions) {
@@ -66,7 +78,7 @@ export function renderNumberInput(inputOptions) {
         inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === 'on';
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
-    const { default: defaultValue, step, min, max } = inputOptions.data;
+    const { default: defaultValue, step, min, max } = inputOptions;
 
     const randomiseToggle = `
     <div class="randomise-buttons-container" data-linked-input-id="${id}">

@@ -2,63 +2,64 @@ import { inputRenderers } from './inputRenderers.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 
-/**
- * @typedef {Object} InputOptions
- * @property {}
- */
 const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
 const inputsInfoObject = await inputsInfoResponse.json();
 
 /**
- * Render an input
  * 
- * @param {} nodeObject 
+ * @param {Object} workflowObject The workflow object to render inputs for.
  */
-export function renderNodeInputs(nodeObject, nodeMetadata) {
-    const [nodeId, nodeInfo] = nodeObject;
+export function renderInputs(workflowObject) {
+    const inputsMetadata = workflowObject['_comfyuimini_meta'].input_options;
 
-    if (nodeId.startsWith('_')) {
-        return;
+    const transformedNodeList = Object.entries(workflowObject)
+        .filter(([id]) => !id.startsWith('_'))
+        .map(([id, value]) => {
+            return { id, ...value };
+        });
+
+    for (const nodeInfo of transformedNodeList) {
+        const nodeInputsMetadata = inputsMetadata.filter(inputMetadata => inputMetadata.node_id === nodeInfo.id);
+
+        renderNodeInputs(nodeInfo, nodeInputsMetadata);
     }
+}
 
-    const inputInfo = inputsInfoObject[nodeInfo.class_type];
+function renderNodeInputs(nodeObject, nodeInputsMetadata) {
+    const inputInfo = inputsInfoObject[nodeObject.class_type];
 
     if (inputInfo == undefined) {
         return;
     }
 
-    for (const [inputName, inputDefaultValue] of Object.entries(nodeInfo.inputs)) {
-        const inputOptions = inputInfo[inputName];
+    for (const [inputName, inputDefaultFromWorkflow] of Object.entries(nodeObject.inputs)) {
+        const inputOptionsFromComfyUI = inputInfo[inputName];
 
-        if (inputOptions == undefined) {
+        if (inputOptionsFromComfyUI == undefined) {
             continue;
         }
 
-        const inputMetadata = nodeMetadata.find((item) => item.input_name_in_node === inputName);
+        const inputMetadata = nodeInputsMetadata.find((input) => input.input_name_in_node === inputName);
 
         if (inputMetadata.disabled) {
             continue;
         }
 
-        const renderer = inputRenderers[inputOptions.type];
+        const renderer = inputRenderers[inputOptionsFromComfyUI.type];
 
-        if (renderer) {
-            const inputHtml = renderer({...inputOptions, ...inputMetadata});
-            inputsContainer.innerHTML += inputHtml;
+        if (!renderer) {
+            throw new Error(`No renderer found for input type ${inputOptionsFromComfyUI.type}`);
         }
+
+        let dataForRenderer = inputMetadata;
+        if (inputOptionsFromComfyUI.type === "ARRAY") {
+            dataForRenderer.list = inputOptionsFromComfyUI.data;
+        } else {
+            dataForRenderer = { ...dataForRenderer, ...inputOptionsFromComfyUI.data };
+        }
+        dataForRenderer.default = inputDefaultFromWorkflow;
+
+        const inputHtml = renderer(dataForRenderer);
+        inputsContainer.innerHTML += inputHtml;
     }
 }
-
-
-// async function renderInput(inputOptions) {
-//     if (inputOptions.disabled) return '';
-
-//     const renderer = inputRenderers[inputOptions.type];
-
-//     if (renderer) {
-//         return await renderer(inputOptions);
-//     } else {
-//         console.error(`Invalid input type: ${inputType}`);
-//         return '';
-//     }
-// }
