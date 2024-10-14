@@ -1,6 +1,6 @@
 import { handleError } from '../common/errorHandler.js';
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
-import { WorkflowEditor } from '../modules/sharedWorkflowUtils.js';
+import { WorkflowEditor } from '../modules/workflowEditor.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const titleInput = document.getElementById('title-input');
