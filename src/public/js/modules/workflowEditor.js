@@ -14,6 +14,7 @@ export class WorkflowEditor {
         this.titleInput = titleInput;
         this.descriptionInput = descriptionInput;
         this.inputCount = 0;
+        this.comfyInputsInfo = null;
     }
 
     /**
@@ -80,9 +81,29 @@ export class WorkflowEditor {
             }
 
             const inputConfig = this.getInputOptionConfig(nodeId, inputName);
-            const renderConfig = this.buildRenderConfig(inputConfig, inputValue, nodeId, inputName);
+            const renderConfig = await this.buildRenderConfig(inputConfig, inputValue, nodeId, inputName);
 
             await this.renderInput(renderConfig);
+        }
+    }
+
+    async getComfyMetadataForInputType(inputType, nodeId) {
+        if (!this.comfyInputsInfo) {
+            const comfyObjectMetadata = await fetch('/comfyui/inputsinfo');
+            const comfyObjectMetadataJson = await comfyObjectMetadata.json();
+
+            this.comfyInputsInfo = comfyObjectMetadataJson;
+        }
+
+
+        const nodeClassType = this.workflowObject[nodeId].class_type;
+
+        const comfyInputTypeInfo = this.comfyInputsInfo[nodeClassType][inputType];
+
+        if (comfyInputTypeInfo) {
+            return {classType: nodeClassType, ...comfyInputTypeInfo};
+        } else {
+            return null;
         }
     }
 
@@ -93,38 +114,20 @@ export class WorkflowEditor {
      * @param {string} defaultValue The default value of the input.
      * @param {string} nodeId The ID of the node in the workflow.
      * @param {string} inputName The name of the input in the node.
-     * @returns {InputConfig} A config object to pass to renderInput.
+     * @returns {Promise<InputConfig>} A config object to pass to renderInput.
      */
-    buildRenderConfig(inputConfig, defaultValue, nodeId, inputName) {
-        const predictedTypes = {
-            seed: 'integer',
-            steps: 'integer',
-            cfg: 'float',
-            sampler_name: 'select',
-            scheduler: 'select',
-            denoise: 'float',
-            ckpt_name: 'select',
-            width: 'integer',
-            height: 'integer',
-            batch_size: 'integer',
-            text: 'text',
-            filename_prefix: 'text',
-            vae_name: 'select',
-        };
+    async buildRenderConfig(inputConfig, defaultValue, nodeId, inputName) {
+        const comfyMetadataForInput = await this.getComfyMetadataForInputType(inputName, nodeId);
 
         const generatedConfig = {
             nodeId: nodeId,
             inputName: inputName,
             title: inputName,
-            type: null,
+            comfyMetadata: comfyMetadataForInput,
             default: defaultValue,
             disabled: false,
             ...inputConfig,
         };
-
-        if (!generatedConfig.type) {
-            generatedConfig.type = predictedTypes[inputName] || '';
-        }
 
         return generatedConfig;
     }
@@ -172,29 +175,11 @@ export class WorkflowEditor {
      * The minimum config required to render an input.
      *
      * @property {string} nodeId The ID of the node in the workflow.
+     * @property {object} comfyMetadata Input metadata from ComfyUI.
      * @property {string} inputName The name of the input in the node.
      * @property {string} title The title of the input.
-     * @property {string} type The type of the input.
      * @property {string} default The default value of the input.
      * @property {boolean} disabled Whether the input is disabled.
-     */
-
-    /**
-     * @typedef {object} ExpandedInputConfig
-     * Any additional properties that may come with an input config.
-     *
-     * @property {string} nodeId The ID of the node in the workflow.
-     * @property {string} inputName The name of the input in the node.
-     * @property {string} title The title of the input.
-     * @property {string} type The type of the input.
-     * @property {string} default The default value of the input.
-     * @property {boolean} disabled Whether the input is disabled.
-     *
-     * @property {boolean} show_randomise_toggle Whether to show the randomise toggle for the input.
-     * @property {string} select_list The name of the list to get select options from.
-     * @property {number} min The minimum value for the input.
-     * @property {number} max The maximum value for the input.
-     * @property {number} step The step value for the input.
      */
 
     /**
@@ -205,11 +190,15 @@ export class WorkflowEditor {
     async renderInput(inputConfig) {
         this.inputCount += 1;
 
+        console.log(inputConfig);
+
         const nodeId = inputConfig.nodeId;
         const inputNameInNode = inputConfig.inputName;
         const inputTitle = inputConfig.title;
-        const inputType = inputConfig.type || '';
         const inputDefault = inputConfig.default || '';
+
+        const inputType = inputConfig.comfyMetadata.type;
+        const inputNodeClass = inputConfig.comfyMetadata.nodeClassType;
 
         const idPrefix = `${nodeId}-${inputNameInNode}`;
 
@@ -219,19 +208,13 @@ export class WorkflowEditor {
                     <div class="input-top-container">
                         <span class="input-counter">${this.inputCount}.</span>
                         <div class="icon eye hide-input-button" id="hide-button-${idPrefix}"></div>
-                        <select class="input-type-select">
-                            <option value="" disabled ${inputType === '' ? 'selected' : ''}>(Choose input type)</option>
-                            ${this.generateInputOptions(inputType)}
-                        </select>
+                        <span class="input-type-text">[${nodeId}] ${inputNodeClass}: ${inputNameInNode}</span>
                     </div>
                     <label for="${idPrefix}-title">Title</label>
                     <input type="text" id="${idPrefix}-title" placeholder="${inputTitle}" value="${inputTitle}" class="workflow-input workflow-input-title">
                     <label for="${idPrefix}-default">Default value</label>
                     <input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
-                    <div class="additional-input-options">${
-            //@ts-ignore
-            await this.renderAdditionalOptions(inputConfig)
-            }</div>
+                    ${this.loadAdditionalOptionsForType(inputType)}
                 </div>
                 <div class="move-arrows-container">
                     <span class="move-arrow-up">&#x25B2;</span>
@@ -253,109 +236,17 @@ export class WorkflowEditor {
         }
     }
 
-    /**
-     * Renders a number input in the additional input options.
-     *
-     * @param {string} label The label for the additional input option.
-     * @param {string} id The ID of the additional input option.
-     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `min, max, step`
-     * @param {number|null} defaultValue The default value for the additional input option.
-     * @returns {string} The HTML for the number input.
-     */
-    createNumberInput(label, id, key, defaultValue = null) {
-        return `
-        <div class="additional-option-wrapper">
-            <label for="${id}">${label}</label>
-            <input type="number" id="${id}" data-key="${key}" class="additional-input-option" value="${defaultValue}">
-        </div>
-        `;
-    }
-
-    /**
-     * Renders a checkbox input in the additional input options.
-     *
-     * @param {string} label The label for the additional input option.
-     * @param {string} id The ID of the additional input option.
-     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `show_randomise_toggle`
-     * @param {boolean} checked If the checkbox should be checked or not when rendered.
-     * @returns {string} The HTML for the checkbox input.
-     */
-    createCheckboxInput(label, id, key, checked = false) {
-        return `
-        <div class="additional-option-wrapper">
-            <label for="${id}">${label}</label>
-            <input type="checkbox" id="${id}" data-key="${key}" class="additional-input-option" ${checked ? 'checked' : ''}> 
-        </div>
-        `;
-    }
-
-    /**
-     * Renders a select input in the additional input options.
-     *
-     * @param {string} label The label for the additional input option.
-     * @param {string} id The ID of the additional input option.
-     * @param {string} key The key to save the additional input option as when the workflow is being exported. e.g. `select_list`
-     * @param {string[]} options The list of options to select from.
-     * @param {string} selected The default selected option.
-     * @returns {string} The HTML for the select input.
-     */
-    createSelectInput(label, id, key, options, selected = '') {
-        return `
-        <div class="additional-option-wrapper">
-            <label for="${id}">${label}</label>
-            <select id="${id}" data-key="${key}" class="additional-input-option">
-                ${options.map((option) => `<option value="${option}" ${option === selected ? 'selected' : ''}>${option}</option>`).join('')}
-            </select>
-        </div>
-
-        `;
-    }
-
-    /**
-     *
-     * @param {ExpandedInputConfig|object} workflowInputConfig
-     * @returns
-     */
-    async renderAdditionalOptions(workflowInputConfig) {
-        switch (workflowInputConfig.type) {
-            case 'text':
-                return '';
-
-            case 'integer':
-                return (
-                    this.createNumberInput('Min', 'min-value', 'min', workflowInputConfig.min) +
-                    this.createNumberInput('Max', 'max-value', 'max', workflowInputConfig.max) +
-                    this.createCheckboxInput(
-                        'Show randomise toggle?',
-                        'show-random-toggle-value',
-                        'show_randomise_toggle',
-                        workflowInputConfig.show_randomise_toggle
-                    )
-                );
-
-            case 'float':
-                return (
-                    this.createNumberInput('Min', 'min-value', 'min', workflowInputConfig.min) +
-                    this.createNumberInput('Max', 'max-value', 'max', workflowInputConfig.max) +
-                    this.createNumberInput('Step', 'step-value', 'step', workflowInputConfig.step)
-                );
-
-            case 'select':
-                const response = await fetch('/comfyui/selectoptions');
-                const selectTypesList = await response.json();
-
-                const compiledSelectOptions = Object.values(selectTypesList).flat();
-
-                return this.createSelectInput(
-                    'Model list',
-                    'model-list-value',
-                    'select_list',
-                    compiledSelectOptions,
-                    workflowInputConfig.select_list
-                );
-
-            default:
-                return '';
+    loadAdditionalOptionsForType(inputType) {
+        switch (inputType) {
+            case "INT":
+            case "FLOAT": {
+                return `
+                    <div class="additional-option-wrapper">
+                        <label for="TEMP">Show randomise toggle?</label>
+                        <input type="checkbox" id="TEMP" data-key="show_randomise_toggle" class="additional-input-option" ${checked ? 'checked' : ''}> 
+                    </div>
+                `;
+            }
         }
     }
 
