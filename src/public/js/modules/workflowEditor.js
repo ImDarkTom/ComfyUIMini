@@ -87,6 +87,13 @@ export class WorkflowEditor {
         }
     }
 
+    /**
+     * Gets the `/objectinfo` metadata for a given input id and node id.
+     * 
+     * @param {string} inputType The type of input in the node. e.g. `seed`, `scheduler`, `ckpt_name`.
+     * @param {string} nodeId The ID of the node in the workflow.
+     * @returns {Promise<object>} The metadata for the input type.
+     */
     async getComfyMetadataForInputType(inputType, nodeId) {
         if (!this.comfyInputsInfo) {
             const comfyObjectMetadata = await fetch('/comfyui/inputsinfo');
@@ -101,7 +108,7 @@ export class WorkflowEditor {
         const comfyInputTypeInfo = this.comfyInputsInfo[nodeClassType][inputType];
 
         if (comfyInputTypeInfo) {
-            return {classType: nodeClassType, ...comfyInputTypeInfo};
+            return { classType: nodeClassType, ...comfyInputTypeInfo };
         } else {
             return null;
         }
@@ -190,15 +197,12 @@ export class WorkflowEditor {
     async renderInput(inputConfig) {
         this.inputCount += 1;
 
-        console.log(inputConfig);
-
         const nodeId = inputConfig.nodeId;
         const inputNameInNode = inputConfig.inputName;
         const inputTitle = inputConfig.title;
         const inputDefault = inputConfig.default || '';
 
-        const inputType = inputConfig.comfyMetadata.type;
-        const inputNodeClass = inputConfig.comfyMetadata.nodeClassType;
+        const inputNodeClass = inputConfig.comfyMetadata.classType;
 
         const idPrefix = `${nodeId}-${inputNameInNode}`;
 
@@ -214,7 +218,7 @@ export class WorkflowEditor {
                     <input type="text" id="${idPrefix}-title" placeholder="${inputTitle}" value="${inputTitle}" class="workflow-input workflow-input-title">
                     <label for="${idPrefix}-default">Default value</label>
                     <input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
-                    ${this.loadAdditionalOptionsForType(inputType)}
+                    ${this.loadAdditionalOptionsForType(inputConfig, idPrefix)}
                 </div>
                 <div class="move-arrows-container">
                     <span class="move-arrow-up">&#x25B2;</span>
@@ -236,16 +240,23 @@ export class WorkflowEditor {
         }
     }
 
-    loadAdditionalOptionsForType(inputType) {
+    loadAdditionalOptionsForType(inputConfig, idPrefix) {
+        const inputType = inputConfig.comfyMetadata.type;
+
         switch (inputType) {
             case "INT":
             case "FLOAT": {
                 return `
                     <div class="additional-option-wrapper">
-                        <label for="TEMP">Show randomise toggle?</label>
-                        <input type="checkbox" id="TEMP" data-key="show_randomise_toggle" class="additional-input-option" ${checked ? 'checked' : ''}> 
+                        <input type="checkbox" id="${idPrefix}-randomise-toggle" data-key="show_randomise_toggle" class="additional-input-option" ${inputConfig.show_randomise_toggle ? 'checked' : ''}>
+                        <label for="${idPrefix}-randomise-toggle">Show randomise toggle?</label>
                     </div>
                 `;
+            }
+            case "STRING":
+            case "ARRAY":
+            default: {
+                return ``;
             }
         }
     }
@@ -292,21 +303,6 @@ export class WorkflowEditor {
     }
 
     startInputEventListeners() {
-        document.querySelectorAll('.input-type-select').forEach((selectInput) => {
-            selectInput.addEventListener('change', async (e) => {
-                // @ts-ignore
-                const changedTo = e.target.value;
-
-                // @ts-ignore
-                const additionalInputOptionsContainer = e.target
-                    // @ts-ignore
-                    .closest('.options-container')
-                    .querySelector('.additional-input-options');
-
-                additionalInputOptionsContainer.innerHTML = await this.renderAdditionalOptions({ type: changedTo });
-            });
-        });
-
         this.containerElem.addEventListener('click', (e) => {
             // @ts-ignore
             const targetHasClass = (/** @type {string} */ className) => e.target.classList.contains(className);
@@ -332,11 +328,19 @@ export class WorkflowEditor {
     updateJsonWithUserInput() {
         const inputOptionsList = [];
 
-        const allInputs = this.containerElem.querySelectorAll('.input-item');
+        const modifiedWorkflow = this.workflowObject;
 
+        const allInputs = this.containerElem.querySelectorAll('.input-item');
         for (const inputContainer of allInputs) {
             const inputNodeId = inputContainer.getAttribute('data-node-id');
+            if (!inputNodeId) {
+                continue;
+            }
+
             const inputNameInNode = inputContainer.getAttribute('data-node-input-name');
+            if (!inputNameInNode) {
+                continue;
+            }
 
             let inputOptions = {};
             inputOptions['node_id'] = inputNodeId;
@@ -348,14 +352,20 @@ export class WorkflowEditor {
                 continue;
             }
 
+
+
             const inputTitleElement = /** @type {HTMLInputElement} */ (
                 inputContainer.querySelector('.workflow-input-title')
             );
 
             if (!inputTitleElement) {
                 alert(`Error while saving workflow, input title element not found for ${inputNameInNode}`);
-                return '';
+                continue;
             }
+
+            inputOptions['title'] = inputTitleElement.value;
+
+
 
             const defaultValueElement = /** @type {HTMLInputElement} */ (
                 inputContainer.querySelector('.workflow-input-default')
@@ -363,80 +373,26 @@ export class WorkflowEditor {
 
             if (!defaultValueElement) {
                 alert(`Error while saving workflow, default value element not found for ${inputNameInNode}`);
-                return '';
+                continue;
             }
 
-            inputOptions['title'] = inputTitleElement.value;
-            inputOptions['default'] = defaultValueElement.value;
+            modifiedWorkflow[inputNodeId].inputs[inputNameInNode] = defaultValueElement.value;
 
-            const inputTypeSelect = /** @type {HTMLSelectElement} */ (
-                inputContainer.querySelector('.input-type-select')
-            );
 
-            if (!inputTypeSelect) {
-                alert(`Error while saving workflow, input type select not found for ${inputNameInNode}`);
-                return '';
-            }
+            /** @type {HTMLInputElement|null} */
+            const showRandomiseToggle = inputContainer.querySelector('.additional-option-wrapper > input[data-key="show_randomise_toggle"]');
 
-            const inputType = inputTypeSelect.value;
-
-            if (inputType == '') {
-                alert(`Input type for "${inputTitleElement.value}" not selected.`);
-                return '';
-            }
-
-            if (inputType == 'integer' || inputType == 'float') {
-                if (isNaN(Number(defaultValueElement.value))) {
-                    alert(`Default value for "${inputTitleElement.value}" is not a number.`);
-                    return '';
-                }
-            }
-
-            if (inputType == 'integer') {
-                if (Number.isInteger(defaultValueElement.value)) {
-                    alert(`Default value for "${inputTitleElement.value}" is not an integer.`);
-                    return '';
-                }
-            }
-
-            inputOptions['type'] = inputType;
-
-            /** @type {NodeListOf<HTMLInputElement|HTMLInputElement>} */
-            const additionalInputOptions = inputContainer.querySelectorAll(
-                '.additional-input-options .additional-input-option'
-            );
-
-            for (const additionalInputOption of additionalInputOptions) {
-                const additionalInputOptionValue = additionalInputOption.value;
-                const additionalInputOptionKey = additionalInputOption.getAttribute('data-key');
-                const additionalInputType = additionalInputOption.type;
-
-                if (additionalInputOptionValue === null || additionalInputOptionValue === '') {
-                    continue;
-                }
-
-                if (additionalInputType === 'checkbox' && !additionalInputOption.checked) {
-                    continue;
-                }
-
-                if (additionalInputOption.type === 'checkbox') {
-                    // We have already skipped if checkbox value is false, therefore it can only be true
-                    inputOptions[additionalInputOptionKey] = true;
-                    continue;
-                }
-
-                inputOptions[additionalInputOptionKey] = additionalInputOptionValue;
+            if (showRandomiseToggle) {
+                inputOptions['show_randomise_toggle'] = showRandomiseToggle.checked;
             }
 
             inputOptionsList.push(inputOptions);
         }
 
-        const modifiedWorkflow = this.workflowObject;
-
         modifiedWorkflow['_comfyuimini_meta'] = {};
         modifiedWorkflow['_comfyuimini_meta']['title'] = this.titleInput.value || 'Unnamed Workflow';
         modifiedWorkflow['_comfyuimini_meta']['description'] = this.descriptionInput.value || '';
-        modifiedWorkflow['_comfyuimini_meta']['format_version'] = '1';
+        modifiedWorkflow['_comfyuimini_meta']['format_version'] = '2';
 
         modifiedWorkflow['_comfyuimini_meta']['input_options'] = inputOptionsList;
 

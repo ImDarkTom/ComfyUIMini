@@ -31,6 +31,11 @@
     padding-bottom: 1rem;
 }
 
+.properties-container > label {
+    padding: 0.5rem 0 0 0;
+    display: block;
+}
+
 .properties-input {
     width: 100%;
     box-sizing: border-box;
@@ -69,8 +74,7 @@
     border-radius: 0.5rem;
 }
 
-.inputs-container input,
-.additional-input-options select {
+.options-container > input {
     background-color: var(--background-tertiary-color);
     color: var(--text-secondary-color);
     border: 0;
@@ -78,15 +82,17 @@
     border-radius: 0.5rem;
     margin-top: 0.1rem;
     width: 100%;
+    box-sizing: border-box;
 }
 
-.input-type-select {
-    flex: 1;
-    background: var(--background-secondary-color);
-    color: var(--text-primary-color);
-    border: none;
-    box-shadow: 0px -1px 0px 0px var(--text-primary-color) inset;
-    font-weight: bold;
+.options-container > label {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0 0.1rem 0;
+}
+
+.additional-option-wrapper {
+    margin-top: 1rem;
 }
 
 .move-arrows-container {
@@ -115,20 +121,22 @@
 
 .input-top-container {
     width: 100%;
-    height: 2rem;
     display: flex;
     flex-direction: row;
+    font-size: 1.2rem;
+}
+
+.input-counter,
+.input-type-text {
+    color: var(--text-primary-color);
 }
 
 .input-counter {
-    color: var(--text-primary-color);
+    width: 2rem;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    font-weight: bold;
-    font-size: 1.2rem;
     user-select: none;
 }
 
@@ -147,17 +155,6 @@
     font-size: 1rem;
     margin-bottom: 0.5rem;
     flex: 1;
-}
-
-.inputs-container label {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 0 0.1rem 0;
-}
-
-.inputs-container input {
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .export-buttons {
