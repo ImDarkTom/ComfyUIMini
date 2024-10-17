@@ -7,23 +7,49 @@ const createInputContainer = (id, title, inputHtml) => `
     </div>
 `;
 
-export async function renderSelectInput(inputOptions) {
-    const selectListResponse = await fetch(`/comfyui/selectoption/${inputOptions.select_list}`);
-    const selectListJson = await selectListResponse.json();
-
+/**
+ * 
+ * @param {Object} inputOptions Options for the select input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.title The title of the input.
+ * @param {string} inputOptions.list The list of options to select from.
+ * @param {string} inputOptions.default The default selection option.
+ * @returns {string}
+ */
+export function renderSelectInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
     const createSelectOptions = (options) => {
-        return options.map((item) => `<option value="${item}">${item}</option>`).join('');
+        let optionsHtml = '';
+
+        if (!options.includes(inputOptions.default)) {
+            optionsHtml += `<option value="" disabled selected>Couldn't find '${inputOptions.default}'</option>`;
+        }
+
+        optionsHtml += options.map((item) =>
+            `<option value="${item}" ${inputOptions.default == item ? "selected" : ""} >${item}</option>`
+        ).join('');
+
+        return optionsHtml;
     };
 
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(selectListJson)}</select>`
+        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.list)}</select>`
     );
 }
 
+/**
+ * 
+ * @param {Object} inputOptions Options for the text input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.default The default value.
+ * @param {string} inputOptions.title The title of the input.
+ * @returns {string}
+ */
 export function renderTextInput(inputOptions) {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
@@ -34,6 +60,19 @@ export function renderTextInput(inputOptions) {
     );
 }
 
+/**
+ * 
+ * @param {Object} inputOptions Options for the number input.
+ * @param {string} inputOptions.node_id The node id.
+ * @param {string} inputOptions.input_name_in_node The name of the input in the node.
+ * @param {string} inputOptions.title The title of the input.
+ * @param {string} inputOptions.default The default value of the input.
+ * @param {number} inputOptions.step The step size of the input.
+ * @param {number} inputOptions.min The minimum value of the input.
+ * @param {number} inputOptions.max The maximum value of the input.
+ * @param {boolean} inputOptions.show_randomise_toggle Whether the input is disabled.
+ * @returns {string}
+ */
 export function renderNumberInput(inputOptions) {
     const hasRandomiseToggle =
         inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === 'on';
@@ -67,8 +106,8 @@ export function renderNumberInput(inputOptions) {
 }
 
 export const inputRenderers = {
-    select: renderSelectInput,
-    text: renderTextInput,
-    integer: renderNumberInput,
-    float: renderNumberInput,
+    ARRAY: renderSelectInput,
+    STRING: renderTextInput,
+    INT: renderNumberInput,
+    FLOAT: renderNumberInput,
 };

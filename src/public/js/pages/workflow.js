@@ -1,6 +1,6 @@
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
-import { inputRenderers } from '../modules/inputRenderers.js';
 import { handleError } from '../common/errorHandler.js';
+import { renderInputs } from '../modules/workflowInputRenderer.js';
 
 const inputsContainer = document.querySelector('.inputs-container');
 const outputImagesContainer = document.querySelector('.output-images-container');
@@ -10,8 +10,9 @@ const currentImageProgressInnerElem = document.querySelector('.current-image-pro
 const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text');
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button');
 
-const workflowData = workflowDataFromEjs;
-workflowData['json'] = workflowData.json ? workflowData.json : await fetchLocalWorkflow();
+
+const workflowDataObject = workflowDataFromEjs;
+workflowDataObject['json'] = workflowDataObject.json ? workflowDataObject.json : await fetchLocalWorkflow();
 
 let totalImageCount = 0;
 let completedImageCount = 0;
@@ -19,38 +20,20 @@ let completedImageCount = 0;
 const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
-async function loadWorkflow() {
-    const workflowInputs = workflowData.json['_comfyuimini_meta'].input_options;
-    await renderInputs(workflowInputs);
+function loadWorkflow() {
+    renderInputs(workflowDataObject["json"]);
 
     startEventListeners();
 }
 
 async function fetchLocalWorkflow() {
     try {
-        return getLocalWorkflow(workflowData.identifier);
+        return getLocalWorkflow(workflowDataObject.identifier);
     } catch (error) {
         handleError(error);
     }
 }
 
-async function renderInputs(workflowInputs) {
-    const html = await Promise.all(workflowInputs.map(renderInput));
-    inputsContainer.innerHTML = html.join('');
-}
-
-async function renderInput(inputOptions) {
-    if (inputOptions.disabled) return '';
-
-    const renderer = inputRenderers[inputOptions.type];
-
-    if (renderer) {
-        return await renderer(inputOptions);
-    } else {
-        console.error(`Invalid input type: ${inputType}`);
-        return '';
-    }
-}
 
 function startEventListeners() {
     document.querySelector('.run-workflow').addEventListener('click', runWorkflow);
@@ -113,7 +96,7 @@ function setProgressBar(type, percentage) {
 }
 
 function fillWorkflowWithUserParams() {
-    const workflowModified = workflowData.json;
+    const workflowModified = workflowDataObject.json;
     // ComfyUI can't process the workflow if it contains the additional metadata.
     delete workflowModified['_comfyuimini_meta'];
 
@@ -201,7 +184,7 @@ function updateProgressBars(messageData) {
 function updateImagePreview(messageData) {
     const currentSkeletonLoaderElem =
         outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[
-            totalImageCount - completedImageCount - 1
+        totalImageCount - completedImageCount - 1
         ];
 
     if (!currentSkeletonLoaderElem) {

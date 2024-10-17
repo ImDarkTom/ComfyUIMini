@@ -26,14 +26,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 server.on('upgrade', handleUpgrade);
 
-const { loadSelectOptions } = require('./utils/selectOptionUtils');
+const { loadObjectInfoMap } = require('./utils/objectInfoUtils');
 const { comfyUICheck } = require('./utils/comfyAPIUtils');
 const { serverWorkflowsCheck } = require('./utils/workflowUtils');
 const getLocalIp = require('./utils/localIp');
 
 comfyUICheck();
 serverWorkflowsCheck();
-loadSelectOptions();
+loadObjectInfoMap();
 
 server.listen(config.get('app_port'), '0.0.0.0', () => {
     logger.success(`Running on http://${getLocalIp()}:${config.get('app_port')}`);

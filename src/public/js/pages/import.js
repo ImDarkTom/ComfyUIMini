@@ -1,4 +1,4 @@
-import { WorkflowEditor } from '../modules/sharedWorkflowUtils.js';
+import { WorkflowEditor } from '../modules/workflowEditor.js';
 
 /**
  *

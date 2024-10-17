@@ -72,7 +72,7 @@ function getServerWorkflowMetadata(serverWorkflowsFolderPath, jsonFileList) {
             try {
                 generateWorkflowMetadataAndSaveToFile(parsedJsonContents, jsonFilename, serverWorkflowsFolderPath);
             } catch (error) {
-                logger.error(`Error when auto-generating metadata for workflow '${jsonFilename}': ${error}`);
+                console.log(`Error when auto-generating metadata for workflow '${jsonFilename}': ${error}`);
                 continue;
             }
 
