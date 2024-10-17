@@ -1,60 +1,15 @@
 /**
- * Predict the input type and the additional input options for a workflow input.
+ * Gets any additional input options for a given input name.
  *
  * @param {string} inputName The name of the input.
- * @returns {object} An object containing the predicted input type and any additional input options.
+ * @returns {object} An object containing any additional options for the input.
  */
-function predictInputTypeAndOptions(inputName) {
-    const predictions = {
-        seed: {
-            type: 'integer',
-            show_randomise_toggle: true,
-        },
-        steps: {
-            type: 'integer',
-        },
-        cfg: {
-            type: 'float',
-        },
-        sampler_name: {
-            type: 'select',
-            select_list: 'sampler',
-        },
-        scheduler: {
-            type: 'select',
-            select_list: 'scheduler',
-        },
-        denoise: {
-            type: 'float',
-        },
-        ckpt_name: {
-            type: 'select',
-            select_list: 'checkpoint',
-        },
-        width: {
-            type: 'integer',
-            min: 1,
-        },
-        height: {
-            type: 'integer',
-            min: 1,
-        },
-        batch_size: {
-            type: 'integer',
-        },
-        text: {
-            type: 'text',
-        },
-        filename_prefix: {
-            type: 'text',
-        },
-        vae_name: {
-            type: 'select',
-            select_list: 'vae',
-        },
-    };
+function getAdditionalInputOptions(inputName) {
+    if (inputName === 'seed') {
+        return { show_randomise_toggle: true };
+    }
 
-    return predictions[inputName] || { type: 'text' };
+    return {};
 }
 
 /**
@@ -88,8 +43,8 @@ function autoGenerateMetadata(workflowObject, workflowFilename) {
 
     const generatedMetadata = {
         title: workflowFilename,
-        description: '[Auto generated metadata]',
-        format_version: '1',
+        description: 'A ComfyUI workflow.',
+        format_version: '2',
         input_options: [],
     };
 
@@ -110,8 +65,7 @@ function autoGenerateMetadata(workflowObject, workflowFilename) {
                 node_id: nodeId,
                 input_name_in_node: inputName,
                 title: `[${nodeTitle}-${nodeId}] ${inputName}`,
-                default: defaultInputValue,
-                ...predictInputTypeAndOptions(inputName),
+                ...getAdditionalInputOptions(inputName),
             });
         }
     }

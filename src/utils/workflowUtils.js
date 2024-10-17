@@ -79,7 +79,7 @@ function getServerWorkflowMetadata(serverWorkflowsFolderPath, jsonFileList) {
             serverWorkflowMetadata[`[CONVERTED] ${jsonFilename}`] = {
                 title: jsonFilename,
                 filename: `[CONVERTED] ${jsonFilename}`,
-                description: 'Auto generated.',
+                description: 'A ComfyUI workflow.',
             };
 
             continue;
