@@ -123,27 +123,34 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    align-items: center;
     font-size: 1.2rem;
 }
 
 .input-counter,
 .input-type-text {
     color: var(--text-primary-color);
+    font-weight: bold;
 }
 
 .input-counter {
     width: 2rem;
-    font-weight: bold;
+    user-select: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    user-select: none;
+}
+
+.input-type-text {
+    display: block;
+    overflow-wrap: anywhere;
+    max-width: calc(100% - 2rem - 2rem - 0.5rem); /* account for other elements in the parent */
 }
 
 .hide-input-button {
     width: 2rem;
     height: 2rem;
-    margin-right: 1ch;
+    margin: 0 0.5rem 0 0;
 }
 
 .input-item.disabled {
