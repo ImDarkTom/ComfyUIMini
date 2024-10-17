@@ -340,9 +340,14 @@ async function interruptGeneration() {
 }
 
 async function getObjectInfo() {
-    const response = await comfyuiAxios.get('/api/object_info');
+    try {
+        const response = await comfyuiAxios.get('/api/object_info');
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        logger.warn(`Could not get ComfyUI object info: ${error}`);
+        return {};
+    }
 }
 
 module.exports = {
