@@ -3,9 +3,20 @@
     --input-font-size: 1.2rem;
 }
 
+.inputs-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 1rem 0.5rem;
+}
+
+@media screen and (min-width: 420px) {
+    .inputs-container {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+}
+
 .workflow-input-container label {
     display: block;
-    padding-top: 1.2ch;
     padding-bottom: 0.3ch;
     font-size: 1.2rem;
     font-weight: bold;
@@ -110,7 +121,6 @@ textarea.workflow-input {
 .run-workflow {
     width: 100%;
     height: 100%;
-    margin: 1;
     background-color: var(--background-secondary-color);
     color: var(--text-primary-color);
     border: 0;
