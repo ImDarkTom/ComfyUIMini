@@ -74,7 +74,8 @@
     border-radius: 0.5rem;
 }
 
-.options-container > input {
+.options-container > input, 
+.options-container > select {
     background-color: var(--background-tertiary-color);
     color: var(--text-secondary-color);
     border: 0;
@@ -100,6 +101,7 @@
     display: flex;
     flex-direction: column;
     user-select: none;
+    margin: 0 0 0 1ch;
 }
 
 .move-arrows-container span {

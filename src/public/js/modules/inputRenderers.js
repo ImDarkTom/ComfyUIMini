@@ -70,17 +70,15 @@ export function renderTextInput(inputOptions) {
  * @param {number} inputOptions.step The step size of the input.
  * @param {number} inputOptions.min The minimum value of the input.
  * @param {number} inputOptions.max The maximum value of the input.
- * @param {boolean} inputOptions.show_randomise_toggle Whether the input is disabled.
  * @returns {string}
  */
 export function renderNumberInput(inputOptions) {
-    const hasRandomiseToggle =
-        inputOptions.show_randomise_toggle === true || inputOptions.show_randomise_toggle === 'on';
+    const showRandomiseToggle = inputOptions.input_name_in_node === "seed";
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
     const { default: defaultValue, step, min, max } = inputOptions;
 
-    const randomiseToggle = `
+    const randomiseToggleHTML = `
     <div class="randomise-buttons-container" data-linked-input-id="${id}">
         <span class="randomise-now-button">↻</span>
         <span class="randomise-input-toggle"></span>
@@ -94,13 +92,13 @@ export function renderNumberInput(inputOptions) {
             id="${id}" 
             type="number" 
             placeholder="${defaultValue}" 
-            class="workflow-input ${hasRandomiseToggle ? 'has-random-toggle' : ''}" 
+            class="workflow-input ${showRandomiseToggle ? 'has-random-toggle' : ''}" 
             value="${defaultValue}"
             ${step !== undefined ? `step="${step}"` : ''}
             ${min !== undefined ? `min="${min}"` : ''} 
             ${max !== undefined ? `max="${max}"` : ''}
         >
-        ${hasRandomiseToggle ? randomiseToggle : ''}
+        ${showRandomiseToggle ? randomiseToggleHTML : ''}
     `
     );
 }

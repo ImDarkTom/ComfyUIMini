@@ -80,8 +80,8 @@ export class WorkflowEditor {
                 continue;
             }
 
-            const inputConfig = this.getInputOptionConfig(nodeId, inputName);
-            const renderConfig = await this.buildRenderConfig(inputConfig, inputValue, nodeId, inputName);
+            const userInputConfig = this.getUserInputConfig(nodeId, inputName);
+            const renderConfig = await this.buildRenderConfig(userInputConfig, inputValue, nodeId, inputName);
 
             await this.renderInput(renderConfig);
         }
@@ -146,7 +146,7 @@ export class WorkflowEditor {
      * @param {string} inputName The name of the input in the node.
      * @returns {object} Returns an empty object if no metadata is found, otherwise returns said additional metadata.
      */
-    getInputOptionConfig(nodeId, inputName) {
+    getUserInputConfig(nodeId, inputName) {
         const cuiMiniMetadata = this.workflowObject['_comfyuimini_meta'];
 
         if (!cuiMiniMetadata) {
@@ -164,17 +164,6 @@ export class WorkflowEditor {
                 return option;
             }
         }
-    }
-
-    generateInputOptions(selectedInputType) {
-        const options = ['text', 'integer', 'float', 'select'];
-
-        return options
-            .map(
-                (type) =>
-                    `<option value="${type}" ${type === selectedInputType ? 'selected' : ''}>${type === 'select' ? 'Select (from model list or builtin)' : type.charAt(0).toUpperCase() + type.slice(1)}</option>`
-            )
-            .join('');
     }
 
     /**
@@ -200,7 +189,6 @@ export class WorkflowEditor {
         const nodeId = inputConfig.nodeId;
         const inputNameInNode = inputConfig.inputName;
         const inputTitle = inputConfig.title;
-        const inputDefault = inputConfig.default || '';
 
         const inputNodeClass = inputConfig.comfyMetadata.classType;
 
@@ -216,9 +204,7 @@ export class WorkflowEditor {
                     </div>
                     <label for="${idPrefix}-title">Title</label>
                     <input type="text" id="${idPrefix}-title" placeholder="${inputTitle}" value="${inputTitle}" class="workflow-input workflow-input-title">
-                    <label for="${idPrefix}-default">Default value</label>
-                    <input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
-                    ${this.loadAdditionalOptionsForType(inputConfig, idPrefix)}
+                    ${this.renderDefaultValueInput(inputConfig, idPrefix)}
                 </div>
                 <div class="move-arrows-container">
                     <span class="move-arrow-up">&#x25B2;</span>
@@ -240,25 +226,44 @@ export class WorkflowEditor {
         }
     }
 
-    loadAdditionalOptionsForType(inputConfig, idPrefix) {
-        const inputType = inputConfig.comfyMetadata.type;
+    /**
+     * Renders a default value input for a input, differs based on input type.
+     * 
+     * @param {InputConfig} inputConfig The config for the input.
+     * @param {string} idPrefix The id prefix for each element in the input.
+     * @returns {string} The rendered HTML for the default value input.
+     */
+    renderDefaultValueInput(inputConfig, idPrefix) {
+        const inputDefault = inputConfig.default || '';
 
-        switch (inputType) {
-            case "INT":
-            case "FLOAT": {
-                return `
-                    <div class="additional-option-wrapper">
-                        <input type="checkbox" id="${idPrefix}-randomise-toggle" data-key="show_randomise_toggle" class="additional-input-option" ${inputConfig.show_randomise_toggle ? 'checked' : ''}>
-                        <label for="${idPrefix}-randomise-toggle">Show randomise toggle?</label>
-                    </div>
+        let inputHTML = `<label for="${idPrefix}-default">Default</label>`;
+        
+        switch (inputConfig.comfyMetadata.type) {
+            case 'ARRAY':
+                const optionsList = inputConfig.comfyMetadata.data;
+
+                inputHTML += `<select id="${idPrefix}-default" class="workflow-input workflow-input-default">`;
+
+                for (const option of optionsList) {
+                    inputHTML += `<option value="${option}" ${inputDefault == option ? "selected" : ""}>${option}</option>`;
+                }
+
+                inputHTML += '</select>';
+
+                break;
+            case 'INT':
+            case 'FLOAT':
+                inputHTML += `
+                    <input type="number" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">
                 `;
-            }
-            case "STRING":
-            case "ARRAY":
-            default: {
-                return ``;
-            }
+                break;
+            case `STRING`:
+            default:
+                inputHTML += `<input type="text" id="${idPrefix}-default" placeholder="${inputDefault}" value="${inputDefault}" class="workflow-input workflow-input-default">`;
+                break;
         }
+
+        return inputHTML;
     }
 
     /**
@@ -377,14 +382,6 @@ export class WorkflowEditor {
             }
 
             modifiedWorkflow[inputNodeId].inputs[inputNameInNode] = defaultValueElement.value;
-
-
-            /** @type {HTMLInputElement|null} */
-            const showRandomiseToggle = inputContainer.querySelector('.additional-option-wrapper > input[data-key="show_randomise_toggle"]');
-
-            if (showRandomiseToggle) {
-                inputOptions['show_randomise_toggle'] = showRandomiseToggle.checked;
-            }
 
             inputOptionsList.push(inputOptions);
         }
