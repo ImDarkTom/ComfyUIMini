@@ -52,11 +52,7 @@ function renderNodeInputs(nodeObject, nodeInputsMetadata) {
         }
 
         let dataForRenderer = inputMetadata;
-        if (inputOptionsFromComfyUI.type === "ARRAY") {
-            dataForRenderer.list = inputOptionsFromComfyUI.data;
-        } else {
-            dataForRenderer = { ...dataForRenderer, ...inputOptionsFromComfyUI.data };
-        }
+        dataForRenderer = { ...dataForRenderer, ...inputOptionsFromComfyUI };
         dataForRenderer.default = inputDefaultFromWorkflow;
 
         const inputHtml = renderer(dataForRenderer);

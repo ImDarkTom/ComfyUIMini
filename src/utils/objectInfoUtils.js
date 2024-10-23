@@ -7,46 +7,59 @@ async function loadObjectInfoMap() {
 
     for (const [nodeName, nodeInfo] of Object.entries(objectInfoObject)) {
         for (const [inputName, inputInfo] of Object.entries(nodeInfo.input.required)) {
-            const processedInputData = getInputData(inputInfo);
+            const normalisedInfo = getNormalisedInfo(inputInfo);
 
-            if (processedInputData.userAcessible) {
+            if (normalisedInfo.userAccessible) {
                 if (!inputsInfoObject[nodeName]) {
                     inputsInfoObject[nodeName] = {};
                 }
 
-                inputsInfoObject[nodeName][inputName] = { type: processedInputData.type, data: inputInfo[processedInputData.getDataFromKey] };
+                inputsInfoObject[nodeName][inputName] = normalisedInfo;
             }
         }
     }
 }
 
 /**
+ * ComfyUI uses weirdly different formats for each input type, 
+ * e.g. For most inputs, `inputInfo[0]` is a string containing the input type, for arrays, its the list of options. 
+ * 
+ * However, arrays may also *sometimes* have a second element with other options such as `tooltip`, `default`, or `image_upload`
+ * that determines if the input has an upload input or is just a list of options.
  * 
  * @param {object} inputInfo 
  * @returns {object}
  * @returns {object.userAcessible} If the input contains an input that can be shown to the user i.e. not just piped from another node.
- * @returns {object.getDataFromKey} What key the data is stored in, 0 for lists, 1 for others.
  */
-function getInputData(inputInfo) {
+function getNormalisedInfo(inputInfo) {
+    const normalisedInfo = {
+        userAccessible: false,
+    };
+
     if (Array.isArray(inputInfo[0])) {
-        return {
-            userAcessible: true,
-            type: "ARRAY",
-            getDataFromKey: 0
-        };
+        normalisedInfo.userAccessible = true;
+        normalisedInfo.type = "ARRAY";
+        normalisedInfo.data = inputInfo[0];
+        
+        if (inputInfo[1]) {
+            normalisedInfo.default = inputInfo[1]?.default;
+            normalisedInfo.tooltip = inputInfo[1]?.tooltip;
+            normalisedInfo.imageUpload = inputInfo[1]?.image_upload;
+        }
+        
+        return normalisedInfo;
     }
 
     if (["INT", "FLOAT", "STRING"].includes(inputInfo[0])) {
-        return {
-            userAcessible: true,
-            type: inputInfo[0],
-            getDataFromKey: 1
-        }
+        // data can contain default, tooltip for any type, min, max for int, and min max, and step for ints, and multiline, dynamicPrompts for strings
+        normalisedInfo.userAccessible = true;
+        normalisedInfo.type = inputInfo[0];
+        normalisedInfo.data = inputInfo[1];
+
+        return normalisedInfo;
     }
 
-    return {
-        userAcessible: false
-    }
+    return normalisedInfo;
 }
 
 module.exports = {

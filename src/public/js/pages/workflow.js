@@ -37,9 +37,47 @@ async function fetchLocalWorkflow() {
 
 function startEventListeners() {
     document.querySelector('.run-workflow').addEventListener('click', runWorkflow);
+    document.querySelectorAll('.workflow-input-container .file-input').forEach((element) => fileUploadEventListener(element));
 
     cancelGenerationButtonElem.addEventListener('click', cancelRun);
     inputsContainer.addEventListener('click', handleInputContainerClick);
+}
+
+function fileUploadEventListener(element) {
+    element.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/comfyui/upload/image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const responseJson = await response.json();
+
+                if (responseJson.error) {
+                    console.error(responseJson.error);
+                }
+
+                addOptionToSelect(document.querySelector('#' + element.getAttribute('data-select-id')), responseJson.externalResponse.name);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    });
+}
+
+function addOptionToSelect(selectElem, option) {
+    const optionElem = document.createElement('option');
+    optionElem.value = option;
+    optionElem.textContent = option;
+
+    selectElem.appendChild(optionElem);
 }
 
 function handleInputContainerClick(e) {

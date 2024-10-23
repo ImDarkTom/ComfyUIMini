@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const config = require('config');
+const FormData = require('form-data');
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
@@ -350,6 +351,26 @@ async function getObjectInfo() {
     }
 }
 
+async function uploadImage(file) {
+    try {
+        const form = new FormData();
+        form.append('image', file.buffer, {
+            filename: file.originalname,
+            contentType: file.mimetype,
+        });
+
+        const response = await comfyuiAxios.post('/upload/image', form, {
+            headers: { 
+                ...form.getHeaders(),
+            }
+        });
+
+        return response;
+    } catch (error) {
+        return {error: error}
+    }
+}
+
 module.exports = {
     generateImage,
     getQueue,
@@ -359,5 +380,6 @@ module.exports = {
     getImage,
     getModelTypesList,
     getItemsForModelType,
-    getObjectInfo
+    getObjectInfo,
+    uploadImage
 };

@@ -13,11 +13,16 @@ const createInputContainer = (id, title, inputHtml) => `
  * @param {string} inputOptions.node_id The node id.
  * @param {string} inputOptions.input_name_in_node The name of the input in the node.
  * @param {string} inputOptions.title The title of the input.
- * @param {string} inputOptions.list The list of options to select from.
+ * @param {string} inputOptions.data The list of options to select from.
  * @param {string} inputOptions.default The default selection option.
  * @returns {string}
  */
 export function renderSelectInput(inputOptions) {
+    function renderUploadMenu(inputId) {
+        return `<label for="${inputId}-file_input" class="file-input-label"><span class="icon upload"></span></label>
+        <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">`
+    }
+
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
     const createSelectOptions = (options) => {
@@ -37,7 +42,8 @@ export function renderSelectInput(inputOptions) {
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.list)}</select>`
+        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.data)}</select>
+        ${inputOptions.imageUpload === true ? renderUploadMenu(id) : ""}`
     );
 }
 

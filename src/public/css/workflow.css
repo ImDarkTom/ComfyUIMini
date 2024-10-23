@@ -104,6 +104,29 @@ textarea.workflow-input {
     background-color: var(--background-secondary-color);
 }
 
+.workflow-input-container .file-input {
+    display: none;
+}
+
+.workflow-input-container .file-input-label {
+    height: var(--input-height);
+    width: var(--input-height);
+    background-color: var(--background-tertiary-color);
+    box-sizing: border-box;
+    border-radius: 0.5rem;
+    margin: 0 0 0 0.5rem;
+    padding: 0.5rem;
+}
+
+.workflow-input-container .file-input-label:active {
+    transform: scale(0.95);
+}
+
+.workflow-input-container .file-input-label > span {
+    height: 100%;
+    width: 100%;
+}
+
 .run-button-wrapper {
     margin: 1rem 0;
     height: 3rem;
