@@ -1,6 +1,6 @@
 const express = require('express');
 const { getHistory, getQueue, interruptGeneration, getImage, uploadImage } = require('../utils/comfyAPIUtils');
-const { inputsInfoObject } = require('../utils/objectInfoUtils');
+const { inputsInfoObject, loadObjectInfo } = require('../utils/objectInfoUtils');
 const multer = require('multer');
 
 const upload = multer();
@@ -55,6 +55,12 @@ router.post('/upload/image', upload.single('image'), async (req, res) => {
         }
 
         const response = await uploadImage(req.file);
+
+        try {
+            await loadObjectInfo();
+        } catch (err) {
+            console.error('Error reloading object info', err);
+        }
 
         res.status(200).json({
             message: 'File uploaded successfully',

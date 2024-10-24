@@ -2,7 +2,7 @@ const { getObjectInfo } = require("./comfyAPIUtils");
 
 const inputsInfoObject = {};
 
-async function loadObjectInfoMap() {
+async function loadObjectInfo() {
     const objectInfoObject = await getObjectInfo();
 
     for (const [nodeName, nodeInfo] of Object.entries(objectInfoObject)) {
@@ -63,6 +63,6 @@ function getNormalisedInfo(inputInfo) {
 }
 
 module.exports = {
-    loadObjectInfoMap,
+    loadObjectInfo,
     inputsInfoObject
 }
