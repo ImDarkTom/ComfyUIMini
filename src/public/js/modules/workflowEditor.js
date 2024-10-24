@@ -83,6 +83,10 @@ export class WorkflowEditor {
             const userInputConfig = this.getUserInputConfig(nodeId, inputName);
             const renderConfig = await this.buildRenderConfig(userInputConfig, inputValue, nodeId, inputName);
 
+            if (!renderConfig) {
+                continue;
+            }
+
             await this.renderInput(renderConfig);
         }
     }
@@ -121,10 +125,14 @@ export class WorkflowEditor {
      * @param {string} defaultValue The default value of the input.
      * @param {string} nodeId The ID of the node in the workflow.
      * @param {string} inputName The name of the input in the node.
-     * @returns {Promise<InputConfig>} A config object to pass to renderInput.
+     * @returns {Promise<InputConfig|null>} A config object to pass to renderInput or null if the input doesn't have metadata.
      */
     async buildRenderConfig(inputConfig, defaultValue, nodeId, inputName) {
         const comfyMetadataForInput = await this.getComfyMetadataForInputType(inputName, nodeId);
+
+        if (!comfyMetadataForInput) {
+            return null;
+        }
 
         const generatedConfig = {
             nodeId: nodeId,
@@ -237,7 +245,7 @@ export class WorkflowEditor {
         const inputDefault = inputConfig.default || '';
 
         let inputHTML = `<label for="${idPrefix}-default">Default</label>`;
-        
+
         switch (inputConfig.comfyMetadata.type) {
             case 'ARRAY':
                 const optionsList = inputConfig.comfyMetadata.data;
