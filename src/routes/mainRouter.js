@@ -42,12 +42,17 @@ router.get('/edit/:type/:identifier', (req, res) => {
         case 'server':
             const workflowFileJson = readServerWorkflow(workflowIdentifier);
 
-            if (workflowFileJson === 'invalid') {
-                res.status(400).send('Invalid workflow filename.');
-                break;
-            } else if (workflowFileJson === 'error') {
-                res.status(500).send('Internal Server Error');
-                break;
+            if (workflowFileJson.error) {
+                if (workflowFileJson.error === 'notFound') {
+                    res.status(404).send('Workflow not found.');
+                    break;
+                } else if (workflowFileJson.error === 'invalidJson') {
+                    res.status(400).send('Invalid workflow file.');
+                    break;
+                } else {
+                    res.status(500).send('Internal Server Error');
+                    break;
+                }
             }
 
             const workflowTitle = workflowFileJson['_comfyuimini_meta'].title;

@@ -16,6 +16,8 @@
     },
     "license": "AGPL-3.0",
     "dependencies": {
+        "@types/config": "^3.3.5",
+        "@types/express": "^5.0.0",
         "axios": "^1.7.2",
         "config": "^3.3.12",
         "cookie-parser": "^1.4.6",
@@ -27,6 +29,10 @@
     },
     "description": "",
     "devDependencies": {
-        "prettier": "^3.3.3"
+        "@types/winston": "^2.4.4",
+        "prettier": "^3.3.3",
+        "ts-node": "^10.9.2",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.6.3"
     }
 }
