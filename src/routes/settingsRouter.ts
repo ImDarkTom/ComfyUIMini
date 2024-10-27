@@ -1,10 +1,15 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 router.use(express.json());
 
 router.get('/theme', async (req, res) => {
     const requestTheme = req.query.theme;
+
+    if (!requestTheme || typeof requestTheme !== 'string') {
+        res.status(400).send({ error: 'Theme name not set or invalid.' });
+        return;
+    }
 
     const themesList = ['dark', 'light', 'midnight', 'whiteout', 'aurora'];
 
@@ -13,7 +18,7 @@ router.get('/theme', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 365,
             httpOnly: true,
             secure: false,
-            sameSite: 'Lax',
+            sameSite: 'lax',
         });
 
         res.send(`Theme set to ${requestTheme}.`).status(200);
@@ -22,21 +27,22 @@ router.get('/theme', async (req, res) => {
     }
 });
 
-router.get('/galleryitemsperpage', async (req, res) => {
+router.get('/galleryitemsperpage', async (req, res): Promise<void> => {
     const requestCount = Number(req.query.count);
 
     if (isNaN(requestCount) || requestCount < 1) {
-        return res.status(400).send({ error: 'Invalid number, must be a valid integer greater than 0.' });
+        res.status(400).send({ error: 'Invalid number, must be a valid integer greater than 0.' });
+        return
     }
 
-    res.cookie('galleryItemsPerPage', requestCount, {
+    res.cookie('galleryItemsPerPage', requestCount.toString(), {
         maxAge: 1000 * 60 * 60 * 24 * 365,
         httpOnly: true,
         secure: false,
-        sameSite: 'Lax',
+        sameSite: 'lax',
     });
 
     res.json({ message: `Set gallery items per page to ${requestCount}` });
 });
 
-module.exports = router;
+export default router;

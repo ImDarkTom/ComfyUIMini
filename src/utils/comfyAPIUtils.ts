@@ -8,6 +8,7 @@ import path from 'path';
 import config from 'config';
 import FormData from 'form-data';
 import { HistoryResponse } from '../types/History';
+import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
@@ -363,7 +364,7 @@ async function interruptGeneration() {
     return response.data;
 }
 
-async function getObjectInfo() {
+async function getObjectInfo(): Promise<ObjectInfoPartial> {
     try {
         const response = await comfyuiAxios.get('/api/object_info');
 

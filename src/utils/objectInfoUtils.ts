@@ -1,6 +1,7 @@
-const { getObjectInfo } = require("./comfyAPIUtils");
+import { NormalisedInputInfo, ObjectInfoPartial } from "../types/ComfyObjectInfo";
+import { getObjectInfo } from "./comfyAPIUtils";
 
-const inputsInfoObject = {};
+const inputsInfoObject: { [nodeName: string]: { [inputName: string]: NormalisedInputInfo } } = {};
 
 async function loadObjectInfo() {
     const objectInfoObject = await getObjectInfo();
@@ -31,10 +32,10 @@ async function loadObjectInfo() {
  * @returns {object}
  * @returns {object.userAcessible} If the input contains an input that can be shown to the user i.e. not just piped from another node.
  */
-function getNormalisedInfo(inputInfo) {
+function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
     const normalisedInfo = {
         userAccessible: false,
-    };
+    } as NormalisedInputInfo;
 
     if (Array.isArray(inputInfo[0])) {
         normalisedInfo.userAccessible = true;
@@ -62,7 +63,7 @@ function getNormalisedInfo(inputInfo) {
     return normalisedInfo;
 }
 
-module.exports = {
+export {
     loadObjectInfo,
     inputsInfoObject
 }
