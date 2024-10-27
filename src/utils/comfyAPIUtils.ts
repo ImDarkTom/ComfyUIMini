@@ -56,6 +56,9 @@ async function getImage(filename: string, subfolder: string, type: string) {
                 }
             }
         }
+
+        console.error('Unknown error when fetching image:', err);
+        return null;
     }
 }
 
