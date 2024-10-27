@@ -4,7 +4,7 @@
     "main": "src/index.js",
     "scripts": {
         "start": "ts-node src/index.ts",
-        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+        "dev": "ts-node-dev --respawn --transpile-only --ignore-watch \"node_modules\" src/index.ts", 
         "format": "prettier --write ."
     },
     "keywords": [],
