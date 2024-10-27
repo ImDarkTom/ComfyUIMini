@@ -50,8 +50,8 @@ async function getImage(filename: string, subfolder: string, type: string) {
                     return {
                         data: readFile,
                         headers: {
-                            'Content-Type': 'image/png',
-                            'Content-Length': readFile.length,
+                            'content-type': 'image/png',
+                            'content-length': readFile.length,
                         },
                     };
                 }

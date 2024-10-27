@@ -34,20 +34,20 @@ router.get('/image', async (req, res): Promise<void> => {
         return;
     }
 
-    const imageResponse = await getImage(filename, subfolder, imageType); 
+    const imageResponse = await getImage(filename, subfolder, imageType);
 
     if (!imageResponse || 
-        !imageResponse.headers['Content-Length'] || 
-        !imageResponse.headers['Content-Type'] ||
-        !(typeof imageResponse.headers['Content-Type'] === 'string') ||
-        !(typeof imageResponse.headers['Content-Length'] === 'string')
+        !imageResponse.headers['content-length'] || 
+        !imageResponse.headers['content-type'] ||
+        !(typeof imageResponse.headers['content-type'] === 'string') ||
+        !(typeof imageResponse.headers['content-length'] === 'string')
     ) {
         res.status(500).send('Server error when fetching image. Check console for more information.');
         return;
     }
 
-    res.set('Content-Type', imageResponse.headers['Content-Type']);
-    res.set('Content-Length', imageResponse.headers['Content-Length']);
+    res.set('Content-Type', imageResponse.headers['content-type']);
+    res.set('Content-Length', imageResponse.headers['content-length']);
     res.send(imageResponse.data);
 });
 
