@@ -51,7 +51,7 @@ yarn install
 3. Run the app
 
 ```bash
-node .
+npm start
 ```
 
 _Note: You may experience a crash on first launch, this should be gone after launching it again_

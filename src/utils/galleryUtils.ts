@@ -1,8 +1,8 @@
-const path = require('path');
-const fs = require('fs');
-const config = require('config');
+import path from 'path';
+import fs from 'fs';
+import config from 'config';
 
-function getRelativeTimeText(timestamp) {
+function getRelativeTimeText(timestamp: number): string {
     const now = Date.now();
     const secondsPast = Math.floor((now - timestamp) / 1000);
 
@@ -66,7 +66,15 @@ function getRelativeTimeText(timestamp) {
  * @returns {GalleryPageData} - Object containing paginated images and additional page info.
  */
 function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
-    const imageOutputPath = config.output_dir;
+    const imageOutputPath = config.get('output_dir');
+
+    if (!imageOutputPath || !(typeof imageOutputPath === 'string')) {
+        return { 
+            error: 'Output directory not set properly in config.',
+            scanned: { subfolders: [], images: [] },
+            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 }
+        };
+    }
 
     if (!fs.existsSync(imageOutputPath)) {
         return { 
@@ -113,7 +121,7 @@ function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
 
     const paginatedFiles = filteredFiles.slice(startIndex, endIndex);
 
-    let subfolders;
+    let subfolders: string[];
     try {
         subfolders = fs
             .readdirSync(imageOutputPath)
@@ -133,6 +141,6 @@ function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
     };
 }
 
-module.exports = {
-    getGalleryPageData,
-};
+export {
+    getGalleryPageData
+}

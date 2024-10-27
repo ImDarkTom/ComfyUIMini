@@ -1,5 +1,11 @@
-const winston = require('winston');
-const config = require('config');
+import winston from 'winston';
+import config from 'config';
+
+interface CustomLogger extends winston.Logger {
+    success: winston.LeveledLogMethod;
+    optional: winston.LeveledLogMethod;
+    logOptional: (type: string, message: string) => void;
+}
 
 const customLevels = {
     levels: {
@@ -33,7 +39,7 @@ const logger = winston.createLogger({
         })
     ),
     transports: [new winston.transports.Console()],
-});
+}) as CustomLogger;
 
 winston.addColors(customLevels.colors);
 
@@ -43,12 +49,18 @@ winston.addColors(customLevels.colors);
  * @param {string} type Type of optional log from config.
  * @param {string} message Text to log.
  */
-function logOptional(type, message) {
-    if (config.optional_log[type]) {
+function logOptional(type: string, message: string) {
+    const optionalLogConfigs: any = config.get('optional_log');
+
+    if (!optionalLogConfigs || optionalLogConfigs[type] === undefined) {
+        return;
+    }
+
+    if (optionalLogConfigs[type]) {
         logger.optional(message);
     }
 }
 
 logger.logOptional = logOptional;
 
-module.exports = logger;
+export default logger;
