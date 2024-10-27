@@ -3,6 +3,8 @@
     "version": "1.4.0",
     "main": "src/index.js",
     "scripts": {
+        "start": "ts-node src/index.ts",
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
         "format": "prettier --write ."
     },
     "keywords": [],
@@ -18,21 +20,23 @@
     "dependencies": {
         "@types/config": "^3.3.5",
         "@types/express": "^5.0.0",
+        "@types/multer": "^1.4.12",
+        "@types/winston": "^2.4.4",
+        "@types/ws": "^8.5.12",
         "axios": "^1.7.2",
         "config": "^3.3.12",
         "cookie-parser": "^1.4.6",
         "ejs": "^3.1.10",
         "express": "^4.18.2",
         "multer": "^1.4.5-lts.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.3",
         "winston": "^3.14.2",
         "ws": "^8.18.0"
     },
     "description": "",
     "devDependencies": {
-        "@types/winston": "^2.4.4",
         "prettier": "^3.3.3",
-        "ts-node": "^10.9.2",
-        "ts-node-dev": "^2.0.0",
-        "typescript": "^5.6.3"
+        "ts-node-dev": "^2.0.0"
     }
 }
