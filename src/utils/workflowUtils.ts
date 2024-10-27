@@ -3,7 +3,7 @@ import fs from 'fs';
 import logger from './logger';
 import { autoGenerateMetadata } from './metadataUtils';
 import config from 'config';
-import { Workflow } from '../types/Workflow';
+import { Workflow, WorkflowFileReadError, WorkflowWithMetadata } from '../types/Workflow';
 
 type ServerWorkflowMetadataList = Record<
     string,
@@ -13,10 +13,6 @@ type ServerWorkflowMetadataList = Record<
         description: string;
     }
 >;
-
-type WorkflowFileReadError = {
-    error: 'notFound' | 'invalidJson' | 'unknown';
-};
 
 let fetchedWorkflowMetadata: ServerWorkflowMetadataList = {};
 
@@ -207,7 +203,7 @@ function writeConvertedWorkflowToFile(
  * @param {string} filename The server workflow filename.
  * @returns {Record<string, object>|WorkflowFileReadError} The workflow object, or an object with an error type if there was an error.
  */
-function readServerWorkflow(filename: string): Record<string, object> | WorkflowFileReadError {
+function readServerWorkflow(filename: string): WorkflowWithMetadata | WorkflowFileReadError {
     try {
         const workflowFilePath = path.join(__dirname, '..', '..', 'workflows', filename);
         const fileContents = fs.readFileSync(workflowFilePath);

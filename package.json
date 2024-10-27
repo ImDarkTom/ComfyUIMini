@@ -19,6 +19,7 @@
     "license": "AGPL-3.0",
     "dependencies": {
         "@types/config": "^3.3.5",
+        "@types/cookie-parser": "^1.4.7",
         "@types/express": "^5.0.0",
         "@types/multer": "^1.4.12",
         "@types/winston": "^2.4.4",

@@ -32,3 +32,7 @@ export interface WorkflowWithMetadata {
     nodes: Workflow;
     _comfyuimini_meta: WorkflowMetadata;
 }
+
+export type WorkflowFileReadError = {
+    error: 'notFound' | 'invalidJson' | 'unknown';
+};
