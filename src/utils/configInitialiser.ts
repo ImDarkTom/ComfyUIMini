@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 function initialiseConfig() {
     const configDir = path.join(__dirname, '..', '..', 'config', 'default.json');
@@ -15,4 +15,4 @@ function initialiseConfig() {
     }
 }
 
-module.exports = { initialiseConfig };
+export { initialiseConfig };
