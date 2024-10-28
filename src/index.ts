@@ -26,14 +26,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 server.on('upgrade', handleUpgrade);
 
-import { loadObjectInfo } from './utils/objectInfoUtils';
 import { comfyUICheck } from './utils/comfyAPIUtils';
 import { serverWorkflowsCheck } from './utils/workflowUtils';
 import getLocalIp from './utils/localIp';
 
 comfyUICheck();
 serverWorkflowsCheck();
-loadObjectInfo();
 
 server.listen(config.get('app_port'), '0.0.0.0', () => {
     logger.success(`Running on http://${getLocalIp()}:${config.get('app_port')}`);

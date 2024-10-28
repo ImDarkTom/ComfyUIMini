@@ -1,34 +1,40 @@
-import { NormalisedInputInfo, ObjectInfoPartial } from "../types/ComfyObjectInfo";
-import { getObjectInfo } from "./comfyAPIUtils";
+import { NormalisedInputInfo, ProcessedObjectInfo } from '../types/ComfyObjectInfo';
+import { fetchRawObjectInfo } from './comfyAPIUtils';
 
-const inputsInfoObject: { [nodeName: string]: { [inputName: string]: NormalisedInputInfo } } = {};
+async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
+    const rawObjectInfo = await fetchRawObjectInfo();
 
-async function loadObjectInfo() {
-    const objectInfoObject = await getObjectInfo();
+    if (rawObjectInfo === null) {
+        return null;
+    }
 
-    for (const [nodeName, nodeInfo] of Object.entries(objectInfoObject)) {
+    const processedObjectInfo: ProcessedObjectInfo = {};
+
+    for (const [nodeName, nodeInfo] of Object.entries(rawObjectInfo)) {
         for (const [inputName, inputInfo] of Object.entries(nodeInfo.input.required)) {
             const normalisedInfo = getNormalisedInfo(inputInfo);
 
             if (normalisedInfo.userAccessible) {
-                if (!inputsInfoObject[nodeName]) {
-                    inputsInfoObject[nodeName] = {};
+                if (!processedObjectInfo[nodeName]) {
+                    processedObjectInfo[nodeName] = {};
                 }
 
-                inputsInfoObject[nodeName][inputName] = normalisedInfo;
+                processedObjectInfo[nodeName][inputName] = normalisedInfo;
             }
         }
     }
+
+    return processedObjectInfo;
 }
 
 /**
- * ComfyUI uses weirdly different formats for each input type, 
- * e.g. For most inputs, `inputInfo[0]` is a string containing the input type, for arrays, its the list of options. 
- * 
+ * ComfyUI uses weirdly different formats for each input type,
+ * e.g. For most inputs, `inputInfo[0]` is a string containing the input type, for arrays, its the list of options.
+ *
  * However, arrays may also *sometimes* have a second element with other options such as `tooltip`, `default`, or `image_upload`
  * that determines if the input has an upload input or is just a list of options.
- * 
- * @param {object} inputInfo 
+ *
+ * @param {object} inputInfo
  * @returns {object}
  * @returns {object.userAcessible} If the input contains an input that can be shown to the user i.e. not just piped from another node.
  */
@@ -39,19 +45,19 @@ function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
 
     if (Array.isArray(inputInfo[0])) {
         normalisedInfo.userAccessible = true;
-        normalisedInfo.type = "ARRAY";
+        normalisedInfo.type = 'ARRAY';
         normalisedInfo.data = inputInfo[0];
-        
+
         if (inputInfo[1]) {
             normalisedInfo.default = inputInfo[1]?.default;
             normalisedInfo.tooltip = inputInfo[1]?.tooltip;
             normalisedInfo.imageUpload = inputInfo[1]?.image_upload;
         }
-        
+
         return normalisedInfo;
     }
 
-    if (["INT", "FLOAT", "STRING"].includes(inputInfo[0])) {
+    if (['INT', 'FLOAT', 'STRING'].includes(inputInfo[0])) {
         // data can contain default, tooltip for any type, min, max for int, and min max, and step for ints, and multiline, dynamicPrompts for strings
         normalisedInfo.userAccessible = true;
         normalisedInfo.type = inputInfo[0];
@@ -63,7 +69,4 @@ function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
     return normalisedInfo;
 }
 
-export {
-    loadObjectInfo,
-    inputsInfoObject
-}
+export { getProcessedObjectInfo };
