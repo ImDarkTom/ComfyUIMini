@@ -1,26 +1,26 @@
-import { default as axios } from 'axios';
-import { Workflow } from '../types/Workflow';
+import axios from 'axios';
 import WebSocket from 'ws';
-import logger from './logger';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import config from 'config';
 import FormData from 'form-data';
+import https from 'https';
+import logger from './logger';
+import { Workflow } from '../types/Workflow';
 import { HistoryResponse } from '../types/History';
 import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
-import https from 'https';
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
-const comfyUIUrl: string = config.get('comfyui_url');
+const comfyUiUrl: string = config.get('comfyui_url');
 
 const httpsAgent = new https.Agent({
     rejectUnauthorized: config.get('reject_unauthorised_cert') || false,
 });
 
 const comfyuiAxios = axios.create({
-    baseURL: comfyUIUrl,
+    baseURL: comfyUiUrl,
     timeout: 10000,
     headers: {
         'User-Agent': `ComfyUIMini/${appVersion}`,
@@ -332,7 +332,7 @@ async function comfyUICheck() {
         return;
     }
 
-    if (comfyUIUrl.startsWith('https://')) {
+    if (comfyUiUrl.startsWith('https://')) {
         if (config.get('reject_unauthorised_cert')) {
             logger.warn(
                 'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a https:// ComfyUI websocket.'

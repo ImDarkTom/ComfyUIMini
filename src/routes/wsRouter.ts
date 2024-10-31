@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
-import { generateImage } from '../utils/comfyAPIUtils';
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
+import { generateImage } from '../utils/comfyAPIUtils';
 import logger from '../utils/logger';
 
 const wss = new WebSocket.Server({ noServer: true });

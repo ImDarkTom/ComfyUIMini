@@ -1,5 +1,5 @@
-import { NormalisedInputInfo, ProcessedObjectInfo } from '../types/ComfyObjectInfo';
 import { fetchRawObjectInfo } from './comfyAPIUtils';
+import { NormalisedInputInfo, ProcessedObjectInfo } from '../types/ComfyObjectInfo';
 
 async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
     const rawObjectInfo = await fetchRawObjectInfo();
