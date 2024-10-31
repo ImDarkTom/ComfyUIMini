@@ -3,9 +3,9 @@ export interface ObjectInfoPartial {
         input: {
             required: {
                 [inputName: string]: any;
-            }
-        }
-    }
+            };
+        };
+    };
 }
 
 export interface NormalisedInputInfo {
@@ -20,4 +20,10 @@ export interface NormalisedInputInfo {
     step?: number;
     multiline?: boolean;
     dynamicPrompts?: boolean;
+}
+
+export interface ProcessedObjectInfo {
+    [nodeName: string]: {
+        [inputName: string]: NormalisedInputInfo;
+    };
 }

@@ -4,6 +4,7 @@ import logger from './logger';
 import { autoGenerateMetadata } from './metadataUtils';
 import config from 'config';
 import { Workflow, WorkflowFileReadError, WorkflowWithMetadata } from '../types/Workflow';
+import paths from './paths';
 
 type ServerWorkflowMetadataList = Record<
     string,
@@ -17,40 +18,24 @@ type ServerWorkflowMetadataList = Record<
 let fetchedWorkflowMetadata: ServerWorkflowMetadataList = {};
 
 function serverWorkflowsCheck(): void {
-    const serverWorkflowsFolderPath = path.join(__dirname, '..', '..', 'workflows');
+    checkForWorkflowsFolder();
 
-    checkForWorkflowsFolder(serverWorkflowsFolderPath);
-
-    const jsonFileList = getWorkflowFolderJsonFiles(serverWorkflowsFolderPath);
-    const fetchedServerWorkflowMetadata = getServerWorkflowMetadata(serverWorkflowsFolderPath, jsonFileList);
+    const jsonFileList = getWorkflowFolderJsonFiles();
+    const fetchedServerWorkflowMetadata = getServerWorkflowMetadata(jsonFileList);
 
     fetchedWorkflowMetadata = fetchedServerWorkflowMetadata;
 }
 
 /**
- * Reads the server workflows folder for JSON files.
- *
- * @param {string} serverWorkflowsFolderPath The path to the server workflows folder.
- * @returns {string[]} An array of JSON filenames in the workflows folder.
- */
-function getWorkflowFolderJsonFiles(serverWorkflowsFolderPath: string): string[] {
-    const filesList = fs.readdirSync(serverWorkflowsFolderPath);
-    const jsonFilesList = filesList.filter((file) => path.extname(file).toLowerCase() === '.json');
-
-    return jsonFilesList;
-}
-
-/**
  * Checks if the server workflows folder path exists, if not, tries to creates it.
- * @param {string} serverWorkflowsFolderPath The path to the server workflows folder.
  */
-function checkForWorkflowsFolder(serverWorkflowsFolderPath: string) {
-    if (!fs.existsSync(serverWorkflowsFolderPath)) {
+function checkForWorkflowsFolder() {
+    if (!fs.existsSync(paths.workflows)) {
         logger.warn(`Server workflows folder path from config not found, attempting to create...`);
 
         try {
-            fs.mkdirSync(serverWorkflowsFolderPath);
-            logger.success(`Server workflows folder created at '${serverWorkflowsFolderPath}'`);
+            fs.mkdirSync(paths.workflows);
+            logger.success(`Server workflows folder created at '${paths.workflows}'`);
         } catch (err) {
             console.error(`Error creating server workflows directory: ${err}`);
         }
@@ -59,6 +44,18 @@ function checkForWorkflowsFolder(serverWorkflowsFolderPath: string) {
     }
 
     return;
+}
+
+/**
+ * Reads the server workflows folder for JSON files.
+ *
+ * @returns {string[]} An array of JSON filenames in the workflows folder.
+ */
+function getWorkflowFolderJsonFiles(): string[] {
+    const filesList = fs.readdirSync(paths.workflows);
+    const jsonFilesList = filesList.filter((file) => path.extname(file).toLowerCase() === '.json');
+
+    return jsonFilesList;
 }
 
 /**
@@ -86,18 +83,14 @@ function checkIfObjectIsValidWorkflow(workflowJson: { [key: string]: any }): boo
 /**
  * Attempts to get text metadata for all workflows in the server workflows folder.
  *
- * @param {string} serverWorkflowsFolderPath The folder where the workflows are stored.
  * @param {string[]} jsonFileList List of JSON files in the workflows folder.
  * @returns {ServerWorkflowMetadataList} An object containing the metadata for each workflow.
  */
-function getServerWorkflowMetadata(
-    serverWorkflowsFolderPath: string,
-    jsonFileList: string[]
-): ServerWorkflowMetadataList {
+function getServerWorkflowMetadata(jsonFileList: string[]): ServerWorkflowMetadataList {
     let accumulatedWorkflowMetadata: ServerWorkflowMetadataList = {};
 
     for (const jsonFilename of jsonFileList) {
-        const jsonFileContents = fs.readFileSync(path.join(serverWorkflowsFolderPath, jsonFilename), 'utf8');
+        const jsonFileContents = fs.readFileSync(path.join(paths.workflows, jsonFilename), 'utf8');
         const parsedJsonContents = JSON.parse(jsonFileContents);
 
         if (!checkIfObjectIsValidWorkflow(parsedJsonContents)) {
@@ -108,7 +101,7 @@ function getServerWorkflowMetadata(
 
         if (!jsonMetadata) {
             try {
-                generateWorkflowMetadataAndSaveToFile(parsedJsonContents, jsonFilename, serverWorkflowsFolderPath);
+                generateWorkflowMetadataAndSaveToFile(parsedJsonContents, jsonFilename);
             } catch (error) {
                 console.log(`Error when auto-generating metadata for workflow '${jsonFilename}': ${error}`);
                 continue;
@@ -140,13 +133,8 @@ function getServerWorkflowMetadata(
  *
  * @param {Workflow} workflowObjectWithoutMetadata The workflow object without metadata.
  * @param {string} workflowFilename The filename of the workflow in the workflows folder.
- * @param {string} serverWorkflowsFolderPath The path to the workflows folder.
  */
-function generateWorkflowMetadataAndSaveToFile(
-    workflowObjectWithoutMetadata: Workflow,
-    workflowFilename: string,
-    serverWorkflowsFolderPath: string
-) {
+function generateWorkflowMetadataAndSaveToFile(workflowObjectWithoutMetadata: Workflow, workflowFilename: string) {
     if (config.get('auto_convert_comfyui_workflows') === false) {
         return;
     }
@@ -163,7 +151,7 @@ function generateWorkflowMetadataAndSaveToFile(
     };
 
     try {
-        writeConvertedWorkflowToFile(fullWorkflowMetadata, workflowFilename, serverWorkflowsFolderPath);
+        writeConvertedWorkflowToFile(fullWorkflowMetadata, workflowFilename);
     } catch (error) {
         logger.error(`Error when saving converted workflow to file: ${error}`);
         return;
@@ -179,22 +167,17 @@ function generateWorkflowMetadataAndSaveToFile(
  *
  * @param {object} workflowObject The new workflow object with metadata.
  * @param {string} originalWorkflowFilename The original filename of the workflow.
- * @param {string} serverWorkflowsFolderPath The path to the workflows folder.
  */
-function writeConvertedWorkflowToFile(
-    workflowObject: object,
-    originalWorkflowFilename: string,
-    serverWorkflowsFolderPath: string
-) {
+function writeConvertedWorkflowToFile(workflowObject: object, originalWorkflowFilename: string) {
     fs.writeFileSync(
-        path.join(serverWorkflowsFolderPath, `[CONVERTED] ${originalWorkflowFilename}`),
+        path.join(paths.workflows, `[CONVERTED] ${originalWorkflowFilename}`),
         JSON.stringify(workflowObject, null, 2),
         'utf8'
     );
 
     fs.renameSync(
-        path.join(serverWorkflowsFolderPath, originalWorkflowFilename),
-        path.join(serverWorkflowsFolderPath, `${originalWorkflowFilename}.bak`)
+        path.join(paths.workflows, originalWorkflowFilename),
+        path.join(paths.workflows, `${originalWorkflowFilename}.bak`)
     );
 }
 

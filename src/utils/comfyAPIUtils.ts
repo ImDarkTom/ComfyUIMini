@@ -9,16 +9,23 @@ import config from 'config';
 import FormData from 'form-data';
 import { HistoryResponse } from '../types/History';
 import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
+import https from 'https';
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
+const comfyUIUrl: string = config.get('comfyui_url');
+
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: config.get('reject_unauthorised_cert') || false,
+});
 
 const comfyuiAxios = axios.create({
-    baseURL: config.get('comfyui_url'),
+    baseURL: comfyUIUrl,
     timeout: 10000,
     headers: {
         'User-Agent': `ComfyUIMini/${appVersion}`,
     },
+    httpsAgent: httpsAgent,
 });
 
 async function queuePrompt(workflowPrompt: Workflow) {
@@ -46,7 +53,7 @@ async function getImage(filename: string, subfolder: string, type: string) {
                 // Fallback if ComfyUI is unavailable
                 if (type === 'output') {
                     const readFile = fs.readFileSync(path.join(config.get('output_dir'), subfolder, filename));
-    
+
                     return {
                         data: readFile,
                         headers: {
@@ -65,7 +72,7 @@ async function getImage(filename: string, subfolder: string, type: string) {
 
 /**
  * Gets the list of available models.
- * 
+ *
  * @returns {Promise<string[]>} A promise that resolves to an array of strings representing the available models.
  */
 async function getModelTypesList(): Promise<string[]> {
@@ -81,7 +88,7 @@ async function getModelTypesList(): Promise<string[]> {
 
 /**
  * Gets the list of available models for a specific model type.
- * 
+ *
  * @param {string} modelType The model type to get the list of available models for.
  * @returns {Promise<string[]>} A promise that resolves to a list of strings representing the available models for the specified model type.
  */
@@ -109,10 +116,8 @@ async function getQueue() {
     return response.data;
 }
 
-
-
 async function getOutputImages(promptId: string) {
-    const outputImages: Record<string, string[]> = {}; 
+    const outputImages: Record<string, string[]> = {};
 
     const history = await getHistory(promptId);
     const historyOutputs = history[promptId].outputs;
@@ -143,7 +148,20 @@ function bufferIsText(buffer: Buffer) {
 }
 
 async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
-    const wsServer = new WebSocket(`${config.get('comfyui_ws_url')}/ws?clientId=${clientId}`);
+    const comfyuiWsUrl: string = config.get('comfyui_ws_url');
+    const wsOptions: WebSocket.ClientOptions = {};
+
+    if (comfyuiWsUrl.startsWith('wss://')) {
+        if (config.get('reject_unauthorised_cert')) {
+            logger.warn(
+                'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a wss:// ComfyUI websocket.'
+            );
+        }
+
+        wsOptions.agent = httpsAgent;
+    }
+
+    const wsServer = new WebSocket(`${config.get('comfyui_ws_url')}/ws?clientId=${clientId}`, wsOptions);
 
     wsServer.on('open', async () => {
         try {
@@ -161,7 +179,6 @@ async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
 
                 wsClient.send(JSON.stringify({ type: 'total_images', data: Object.values(cachedImages).length }));
                 wsClient.send(JSON.stringify({ type: 'completed', data: cachedImages }));
-
             } else {
                 wsClient.send(JSON.stringify({ type: 'total_images', data: queueJson['queue_running'][0][4].length }));
             }
@@ -315,6 +332,14 @@ async function comfyUICheck() {
         return;
     }
 
+    if (comfyUIUrl.startsWith('https://')) {
+        if (config.get('reject_unauthorised_cert')) {
+            logger.warn(
+                'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a https:// ComfyUI websocket.'
+            );
+        }
+    }
+
     try {
         await comfyuiAxios.get('/');
 
@@ -364,14 +389,14 @@ async function interruptGeneration() {
     return response.data;
 }
 
-async function getObjectInfo(): Promise<ObjectInfoPartial> {
+async function fetchRawObjectInfo(): Promise<ObjectInfoPartial | null> {
     try {
         const response = await comfyuiAxios.get('/api/object_info');
 
         return response.data;
     } catch (error) {
         logger.warn(`Could not get ComfyUI object info: ${error}`);
-        return {};
+        return null;
     }
 }
 
@@ -384,14 +409,14 @@ async function uploadImage(file: Express.Multer.File) {
         });
 
         const response = await comfyuiAxios.post('/upload/image', form, {
-            headers: { 
+            headers: {
                 ...form.getHeaders(),
-            }
+            },
         });
 
         return response;
     } catch (error) {
-        return {error: error}
+        return { error: error };
     }
 }
 
@@ -404,6 +429,6 @@ export {
     getImage,
     getModelTypesList,
     getItemsForModelType,
-    getObjectInfo,
-    uploadImage
+    fetchRawObjectInfo,
+    uploadImage,
 };

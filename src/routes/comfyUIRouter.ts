@@ -1,6 +1,6 @@
 import express from 'express';
 import { getHistory, getQueue, interruptGeneration, getImage, uploadImage } from '../utils/comfyAPIUtils';
-import { inputsInfoObject, loadObjectInfo } from '../utils/objectInfoUtils';
+import { getProcessedObjectInfo } from '../utils/objectInfoUtils';
 import multer from 'multer';
 
 const upload = multer();
@@ -25,9 +25,9 @@ router.get('/history/:promptId', async (req, res) => {
 router.get('/image', async (req, res): Promise<void> => {
     const queries = req.query;
 
-    const filename = (typeof queries.filename === 'string') ? queries.filename : null;
-    const subfolder = (typeof queries.subfolder === 'string') ? queries.subfolder : "";
-    const imageType = (typeof queries.type === 'string') ? queries.type : null;
+    const filename = typeof queries.filename === 'string' ? queries.filename : null;
+    const subfolder = typeof queries.subfolder === 'string' ? queries.subfolder : '';
+    const imageType = typeof queries.type === 'string' ? queries.type : null;
 
     if (!filename || !imageType) {
         res.status(400).send('Missing parameters');
@@ -36,8 +36,9 @@ router.get('/image', async (req, res): Promise<void> => {
 
     const imageResponse = await getImage(filename, subfolder, imageType);
 
-    if (!imageResponse || 
-        !imageResponse.headers['content-length'] || 
+    if (
+        !imageResponse ||
+        !imageResponse.headers['content-length'] ||
         !imageResponse.headers['content-type'] ||
         !(typeof imageResponse.headers['content-type'] === 'string') ||
         !(typeof imageResponse.headers['content-length'] === 'string')
@@ -63,14 +64,22 @@ router.get('/interrupt', async (req, res) => {
     res.send(interruptionResponse.data);
 });
 
-router.get('/inputsinfo', (req, res) => {
-    res.json(inputsInfoObject);
+router.get('/inputsinfo', async (req, res) => {
+    const processedObjectInfo = await getProcessedObjectInfo();
+
+    if (processedObjectInfo === null) {
+        res.status(500).send('Could not get ComfyUI object info.');
+        return;
+    }
+
+    res.json(processedObjectInfo);
 });
 
 router.post('/upload/image', upload.single('image'), async (req, res): Promise<void> => {
     try {
-        if (!req.file ||
-            !req.headers['content-type'] || 
+        if (
+            !req.file ||
+            !req.headers['content-type'] ||
             !req.headers['content-type'].startsWith('multipart/form-data')
         ) {
             res.status(400).json({ error: 'No file selected for upload' });
@@ -84,19 +93,13 @@ router.post('/upload/image', upload.single('image'), async (req, res): Promise<v
             return;
         }
 
-        try {
-            await loadObjectInfo();
-        } catch (err) {
-            console.error('Error reloading object info', err);
-        }
-
         res.status(200).json({
             message: 'File uploaded successfully',
             externalResponse: response.data,
         });
     } catch (err) {
         console.error('Error uploading file to ComfyUI', err);
-        res.status(500).json({error: 'Failed to upload file.'});
+        res.status(500).json({ error: 'Failed to upload file.' });
     }
 });
 
