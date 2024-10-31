@@ -9,16 +9,23 @@ import config from 'config';
 import FormData from 'form-data';
 import { HistoryResponse } from '../types/History';
 import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
+import https from 'https';
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../package.json').version;
+const comfyUIUrl: string = config.get('comfyui_url');
+
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: config.get('reject_unauthorised_cert') || false,
+});
 
 const comfyuiAxios = axios.create({
-    baseURL: config.get('comfyui_url'),
+    baseURL: comfyUIUrl,
     timeout: 10000,
     headers: {
         'User-Agent': `ComfyUIMini/${appVersion}`,
     },
+    httpsAgent: httpsAgent,
 });
 
 async function queuePrompt(workflowPrompt: Workflow) {
@@ -141,7 +148,20 @@ function bufferIsText(buffer: Buffer) {
 }
 
 async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
-    const wsServer = new WebSocket(`${config.get('comfyui_ws_url')}/ws?clientId=${clientId}`);
+    const comfyuiWsUrl: string = config.get('comfyui_ws_url');
+    const wsOptions: WebSocket.ClientOptions = {};
+
+    if (comfyuiWsUrl.startsWith('wss://')) {
+        if (config.get('reject_unauthorised_cert')) {
+            logger.warn(
+                'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a wss:// ComfyUI websocket.'
+            );
+        }
+
+        wsOptions.agent = httpsAgent;
+    }
+
+    const wsServer = new WebSocket(`${config.get('comfyui_ws_url')}/ws?clientId=${clientId}`, wsOptions);
 
     wsServer.on('open', async () => {
         try {
@@ -310,6 +330,14 @@ async function comfyUICheck() {
     if (!minComfyUIVersion) {
         logger.warn('No minimum ComfyUI version specified in config.');
         return;
+    }
+
+    if (comfyUIUrl.startsWith('https://')) {
+        if (config.get('reject_unauthorised_cert')) {
+            logger.warn(
+                'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a https:// ComfyUI websocket.'
+            );
+        }
     }
 
     try {
