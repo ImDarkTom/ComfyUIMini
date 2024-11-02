@@ -11,7 +11,15 @@ async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
     const processedObjectInfo: ProcessedObjectInfo = {};
 
     for (const [nodeName, nodeInfo] of Object.entries(rawObjectInfo)) {
-        for (const [inputName, inputInfo] of Object.entries(nodeInfo.input.required)) {
+        const requiredInputs = nodeInfo.input.required;
+        const optionalInputs = nodeInfo.input.optional; 
+
+        const allInputs = {
+            ...(requiredInputs ?? {}),
+            ...(optionalInputs ?? {}),
+        };
+
+        for (const [inputName, inputInfo] of Object.entries(allInputs)) {
             const normalisedInfo = getNormalisedInfo(inputInfo);
 
             if (normalisedInfo.userAccessible) {

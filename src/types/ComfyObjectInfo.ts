@@ -1,9 +1,12 @@
 export interface ObjectInfoPartial {
     [nodeType: string]: {
         input: {
-            required: {
+            required?: {
                 [inputName: string]: any;
             };
+            optional?: {
+                [inputName: string]: any;
+            }
         };
     };
 }
