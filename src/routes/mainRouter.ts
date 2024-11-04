@@ -1,15 +1,19 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import themeMiddleware from '../middleware/themeMiddleware';
-import { writeServerWorkflow, readServerWorkflow, serverWorkflowMetadata } from '../utils/workflowUtils';
+import { writeServerWorkflow, readServerWorkflow, serverWorkflowMetadata, checkIfObjectIsValidWorkflow } from '../utils/workflowUtils';
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '../types/Requests';
+import { Workflow, WorkflowWithMetadata } from '../types/Workflow';
+import { getProcessedObjectInfo } from '../utils/objectInfoUtils';
+import { EditInput, EditPageData } from '../types/EjsPageData';
 
 const router = express.Router();
 
 router.use(cookieParser());
 router.use(themeMiddleware);
 router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 
 const appVersion = require('../../package.json').version;
 
@@ -70,6 +74,85 @@ router.get('/edit/:type/:identifier', (req: RequestWithTheme, res) => {
             res.status(400).send('Invalid workflow type');
             break;
     }
+});
+
+router.post('/edit2', async (req: RequestWithTheme, res) => {
+    const workflowText = req.body.workflow;
+
+    if (!workflowText) {
+        res.status(400).send('No workflow provided');
+        return;
+    }
+
+    let workflow;
+    try {
+        workflow = JSON.parse(workflowText);
+    } catch (error) {
+        res.status(400).send('Invalid workflow');
+        return;
+    }
+
+    if (!checkIfObjectIsValidWorkflow(workflow)) {
+        res.status(400).send('Invalid workflow');
+        return;
+    }
+
+    let title: string = 'Unnamed Workflow';
+    let description: string = '';
+
+    if ('_comfyuimini_meta' in workflow) {
+           if ('title' in workflow._comfyuimini_meta) {
+            title = workflow._comfyuimini_meta.title;
+        }
+
+        if ('description' in workflow._comfyuimini_meta) {
+            description = workflow._comfyuimini_meta.description;
+        }
+    }
+
+    const objectInfo = await getProcessedObjectInfo();
+
+    if (objectInfo === null) {
+        res.status(500).send('Could not get ComfyUI object info.');
+        return;
+    }
+
+    console.log(objectInfo);
+
+    res.render('pages/edit2', {
+        title: title,
+        description: description,
+        inputs: [],
+        theme: req.theme,
+    } as EditPageData);
+});
+
+function getEditInputsList(workflow: WorkflowWithMetadata | Workflow): EditInput[] {
+    const inputs: EditInput[] = [];
+
+    if ('_comfyuimini_meta' in workflow) {
+        if ('input_options' in workflow._comfyuimini_meta) {
+            const inputOptions = workflow._comfyuimini_meta.input_options;
+
+            for (const inputOption of inputOptions) {
+                const nodeId = inputOption.node_id;
+                const inputNameInNode = inputOption.input_name_in_node;
+                const title = inputOption.title ?? `[${nodeId}] ${inputNameInNode}`;
+
+                inputs.push({
+                    nodeId,
+                    inputName: inputNameInNode,
+                    title,
+                    default: '',
+                    type: 'STRING',
+                });
+            }
+        }
+    }
+}
+
+router.get('/import2', (req: RequestWithTheme, res) => {
+    res.render('pages/import2', { theme: req.theme });
 });
 
 router.put('/edit/:fileName', (req, res) => {

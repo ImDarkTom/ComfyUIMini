@@ -64,11 +64,12 @@ function getWorkflowFolderJsonFiles(): string[] {
  * @param {object} workflowJson The workflow object.
  * @returns {boolean} True if workflow is a valid ComfyUI workflow, otherwise false.
  */
-function checkIfObjectIsValidWorkflow(workflowJson: { [key: string]: any }): boolean {
+function checkIfObjectIsValidWorkflow(workflowJson: { [key: string]: any }): workflowJson is Workflow | WorkflowWithMetadata {
     if (typeof workflowJson !== 'object') {
         return false;
     }
 
+    // TODO: Use object.entries instead
     for (const key of Object.keys(workflowJson)) {
         const node = workflowJson[key];
 
@@ -236,5 +237,6 @@ export {
     serverWorkflowsCheck,
     readServerWorkflow,
     writeServerWorkflow,
+    checkIfObjectIsValidWorkflow,
     fetchedWorkflowMetadata as serverWorkflowMetadata,
 };
