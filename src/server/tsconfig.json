@@ -8,8 +8,9 @@
         "skipLibCheck": true,
         "allowJs": true,
         "checkJs": false,
-        "noEmit": true
+        "noEmit": false,
+        "rootDir": ".",
+        "outDir": "../../dist/server"
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules"]
+    "include": ["./**/*"],
 }

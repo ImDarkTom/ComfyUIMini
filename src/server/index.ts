@@ -26,6 +26,7 @@ app.use('/', mainRouter);
 app.use('/comfyui', comfyUIRouter);
 app.use('/setsetting', settingsRouter);
 app.use(express.static(paths.public));
+app.use(express.static(paths.clientJs));
 
 comfyUICheck();
 serverWorkflowsCheck();

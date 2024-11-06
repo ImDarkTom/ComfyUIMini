@@ -11,7 +11,7 @@ router.use(cookieParser());
 router.use(themeMiddleware);
 router.use(express.json());
 
-const appVersion = require('../../package.json').version;
+const appVersion = require('../../../package.json').version;
 
 router.get('/', (req: RequestWithTheme, res) => {
     res.render('pages/index', {

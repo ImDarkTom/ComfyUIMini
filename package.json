@@ -1,10 +1,15 @@
 {
     "name": "comfyuimini",
-    "version": "1.4.0",
-    "main": "src/index.js",
+    "version": "1.5.0",
+    "main": "dist/server/index.js",
     "scripts": {
-        "start": "ts-node src/index.ts",
-        "dev": "ts-node-dev --respawn --transpile-only --ignore-watch \"node_modules\" src/index.ts", 
+        "start": "node .",
+        "build:server": "tsc -p src/server/tsconfig.json",
+        "build:client": "tsc -p src/client/tsconfig.json",
+        "build": "npm run build:server && npm run build:client",
+        "dev:server": "tsc -w -p src/server/tsconfig.json",
+        "dev:client": "tsc -w -p src/client/tsconfig.json",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"nodemon dist/server/index.js --watch dist/server\"",
         "format": "prettier --write ."
     },
     "keywords": [],
@@ -37,6 +42,7 @@
     },
     "description": "",
     "devDependencies": {
+        "concurrently": "^9.1.0",
         "prettier": "^3.3.3",
         "ts-node-dev": "^2.0.0"
     }

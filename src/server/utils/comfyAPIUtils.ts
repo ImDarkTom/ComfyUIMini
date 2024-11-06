@@ -12,7 +12,7 @@ import { HistoryResponse } from '../types/History';
 import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
 
 const clientId = crypto.randomUUID();
-const appVersion = require('../../package.json').version;
+const appVersion = require('../../../package.json').version;
 const comfyUiUrl: string = config.get('comfyui_url');
 
 const httpsAgent = new https.Agent({
