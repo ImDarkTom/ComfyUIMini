@@ -188,7 +188,7 @@ function writeConvertedWorkflowToFile(workflowObject: object, originalWorkflowFi
  */
 function readServerWorkflow(filename: string): WorkflowWithMetadata | WorkflowFileReadError {
     try {
-        const workflowFilePath = path.join(__dirname, '..', '..', 'workflows', filename);
+        const workflowFilePath = path.join(paths.workflows, filename);
         const fileContents = fs.readFileSync(workflowFilePath);
         const workflowObject = JSON.parse(fileContents.toString());
 
@@ -220,11 +220,7 @@ function readServerWorkflow(filename: string): WorkflowWithMetadata | WorkflowFi
  */
 function writeServerWorkflow(filename: string, workflowObject: object): boolean {
     try {
-        fs.writeFileSync(
-            path.join(__dirname, '..', '..', 'workflows', filename),
-            JSON.stringify(workflowObject, null, 2),
-            'utf8'
-        );
+        fs.writeFileSync(path.join(paths.workflows, filename), JSON.stringify(workflowObject, null, 2), 'utf8');
         return true;
     } catch (error) {
         console.error('Error when saving workflow to file:', error);

@@ -1,4 +1,4 @@
-function openPopupWindow(message) {
+function openPopupWindow(message: string) {
     const popupContainerDiv = document.createElement('div');
     popupContainerDiv.classList.add('popup-container');
 
@@ -17,6 +17,10 @@ function openPopupWindow(message) {
 
 function closePopupWindow() {
     const popupContainer = document.querySelector('.popup-container');
+
+    if (!popupContainer) {
+        return;
+    }
 
     popupContainer.remove();
     return;

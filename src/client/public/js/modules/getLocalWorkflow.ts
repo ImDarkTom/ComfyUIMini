@@ -1,12 +1,16 @@
+// @ts-nocheck
+
 export class LocalWorkflowNotFoundError extends Error {
-    constructor(workflowTitle) {
+    constructor(workflowTitle: string) {
         super(`Could not find any locally saved workflow named '${workflowTitle}'.`);
         this.name = 'LocalWorkflowNotFoundError';
     }
 }
 
-export function getLocalWorkflow(workflowTitle) {
-    const allWorkflows = JSON.parse(localStorage.getItem('workflows')) || [];
+export const getAllWorkflows = () => JSON.parse(localStorage.getItem('workflows') || '[]');
+
+export function getLocalWorkflow(workflowTitle: string) {
+    const allWorkflows = getAllWorkflows();
 
     const allWorkflowTitles = allWorkflows.map((item) => {
         return JSON.parse(item)['_comfyuimini_meta'].title;

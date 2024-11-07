@@ -1,4 +1,4 @@
-async function changeTheme(selectElement) {
+async function changeTheme(selectElement: HTMLSelectElement) {
     const selectedTheme = selectElement.value;
 
     const response = await fetch(`/setsetting/theme?theme=${selectedTheme}`);
@@ -12,7 +12,7 @@ async function changeTheme(selectElement) {
     }
 }
 
-async function setGalleryItemsPerPage(inputElement) {
+async function setGalleryItemsPerPage(inputElement: HTMLInputElement) {
     const galleryItemsPerPage = inputElement.value;
 
     const response = await fetch(`/setsetting/galleryitemsperpage?count=${galleryItemsPerPage}`);
