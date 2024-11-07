@@ -1,6 +1,6 @@
-const bottomSheetContainer = document.querySelector('.bottom-sheet-container');
-const bottomSheetBackgroundOverlay = document.querySelector('.bottom-sheet-bg-overlay');
-const bottomSheetEntriesList = document.querySelector('.bottom-sheet-entries-list');
+const bottomSheetContainer = document.querySelector('.bottom-sheet-container') as HTMLElement;
+const bottomSheetBackgroundOverlay = document.querySelector('.bottom-sheet-bg-overlay') as HTMLElement;
+const bottomSheetEntriesList = document.querySelector('.bottom-sheet-entries-list') as HTMLElement;
 
 function closeBottomSheet() {
     bottomSheetContainer.classList.add('slide-down');
@@ -15,11 +15,15 @@ function closeBottomSheet() {
     }, 300);
 }
 
-/**
- *
- * @param {Array<icon: string, text: string, function: string, functionParams>} entriesList
- */
-function loadBottomSheet(entriesList, event) {
+interface Entry {
+    icon: string;
+    text: string;
+    function: string;
+    functionParams: string[];
+}
+
+
+function loadBottomSheet(entriesList: Entry[], event: Event) {
     event.preventDefault();
 
     bottomSheetEntriesList.innerHTML = '';
