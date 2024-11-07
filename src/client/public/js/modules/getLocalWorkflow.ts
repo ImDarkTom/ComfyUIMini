@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { WorkflowWithMetadata } from '@shared/types/Workflow';
 
 export class LocalWorkflowNotFoundError extends Error {
     constructor(workflowTitle: string) {
@@ -7,22 +7,26 @@ export class LocalWorkflowNotFoundError extends Error {
     }
 }
 
-export const getAllWorkflows = () => JSON.parse(localStorage.getItem('workflows') || '[]');
+export function getAllWorkflows(): WorkflowWithMetadata[] {
+    const workflowTextsList: string[] = JSON.parse(localStorage.getItem('workflows') || '[]');
+    const parsedWorkflowsList: WorkflowWithMetadata[] = workflowTextsList.map((workflowText: string) =>
+        JSON.parse(workflowText)
+    );
 
-export function getLocalWorkflow(workflowTitle: string) {
+    return parsedWorkflowsList;
+}
+
+export function getLocalWorkflow(workflowTitle: string): WorkflowWithMetadata | null {
     const allWorkflows = getAllWorkflows();
 
-    const allWorkflowTitles = allWorkflows.map((item) => {
-        return JSON.parse(item)['_comfyuimini_meta'].title;
+    const currentWorkflow = allWorkflows.find((workflow) => {
+        return workflow._comfyuimini_meta.title == workflowTitle;
     });
 
-    if (!allWorkflowTitles.includes(workflowTitle)) {
-        throw new LocalWorkflowNotFoundError(workflowTitle);
+    if (!currentWorkflow) {
+        console.error(`Could not find workflow with title '${workflowTitle}' in local storage.`);
+        return null;
     }
-
-    const currentWorkflow = JSON.parse(
-        allWorkflows.filter((item) => JSON.parse(item)['_comfyuimini_meta'].title == workflowTitle)[0]
-    );
 
     return currentWorkflow;
 }
