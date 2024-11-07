@@ -14,7 +14,7 @@ export interface ObjectInfoPartial {
 export interface NormalisedInputInfo {
     type: "ARRAY" | "STRING" | "INT" | "FLOAT";
     userAccessible: boolean;
-    data: object;
+    data: string[];
     default?: string;
     tooltip?: string;
     imageUpload?: boolean;

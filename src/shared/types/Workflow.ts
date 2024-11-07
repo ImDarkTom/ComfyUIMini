@@ -32,6 +32,8 @@ export type WorkflowWithMetadata = Workflow & {
     _comfyuimini_meta: WorkflowMetadata;
 }
 
+export type AnyWorkflow = WorkflowWithMetadata | Workflow;
+
 export type WorkflowFileReadError = {
     error: 'notFound' | 'invalidJson' | 'unknown';
 };

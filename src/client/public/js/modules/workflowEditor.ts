@@ -1,12 +1,31 @@
+import { NormalisedInputInfo, ProcessedObjectInfo } from "@shared/types/ComfyObjectInfo";
+import { AnyWorkflow, InputOption, WorkflowMetadata, WorkflowNode } from "@shared/types/Workflow";
+
+interface InputConfig {
+    nodeId: string;
+    comfyMetadata: NormalisedInputInfo & { classType: string };
+    inputName: string;
+    title: string;
+    default: string;
+    disabled: boolean;
+}
+
 export class WorkflowEditor {
+    containerElem: HTMLElement;
+    workflowObject: AnyWorkflow;
+    titleInput: HTMLInputElement;
+    descriptionInput: HTMLTextAreaElement;
+    inputCount: number;
+    comfyInputsInfo: ProcessedObjectInfo | null;
+
     /**
      *
      * @param {HTMLElement} containerElem The container element in which all of the inputs will be renderered.
-     * @param {object} workflowObject The workflow object to render
+     * @param {AnyWorkflow} workflowObject The workflow object to render
      * @param {HTMLInputElement} titleInput The title input element.
      * @param {HTMLTextAreaElement} descriptionInput The description input element.
      */
-    constructor(containerElem, workflowObject, titleInput, descriptionInput) {
+    constructor(containerElem: HTMLElement, workflowObject: AnyWorkflow, titleInput: HTMLInputElement, descriptionInput: HTMLTextAreaElement) {
         this.containerElem = containerElem;
         this.workflowObject = workflowObject;
         this.titleInput = titleInput;
@@ -17,9 +36,9 @@ export class WorkflowEditor {
 
     /**
      *
-     * @param {object} newWorkflowObject The new workflow object to set.
+     * @param {AnyWorkflow} newWorkflowObject The new workflow object to set.
      */
-    setWorkflowObject(newWorkflowObject) {
+    setWorkflowObject(newWorkflowObject: AnyWorkflow) {
         this.workflowObject = newWorkflowObject;
     }
 
@@ -34,7 +53,7 @@ export class WorkflowEditor {
             description: '',
         };
 
-        const jsonMetadata = this.workflowObject['_comfyuimini_meta'] || blankMetadata;
+        const jsonMetadata = this.workflowObject['_comfyuimini_meta']as WorkflowMetadata || blankMetadata;
 
         this.titleInput.removeAttribute('disabled');
         this.titleInput.value = jsonMetadata.title || 'My Workflow';
@@ -65,9 +84,9 @@ export class WorkflowEditor {
      * Loop through each input in a node and render it.
      *
      * @param {string} nodeId The ID of the node in the workflow.
-     * @param {object} node The node object.
+     * @param {WorkflowNode} node The node object.
      */
-    async renderNodeInputs(nodeId, node) {
+    async renderNodeInputs(nodeId: string, node: WorkflowNode) {
         if (nodeId.charAt(0) == '_') {
             return;
         }
@@ -79,7 +98,7 @@ export class WorkflowEditor {
             }
 
             const userInputConfig = this.getUserInputConfig(nodeId, inputName);
-            const renderConfig = await this.buildRenderConfig(userInputConfig, inputValue, nodeId, inputName);
+            const renderConfig = await this.buildRenderConfig(userInputConfig, inputValue.toString(), nodeId, inputName);
 
             if (!renderConfig) {
                 continue;
@@ -94,16 +113,15 @@ export class WorkflowEditor {
      * 
      * @param {string} inputType The type of input in the node. e.g. `seed`, `scheduler`, `ckpt_name`.
      * @param {string} nodeId The ID of the node in the workflow.
-     * @returns {Promise<object>} The metadata for the input type.
+     * @returns {Promise<NormalisedInputInfo & { classType: string } | null>} The metadata for the input type.
      */
-    async getComfyMetadataForInputType(inputType, nodeId) {
+    async getComfyMetadataForInputType(inputType: string, nodeId: string): Promise<NormalisedInputInfo & { classType: string } | null> {
         if (!this.comfyInputsInfo) {
             const comfyObjectMetadata = await fetch('/comfyui/inputsinfo');
-            const comfyObjectMetadataJson = await comfyObjectMetadata.json();
+            const comfyObjectMetadataJson: ProcessedObjectInfo = await comfyObjectMetadata.json();
 
             this.comfyInputsInfo = comfyObjectMetadataJson;
         }
-
 
         const nodeClassType = this.workflowObject[nodeId].class_type;
 
@@ -119,13 +137,13 @@ export class WorkflowEditor {
     /**
      * Create a config to pass to renderInput, any values in inputConfig will override the other arguments here.
      *
-     * @param {object} inputConfig A input's config from the ComfyUIMini metadata object.
+     * @param {InputOption|{}} inputConfig A input's config from the ComfyUIMini metadata object.
      * @param {string} defaultValue The default value of the input.
      * @param {string} nodeId The ID of the node in the workflow.
      * @param {string} inputName The name of the input in the node.
      * @returns {Promise<InputConfig|null>} A config object to pass to renderInput or null if the input doesn't have metadata.
      */
-    async buildRenderConfig(inputConfig, defaultValue, nodeId, inputName) {
+    async buildRenderConfig(inputConfig: InputOption|{}, defaultValue: string, nodeId: string, inputName: string): Promise<InputConfig | null> {
         const comfyMetadataForInput = await this.getComfyMetadataForInputType(inputName, nodeId);
 
         if (!comfyMetadataForInput) {
@@ -150,19 +168,19 @@ export class WorkflowEditor {
      *
      * @param {string} nodeId The ID of the node in the workflow.
      * @param {string} inputName The name of the input in the node.
-     * @returns {object} Returns an empty object if no metadata is found, otherwise returns said additional metadata.
+     * @returns {InputOption|{}} Returns an empty object if no metadata is found, otherwise returns said additional metadata.
      */
-    getUserInputConfig(nodeId, inputName) {
-        const cuiMiniMetadata = this.workflowObject['_comfyuimini_meta'];
+    getUserInputConfig(nodeId: string, inputName: string): InputOption | {} {
+        const cuiMiniMetadata = this.workflowObject['_comfyuimini_meta'] as WorkflowMetadata;
 
         if (!cuiMiniMetadata) {
-            return null;
+            return {};
         }
 
         const inputOptions = cuiMiniMetadata['input_options'];
 
         if (!inputOptions) {
-            return null;
+            return {};
         }
 
         for (const option of inputOptions) {
@@ -170,26 +188,16 @@ export class WorkflowEditor {
                 return option;
             }
         }
-    }
 
-    /**
-     * @typedef {object} InputConfig
-     * The minimum config required to render an input.
-     *
-     * @property {string} nodeId The ID of the node in the workflow.
-     * @property {object} comfyMetadata Input metadata from ComfyUI.
-     * @property {string} inputName The name of the input in the node.
-     * @property {string} title The title of the input.
-     * @property {string} default The default value of the input.
-     * @property {boolean} disabled Whether the input is disabled.
-     */
+        return {};
+    }
 
     /**
      * Renders an input based off an input config.
      *
      * @param {InputConfig} inputConfig The config for the input to render.
      */
-    async renderInput(inputConfig) {
+    async renderInput(inputConfig: InputConfig) {
         this.inputCount += 1;
 
         const nodeId = inputConfig.nodeId;
@@ -222,7 +230,7 @@ export class WorkflowEditor {
         this.containerElem.innerHTML += html;
 
         if (inputConfig.disabled) {
-            const hideButtonElement = this.containerElem.querySelector(`#hide-button-${idPrefix}`);
+            const hideButtonElement = this.containerElem.querySelector(`#hide-button-${idPrefix}`) as HTMLElement;
 
             if (!hideButtonElement) {
                 return;
@@ -239,7 +247,7 @@ export class WorkflowEditor {
      * @param {string} idPrefix The id prefix for each element in the input.
      * @returns {string} The rendered HTML for the default value input.
      */
-    renderDefaultValueInput(inputConfig, idPrefix) {
+    renderDefaultValueInput(inputConfig: InputConfig, idPrefix: string) {
         const inputDefault = inputConfig.default || '';
 
         let inputHTML = `<label for="${idPrefix}-default">Default</label>`;
@@ -277,7 +285,7 @@ export class WorkflowEditor {
      *
      * @param {Element} hideButtonElement The hide button element.
      */
-    hideInput(hideButtonElement) {
+    hideInput(hideButtonElement: HTMLElement) {
         if (hideButtonElement.classList.contains('hide')) {
             hideButtonElement.classList.add('eye');
             hideButtonElement.classList.remove('hide');
@@ -353,7 +361,7 @@ export class WorkflowEditor {
                 continue;
             }
 
-            let inputOptions = {};
+            let inputOptions: InputOption = {} as InputOption;
             inputOptions['node_id'] = inputNodeId;
             inputOptions['input_name_in_node'] = inputNameInNode;
 
@@ -365,9 +373,8 @@ export class WorkflowEditor {
 
 
 
-            const inputTitleElement = /** @type {HTMLInputElement} */ (
-                inputContainer.querySelector('.workflow-input-title')
-            );
+            const inputTitleElement = inputContainer.querySelector('.workflow-input-title') as HTMLInputElement;
+
 
             if (!inputTitleElement) {
                 alert(`Error while saving workflow, input title element not found for ${inputNameInNode}`);
@@ -378,9 +385,7 @@ export class WorkflowEditor {
 
 
 
-            const defaultValueElement = /** @type {HTMLInputElement} */ (
-                inputContainer.querySelector('.workflow-input-default')
-            );
+            const defaultValueElement = inputContainer.querySelector('.workflow-input-default') as HTMLInputElement
 
             if (!defaultValueElement) {
                 alert(`Error while saving workflow, default value element not found for ${inputNameInNode}`);
@@ -392,7 +397,7 @@ export class WorkflowEditor {
             inputOptionsList.push(inputOptions);
         }
 
-        modifiedWorkflow['_comfyuimini_meta'] = {};
+        modifiedWorkflow['_comfyuimini_meta'] = {} as WorkflowMetadata;
         modifiedWorkflow['_comfyuimini_meta']['title'] = this.titleInput.value || 'Unnamed Workflow';
         modifiedWorkflow['_comfyuimini_meta']['description'] = this.descriptionInput.value || '';
         modifiedWorkflow['_comfyuimini_meta']['format_version'] = '2';
@@ -412,7 +417,7 @@ export class WorkflowEditor {
  *
  * @param {HTMLElement} item The input container.
  */
-function moveUp(item) {
+function moveUp(item: HTMLElement) {
     if (!item.parentNode) {
         return;
     }
@@ -429,7 +434,7 @@ function moveUp(item) {
  *
  * @param {HTMLElement} item The input container.
  */
-function moveDown(item) {
+function moveDown(item: HTMLElement) {
     if (!item.parentNode) {
         return;
     }
