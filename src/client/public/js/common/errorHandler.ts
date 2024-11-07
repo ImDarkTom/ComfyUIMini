@@ -1,4 +1,4 @@
-import { LocalWorkflowNotFoundError } from '../modules/getLocalWorkflow';
+import { LocalWorkflowNotFoundError } from '../modules/getLocalWorkflow.js';
 
 export function handleError(error: Error) {
     if (error instanceof LocalWorkflowNotFoundError) {

@@ -28,8 +28,7 @@ export interface Workflow {
     [key: string]: WorkflowNode;
 }
 
-export interface WorkflowWithMetadata {
-    nodes: Workflow;
+export type WorkflowWithMetadata = Workflow & {
     _comfyuimini_meta: WorkflowMetadata;
 }
 

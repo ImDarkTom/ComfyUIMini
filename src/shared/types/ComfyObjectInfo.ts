@@ -12,7 +12,7 @@ export interface ObjectInfoPartial {
 }
 
 export interface NormalisedInputInfo {
-    type: string;
+    type: "ARRAY" | "STRING" | "INT" | "FLOAT";
     userAccessible: boolean;
     data: object;
     default?: string;

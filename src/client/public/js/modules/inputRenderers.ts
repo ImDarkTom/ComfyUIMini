@@ -1,4 +1,4 @@
-const createInputContainer = (id, title, inputHtml) => `
+const createInputContainer = (id: string, title: string, inputHtml: string): string => `
     <div class="workflow-input-container">
         <label for="${id}">${title}</label>
         <div class="inner-input-wrapper">
@@ -7,25 +7,32 @@ const createInputContainer = (id, title, inputHtml) => `
     </div>
 `;
 
+export interface InputOptionsBase {
+    node_id: string;
+    input_name_in_node: string;
+    title: string;
+    default: string;
+}
+
+interface SelectInputOptions extends InputOptionsBase {
+    data: string[];
+    imageUpload: boolean;
+}
+
 /**
  * 
- * @param {Object} inputOptions Options for the select input.
- * @param {string} inputOptions.node_id The node id.
- * @param {string} inputOptions.input_name_in_node The name of the input in the node.
- * @param {string} inputOptions.title The title of the input.
- * @param {string} inputOptions.data The list of options to select from.
- * @param {string} inputOptions.default The default selection option.
+ * @param {InputOptions} inputOptions Options for the select input.
  * @returns {string}
  */
-export function renderSelectInput(inputOptions) {
-    function renderUploadMenu(inputId) {
+export function renderSelectInput(inputOptions: SelectInputOptions): string {
+    function renderUploadMenu(inputId: string) {
         return `<label for="${inputId}-file_input" class="file-input-label"><span class="icon upload"></span></label>
         <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">`
     }
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
-    const createSelectOptions = (options) => {
+    const createSelectOptions = (options: string[]) => {
         let optionsHtml = '';
 
         if (!options.includes(inputOptions.default)) {
@@ -47,16 +54,16 @@ export function renderSelectInput(inputOptions) {
     );
 }
 
+interface TextInputOptions extends InputOptionsBase {
+
+}
+
 /**
  * 
- * @param {Object} inputOptions Options for the text input.
- * @param {string} inputOptions.node_id The node id.
- * @param {string} inputOptions.input_name_in_node The name of the input in the node.
- * @param {string} inputOptions.default The default value.
- * @param {string} inputOptions.title The title of the input.
+ * @param {TextInputOptions} inputOptions Options for the text input.
  * @returns {string}
  */
-export function renderTextInput(inputOptions) {
+export function renderTextInput(inputOptions: TextInputOptions): string {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
 
     return createInputContainer(
@@ -66,19 +73,18 @@ export function renderTextInput(inputOptions) {
     );
 }
 
+interface NumberInputOptions extends InputOptionsBase {
+    step: number;
+    min: number;
+    max: number;
+}
+
 /**
  * 
- * @param {Object} inputOptions Options for the number input.
- * @param {string} inputOptions.node_id The node id.
- * @param {string} inputOptions.input_name_in_node The name of the input in the node.
- * @param {string} inputOptions.title The title of the input.
- * @param {string} inputOptions.default The default value of the input.
- * @param {number} inputOptions.step The step size of the input.
- * @param {number} inputOptions.min The minimum value of the input.
- * @param {number} inputOptions.max The maximum value of the input.
+ * @param {NumberInputOptions} inputOptions Options for the number input.
  * @returns {string}
  */
-export function renderNumberInput(inputOptions) {
+export function renderNumberInput(inputOptions: NumberInputOptions): string {
     const showRandomiseToggle = inputOptions.input_name_in_node === "seed";
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
