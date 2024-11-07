@@ -1,4 +1,4 @@
-import { Workflow, WorkflowMetadata } from '../types/Workflow';
+import { Workflow, WorkflowMetadata } from '@shared/types/Workflow';
 
 /**
  * Attempts to auto-generate metadata for a workflow object.

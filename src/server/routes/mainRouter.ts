@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import themeMiddleware from '../middleware/themeMiddleware';
 import { writeServerWorkflow, readServerWorkflow, serverWorkflowMetadata } from '../utils/workflowUtils';
 import { getGalleryPageData } from '../utils/galleryUtils';
-import { RequestWithTheme } from '../types/Requests';
+import { RequestWithTheme } from '@shared/types/Requests';
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 import { fetchRawObjectInfo } from './comfyAPIUtils';
-import { NormalisedInputInfo, ProcessedObjectInfo } from '../types/ComfyObjectInfo';
+import { NormalisedInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo';
 
 async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
     const rawObjectInfo = await fetchRawObjectInfo();
@@ -12,7 +12,7 @@ async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
 
     for (const [nodeName, nodeInfo] of Object.entries(rawObjectInfo)) {
         const requiredInputs = nodeInfo.input.required;
-        const optionalInputs = nodeInfo.input.optional; 
+        const optionalInputs = nodeInfo.input.optional;
 
         const allInputs = {
             ...(requiredInputs ?? {}),

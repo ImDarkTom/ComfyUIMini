@@ -7,9 +7,9 @@ import config from 'config';
 import FormData from 'form-data';
 import https from 'https';
 import logger from './logger';
-import { Workflow } from '../types/Workflow';
-import { HistoryResponse } from '../types/History';
-import { ObjectInfoPartial } from '../types/ComfyObjectInfo';
+import { Workflow } from '@shared/types/Workflow';
+import { HistoryResponse } from '@shared/types/History';
+import { ObjectInfoPartial } from '@shared/types/ComfyObjectInfo';
 
 const clientId = crypto.randomUUID();
 const appVersion = require('../../../package.json').version;
