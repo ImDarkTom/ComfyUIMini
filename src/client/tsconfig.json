@@ -6,7 +6,7 @@
         "allowJs": false,
         "checkJs": false,
         "rootDir": "../",
-        "outDir": "../../dist/client"
+        "outDir": "../../dist"
     },
     "include": ["./**/*", "../shared/**/*"],
     "exclude": ["../server/**/*"]
