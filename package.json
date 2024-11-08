@@ -8,7 +8,7 @@
         "build": "rimraf dist && npm run build:server && npm run build:client",
         "build:server": "tsc -p src/server/tsconfig.json",
         "build:client": "tsc -p src/client/tsconfig.json",
-        "dev": "concurrently \"npm run dev:client\" \"ts-node-dev --project src/server/tsconfig.json src/server/index.ts\"",
+        "dev": "concurrently \"npm run dev:client\" \"tsx watch --tsconfig src/server/tsconfig.json src/server/index.ts\"",
         "dev:client": "tsc -w -p src/client/tsconfig.json",
         "format": "prettier --write ."
     },
@@ -35,7 +35,6 @@
         "express": "^4.18.2",
         "multer": "^1.4.5-lts.1",
         "rimraf": "^6.0.1",
-        "ts-node": "^10.9.2",
         "typescript": "^5.6.3",
         "winston": "^3.14.2",
         "ws": "^8.18.0"
@@ -44,6 +43,6 @@
     "devDependencies": {
         "concurrently": "^9.1.0",
         "prettier": "^3.3.3",
-        "ts-node-dev": "^2.0.0"
+        "tsx": "^4.19.2"
     }
 }
