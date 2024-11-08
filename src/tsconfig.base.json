@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "noEmit": false,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "baseUrl": "./",
+        "paths": {
+            "@shared/*": ["shared/*"]
+        },
+        "rootDir": "./"
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "allowJs": false,
+        "checkJs": false,
+        "rootDir": "../",
+        "outDir": "../../dist"
+    },
+    "include": ["./**/*", "../shared/**/*"],
+    "exclude": ["../server/**/*"]
+}

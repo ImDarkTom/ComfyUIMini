@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: "Home", theme }) %>
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/pages/index.js" defer type="module"></script>
+</head>
+<body>
+    <div class="header">
+        <img src="/img/android-chrome-icon.png" alt="ComfyUI Mini Icon" class="header-icon">
+        <span class="version-text">v<%= appVersion %></span>
+    </div>
+    <div class="main-container">
+        <div class="workflow-grid">
+            <% for (const workflowMetadata of serverWorkflowMetadata) { %>
+                <%- include('../partials/workflow-grid-item', { workflowMetadata }) %>
+            <% }; %>
+        </div>
+    </div>
+    <%- include('../partials/actionSheet') %>
+    <%- include('../partials/actionBar', { 
+        buttons: [
+            { action: "/", icon: "home", text: "Home", type: "link" },
+            { action: "/#search", icon: "search", text: "Search (TBA)", type: "link" },
+            { action: "/import", icon: "import", text: "Import", type: "link"}, // main button
+            { action: "/gallery", icon: "gallery", text: "Gallery", type: "link" },
+            { action: "/settings", icon: "settings", text: "Settings", type: "link" }
+        ] 
+    }) %>
+</body>
+</html>

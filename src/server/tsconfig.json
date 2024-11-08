@@ -1,0 +1,13 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "allowJs": true,
+        "checkJs": false,
+        "rootDir": "../",
+        "outDir": "../../dist"
+    },
+    "include": ["./**/*", "../shared/**/*"],
+    "exclude": ["../client/**/*"]
+}
