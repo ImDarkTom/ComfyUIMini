@@ -6,7 +6,7 @@
         "start": "node .",
         "build:server": "tsc -p src/server/tsconfig.json",
         "build:client": "tsc -p src/client/tsconfig.json",
-        "build": "npm run build:server && npm run build:client",
+        "build": "rimraf dist && npm run build:server && npm run build:client",
         "dev": "concurrently \"npm run dev:client\" \"ts-node-dev --project src/server/tsconfig.json src/server/index.ts\"",
         "dev:server": "tsc -w -p src/server/tsconfig.json",
         "dev:client": "tsc -w -p src/client/tsconfig.json",

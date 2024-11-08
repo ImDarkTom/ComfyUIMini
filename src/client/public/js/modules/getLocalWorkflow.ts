@@ -8,12 +8,9 @@ export class LocalWorkflowNotFoundError extends Error {
 }
 
 export function getAllWorkflows(): WorkflowWithMetadata[] {
-    const workflowTextsList: string[] = JSON.parse(localStorage.getItem('workflows') || '[]');
-    const parsedWorkflowsList: WorkflowWithMetadata[] = workflowTextsList.map((workflowText: string) =>
-        JSON.parse(workflowText)
-    );
+    const workflowsList: WorkflowWithMetadata[] = JSON.parse(localStorage.getItem('workflows') || '[]');
 
-    return parsedWorkflowsList;
+    return workflowsList;
 }
 
 export function getLocalWorkflow(workflowTitle: string): WorkflowWithMetadata | null {

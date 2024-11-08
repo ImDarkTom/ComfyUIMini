@@ -1,12 +1,13 @@
+import { getAllWorkflows } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
 
 /**
  *
  * @param {string} selector The CSS selector of the element to get.
- * @returns {HTMLInputElement|HTMLTextAreaElement} The element found by the selector.
+ * @returns {HTMLElement} The element found by the selector.
  */
-function getElementOrThrow(selector) {
-    const element = document.querySelector(selector);
+function getElementOrThrow(selector: string): HTMLElement {
+    const element = document.querySelector(selector) as HTMLElement;
 
     if (!element) {
         throw new Error(`Element not found: ${selector}`);
@@ -15,20 +16,24 @@ function getElementOrThrow(selector) {
     return element;
 }
 
-const workflowFileInput = getElementOrThrow('#file-input');
-const workflowInputLabel = getElementOrThrow('.file-input-label');
+const workflowFileInput = getElementOrThrow('#file-input') as HTMLInputElement;
+const workflowInputLabel = getElementOrThrow('.file-input-label') as HTMLElement;
 
-const inputsContainer = getElementOrThrow('.inputs-container');
+const inputsContainer = getElementOrThrow('.inputs-container') as HTMLElement;
 
-const titleInput = getElementOrThrow('#title-input');
-const descriptionInput = getElementOrThrow('#description-input');
+const titleInput = getElementOrThrow('#title-input') as HTMLInputElement;
+const descriptionInput = getElementOrThrow('#description-input') as HTMLTextAreaElement;
 
-const saveToBrowserButton = getElementOrThrow('#save-to-browser');
-const downloadWorkflowButton = getElementOrThrow('#download-workflow');
+const saveToBrowserButton = getElementOrThrow('#save-to-browser') as HTMLButtonElement;
+const downloadWorkflowButton = getElementOrThrow('#download-workflow') as HTMLButtonElement;
 
 const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
 
 workflowFileInput.addEventListener('change', () => {
+    if (!workflowFileInput.files) {
+        return alert('No files selected.');
+    }
+
     const file = workflowFileInput.files[0];
 
     if (!file) {
@@ -63,6 +68,10 @@ workflowFileInput.addEventListener('change', () => {
 });
 
 function isFileSelected() {
+    if (!workflowFileInput.files) {
+        return false;
+    }
+
     return workflowFileInput.files.length > 0;
 }
 
@@ -73,12 +82,8 @@ saveToBrowserButton.addEventListener('click', () => {
 
     const newJson = workflowEditor.updateJsonWithUserInput();
 
-    if (newJson == '') {
-        return;
-    }
-
-    const workflows = JSON.parse(localStorage.getItem('workflows')) || [];
-    workflows.push(JSON.stringify(newJson));
+    const workflows = getAllWorkflows();
+    workflows.push(newJson);
 
     localStorage.setItem('workflows', JSON.stringify(workflows));
 
@@ -91,10 +96,6 @@ downloadWorkflowButton.addEventListener('click', () => {
     }
 
     const newJson = workflowEditor.updateJsonWithUserInput();
-
-    if (newJson == '') {
-        return;
-    }
 
     const jsonString = JSON.stringify(newJson, null, 2);
 
