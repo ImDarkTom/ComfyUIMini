@@ -2,7 +2,7 @@
 
 A mobile-friendly WebUI to run ComfyUI workflows.
 
-![](https://github.com/user-attachments/assets/78a52443-ac9c-498c-8df3-129acd94a48c)
+![App Preview](https://github.com/user-attachments/assets/78a52443-ac9c-498c-8df3-129acd94a48c)
 
 ## Features
 
@@ -27,26 +27,28 @@ A mobile-friendly WebUI to run ComfyUI workflows.
 
 ## Installation
 
-1. Download latest release (more stable) or clone the repo (more up to date)
+    1. Download
+    You can download the latest release from the [releases page](https://github.com/ImDarkTom/ComfyUIMini/releases) (more stable)
+    or clone the repository (more up-to-date).
 
 ```bash
 git clone https://github.com/ImDarkTom/ComfyUIMini.git
 cd ./ComfyUIMini
 ```
 
-2. Install dependencies
-
-With NPM:
+2. Setup
+(a) Install script
+```bash
+chmod +x ./install.sh
+./install.sh
+```
+(b) Or manually
 
 ```bash
 npm install
+npm run build
 ```
 
-Or with Yarn
-
-```bash
-yarn install
-```
 
 3. Run the app
 
