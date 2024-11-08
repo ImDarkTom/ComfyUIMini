@@ -1,24 +1,32 @@
+import { WorkflowWithMetadata } from '@shared/types/Workflow.js';
 import { handleError } from '../common/errorHandler.js';
-import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
+import { getAllWorkflows, getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
 
-const inputsContainer = document.querySelector('.inputs-container');
-const titleInput = document.getElementById('title-input');
-const descriptionInput = document.getElementById('description-input');
+const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
+const titleInput = document.getElementById('title-input') as HTMLInputElement;
+const descriptionInput = document.getElementById('description-input') as HTMLTextAreaElement;
 
-const workflowTextAttrib = document.body.getAttribute('data-workflow-text');
-const workflowOriginalTitle = document.body.getAttribute('data-workflow-title');
-const workflowType = document.body.getAttribute('data-workflow-type');
+const workflowTextAttrib = document.body.getAttribute('data-workflow-text') as string;
+const workflowOriginalTitle = document.body.getAttribute('data-workflow-title') as string;
+const workflowType = document.body.getAttribute('data-workflow-type') as string;
 const workflowFilename = document.body.getAttribute('data-workflow-filename') || '';
 
-const saveButton = document.getElementById('save');
+const saveButton = document.getElementById('save') as HTMLButtonElement;
 
 const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
 
 function loadWorkflow() {
     try {
         if (workflowTextAttrib == '') {
-            workflowEditor.setWorkflowObject(getLocalWorkflow(workflowOriginalTitle));
+            const workflow = getLocalWorkflow(workflowOriginalTitle);
+
+            if (!workflow) {
+                console.error('Workflow not found');
+                return;
+            }
+
+            workflowEditor.setWorkflowObject(workflow);
         } else {
             workflowEditor.setWorkflowObject(JSON.parse(workflowTextAttrib));
         }
@@ -33,10 +41,10 @@ export async function saveWorkflow() {
     const updatedWorkflowObject = workflowEditor.updateJsonWithUserInput();
 
     if (workflowType === 'local') {
-        const workflows = JSON.parse(localStorage.getItem('workflows')) || [];
+        const workflows: WorkflowWithMetadata[] = getAllWorkflows();
 
         const currentWorkflowIndex = workflows.findIndex(
-            (workflow) => JSON.parse(workflow)['_comfyuimini_meta'].title === workflowOriginalTitle
+            (workflow) => workflow['_comfyuimini_meta'].title === workflowOriginalTitle
         );
 
         if (currentWorkflowIndex == -1) {
@@ -44,7 +52,7 @@ export async function saveWorkflow() {
             return;
         }
 
-        workflows[currentWorkflowIndex] = JSON.stringify(updatedWorkflowObject);
+        workflows[currentWorkflowIndex] = updatedWorkflowObject;
 
         localStorage.setItem('workflows', JSON.stringify(workflows));
 

@@ -1,5 +1,5 @@
 import { NormalisedInputInfo, ProcessedObjectInfo } from "@shared/types/ComfyObjectInfo";
-import { AnyWorkflow, InputOption, WorkflowMetadata, WorkflowNode } from "@shared/types/Workflow";
+import { AnyWorkflow, InputOption, WorkflowMetadata, WorkflowNode, WorkflowWithMetadata } from "@shared/types/Workflow";
 
 interface InputConfig {
     nodeId: string;
@@ -344,7 +344,7 @@ export class WorkflowEditor {
      *
      * @returns {object} The exported workflow object.
      */
-    updateJsonWithUserInput() {
+    updateJsonWithUserInput(): WorkflowWithMetadata {
         const inputOptionsList = [];
 
         const modifiedWorkflow = this.workflowObject;
@@ -404,7 +404,7 @@ export class WorkflowEditor {
 
         modifiedWorkflow['_comfyuimini_meta']['input_options'] = inputOptionsList;
 
-        return modifiedWorkflow;
+        return modifiedWorkflow as WorkflowWithMetadata;
     }
 }
 

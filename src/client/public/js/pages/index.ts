@@ -1,12 +1,25 @@
-function editWorkflow(type, title) {
+import { getAllWorkflows } from "../modules/getLocalWorkflow.js";
+
+declare global {
+    interface Window {
+        editWorkflow: (type: string, title: string) => void;
+        renameWorkflow: (name: string) => void;
+        deleteWorkflow: (name: string) => void;
+        downloadWorkflow: (workflowTitle: string) => void;
+    }
+}
+
+window.editWorkflow = editWorkflow;
+function editWorkflow(type: string, title: string) {
     window.location.href = `/edit/${type}/${title}`;
 }
 
-function renameWorkflow(name) {
-    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
+window.renameWorkflow = renameWorkflow;
+export function renameWorkflow(name: string) {
+    const workflowsList = getAllWorkflows();
 
     const workflowNames = workflowsList.map((workflow) => {
-        return JSON.parse(workflow)['_comfyuimini_meta'].title;
+        return workflow['_comfyuimini_meta'].title;
     });
 
     if (!workflowNames.includes(name)) {
@@ -19,15 +32,16 @@ function renameWorkflow(name) {
         return;
     }
 
-    const workflowListJson = workflowsList.map((workflow) => {
-        return JSON.parse(workflow);
-    });
+    const selectedWorkflow = workflowsList.find((workflow) => workflow['_comfyuimini_meta'].title === name);
 
-    const selectedWorkflow = workflowListJson.find((workflow) => workflow['_comfyuimini_meta'].title === name);
+    if (!selectedWorkflow) {
+        alert('Unable to find workflow with name ' + name);
+        return;
+    }
 
     selectedWorkflow['_comfyuimini_meta'].title = newName;
 
-    const updatedWorkflowsList = workflowListJson.map((workflow) => {
+    const updatedWorkflowsList = workflowsList.map((workflow) => {
         return JSON.stringify(workflow);
     });
 
@@ -36,11 +50,11 @@ function renameWorkflow(name) {
     location.reload();
 }
 
-function deleteWorkflow(name) {
-    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
+window.deleteWorkflow = deleteWorkflow;
+export function deleteWorkflow(name: string) {
+    const workflowsList = getAllWorkflows();
 
-    const selectedWorkflowIndex = workflowsList.findIndex((workflowText) => {
-        const workflow = JSON.parse(workflowText);
+    const selectedWorkflowIndex = workflowsList.findIndex((workflow) => {
         return workflow['_comfyuimini_meta'].title === name;
     });
 
@@ -58,14 +72,12 @@ function deleteWorkflow(name) {
 }
 
 function loadLocalWorkflows() {
-    const workflowsGridElem = document.querySelector('.workflow-grid');
+    const workflowsGridElem = document.querySelector('.workflow-grid') as HTMLElement;
 
-    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
+    const workflowsList = getAllWorkflows();
 
-    for (const workflowText of workflowsList) {
-        const workflowJson = JSON.parse(workflowText);
-
-        const title = workflowJson['_comfyuimini_meta'].title;
+    for (const workflow of workflowsList) {
+        const title = workflow['_comfyuimini_meta'].title;
 
         const bottomSheetOptions = [
             {
@@ -102,7 +114,7 @@ function loadLocalWorkflows() {
                 </div>
                 <div class="workflow-text-info">
                     <span class="workflow-title">${title}</span>
-                    <span class="workflow-description">${workflowJson['_comfyuimini_meta'].description}</span>
+                    <span class="workflow-description">${workflow['_comfyuimini_meta'].description}</span>
                 </div>
                 <span class="workflow-settings-icon icon settings" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'></span>
             </div>
@@ -113,8 +125,9 @@ function loadLocalWorkflows() {
     }
 }
 
-function downloadWorkflow(workflowTitle) {
-    function sanitizeFilename(filename) {
+window.downloadWorkflow = downloadWorkflow;
+function downloadWorkflow(workflowTitle: string) {
+    function sanitizeFilename(filename: string) {
         const sanitized = filename
             .replace(/[/\\?%*:|"<>]/g, '_')
             .replace(/^\s+|\s+$/g, '')
@@ -123,21 +136,22 @@ function downloadWorkflow(workflowTitle) {
         return sanitized;
     }
 
-    const workflowsList = JSON.parse(localStorage.getItem('workflows')) || [];
+    const workflowsList = getAllWorkflows();
 
     const workflowNames = workflowsList.map((workflow) => {
-        return JSON.parse(workflow)['_comfyuimini_meta'].title;
+        return workflow['_comfyuimini_meta'].title;
     });
 
     if (!workflowNames.includes(workflowTitle)) {
         return;
     }
 
-    const workflowListJson = workflowsList.map((workflow) => {
-        return JSON.parse(workflow);
-    });
+    const selectedWorkflow = workflowsList.find((workflow) => workflow['_comfyuimini_meta'].title === workflowTitle);
 
-    const selectedWorkflow = workflowListJson.find((workflow) => workflow['_comfyuimini_meta'].title === workflowTitle);
+    if (!selectedWorkflow) {
+        alert('Unable to find workflow with name ' + workflowTitle);
+        return;
+    }
 
     const workflowString = JSON.stringify(selectedWorkflow, null, 2);
 
