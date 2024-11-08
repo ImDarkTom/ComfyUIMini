@@ -17,7 +17,7 @@ A mobile-friendly WebUI to run ComfyUI workflows.
 ### For PC (Hosting WebUI):
 
 -   **ComfyUI**: Ensure ComfyUI is installed and functional (minimum v0.2.2-50-7183fd1 / Sep. 18th release).
--   **NodeJS**: Version _15.6.0_ or higher.
+-   **NodeJS**: Version _16.0.0_ or higher.
 -   **Package manager**: Perferrably NPM as Yarn has not been explicitly tested but should work nonetheless.
 
 ### Mobile (Accessing WebUI):
