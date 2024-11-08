@@ -14,20 +14,21 @@ A mobile-friendly WebUI to run ComfyUI workflows.
 
 ## Requirements
 
-#### For PC (Hosting WebUI):
+### For PC (Hosting WebUI):
 
 -   **ComfyUI**: Ensure ComfyUI is installed and functional (minimum v0.2.2-50-7183fd1 / Sep. 18th release).
 -   **NodeJS**: Version _15.6.0_ or higher.
 -   **Package manager**: Perferrably NPM as Yarn has not been explicitly tested but should work nonetheless.
 
-#### Mobile (Accessing WebUI):
+### Mobile (Accessing WebUI):
 
 -   **Browser**: Any modern browser with support for WebSocket.
 -   **Network**: Connection to the same network as the hosting PC.
 
 ## Installation
 
-1. Download
+1. **Download**
+
 You can download the latest release from the [releases page](https://github.com/ImDarkTom/ComfyUIMini/releases) (more stable)
 or clone the repository (more up-to-date).
 
@@ -36,7 +37,7 @@ git clone https://github.com/ImDarkTom/ComfyUIMini.git
 cd ./ComfyUIMini
 ```
 
-2. Setup
+2. **Setup**
 (a) Install script
 ```bash
 chmod +x ./install.sh
@@ -50,13 +51,13 @@ npm run build
 ```
 
 
-3. Run the app
+3. **Run the app**
 
 ```bash
 npm start
 ```
 
-_Note: You may experience a crash on first launch, this should be gone after launching it again_
+> **Note**: You may experience a crash on first launch, this should be resolve by launching again.
 
 You can change the ComfyUI url/port as well as the port the app runs on in the _/config/default.json_ file.
 
