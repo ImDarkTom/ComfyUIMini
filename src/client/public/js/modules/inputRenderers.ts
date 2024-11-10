@@ -1,3 +1,25 @@
+export interface BaseRenderConfig {
+    node_id: string;
+    input_name_in_node: string;
+    title: string;
+    default: string;
+}
+
+export interface TextRenderConfig extends BaseRenderConfig {
+    multiline?: boolean;
+}
+
+export interface NumberRenderConfig extends BaseRenderConfig {
+    step?: number;
+    min?: number;
+    max?: number;
+}
+
+export interface SelectRenderConfig extends BaseRenderConfig {
+    list: string[];
+    imageUpload?: boolean;
+}
+
 const createInputContainer = (id: string, title: string, inputHtml: string): string => `
     <div class="workflow-input-container">
         <label for="${id}">${title}</label>
@@ -7,27 +29,15 @@ const createInputContainer = (id: string, title: string, inputHtml: string): str
     </div>
 `;
 
-export interface InputOptionsBase {
-    node_id: string;
-    input_name_in_node: string;
-    title: string;
-    default: string;
-}
-
-interface SelectInputOptions extends InputOptionsBase {
-    data: string[];
-    imageUpload: boolean;
-}
-
 /**
- * 
- * @param {InputOptions} inputOptions Options for the select input.
+ *
+ * @param {SelectRenderConfig} inputOptions Options for the select input.
  * @returns {string}
  */
-export function renderSelectInput(inputOptions: SelectInputOptions): string {
+export function renderSelectInput(inputOptions: SelectRenderConfig): string {
     function renderUploadMenu(inputId: string) {
         return `<label for="${inputId}-file_input" class="file-input-label"><span class="icon upload"></span></label>
-        <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">`
+        <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">`;
     }
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
@@ -39,9 +49,11 @@ export function renderSelectInput(inputOptions: SelectInputOptions): string {
             optionsHtml += `<option value="" disabled selected>Couldn't find '${inputOptions.default}'</option>`;
         }
 
-        optionsHtml += options.map((item) =>
-            `<option value="${item}" ${inputOptions.default == item ? "selected" : ""} >${item}</option>`
-        ).join('');
+        optionsHtml += options
+            .map(
+                (item) => `<option value="${item}" ${inputOptions.default == item ? 'selected' : ''} >${item}</option>`
+            )
+            .join('');
 
         return optionsHtml;
     };
@@ -49,23 +61,18 @@ export function renderSelectInput(inputOptions: SelectInputOptions): string {
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.data)}</select>
-        ${inputOptions.imageUpload === true ? renderUploadMenu(id) : ""}`
+        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.list)}</select>
+        ${inputOptions.imageUpload === true ? renderUploadMenu(id) : ''}`
     );
 }
 
-interface TextInputOptions extends InputOptionsBase {
-
-}
-
 /**
- * 
- * @param {TextInputOptions} inputOptions Options for the text input.
+ *
+ * @param {TextRenderConfig} inputOptions Options for the text input.
  * @returns {string}
  */
-export function renderTextInput(inputOptions: TextInputOptions): string {
+export function renderTextInput(inputOptions: TextRenderConfig): string {
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
-
     return createInputContainer(
         id,
         inputOptions.title,
@@ -73,19 +80,13 @@ export function renderTextInput(inputOptions: TextInputOptions): string {
     );
 }
 
-interface NumberInputOptions extends InputOptionsBase {
-    step: number;
-    min: number;
-    max: number;
-}
-
 /**
- * 
- * @param {NumberInputOptions} inputOptions Options for the number input.
+ *
+ * @param {NumberRenderConfig} inputOptions Options for the number input.
  * @returns {string}
  */
-export function renderNumberInput(inputOptions: NumberInputOptions): string {
-    const showRandomiseToggle = inputOptions.input_name_in_node === "seed";
+export function renderNumberInput(inputOptions: NumberRenderConfig): string {
+    const showRandomiseToggle = inputOptions.input_name_in_node === 'seed';
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
     const { default: defaultValue, step, min, max } = inputOptions;
@@ -114,10 +115,3 @@ export function renderNumberInput(inputOptions: NumberInputOptions): string {
     `
     );
 }
-
-export const inputRenderers = {
-    ARRAY: renderSelectInput,
-    STRING: renderTextInput,
-    INT: renderNumberInput,
-    FLOAT: renderNumberInput,
-};

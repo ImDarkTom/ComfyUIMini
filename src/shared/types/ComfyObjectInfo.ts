@@ -6,15 +6,15 @@ export interface ObjectInfoPartial {
             };
             optional?: {
                 [inputName: string]: any;
-            }
+            };
         };
     };
 }
 
 export interface NormalisedInputInfo {
-    type: "ARRAY" | "STRING" | "INT" | "FLOAT";
+    type: 'ARRAY' | 'STRING' | 'INT' | 'FLOAT';
     userAccessible: boolean;
-    data: string[];
+    list: string[];
     default?: string;
     tooltip?: string;
     imageUpload?: boolean;

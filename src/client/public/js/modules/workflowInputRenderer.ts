@@ -1,6 +1,6 @@
-import { InputOption, WorkflowNode, WorkflowWithMetadata } from '@shared/types/Workflow.js';
-import { InputOptionsBase, inputRenderers } from './inputRenderers.js';
-import { ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
+import { InputOption, WorkflowWithMetadata } from '@shared/types/Workflow.js';
+import { BaseRenderConfig, renderNumberInput, renderSelectInput, renderTextInput } from './inputRenderers.js';
+import { NormalisedInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 
@@ -8,75 +8,79 @@ const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
 const inputsInfoObject: ProcessedObjectInfo = await inputsInfoResponse.json();
 
 /**
- * 
+ *
  * @param {WorkflowWithMetadata} workflowObject The workflow object to render inputs for.
  */
 export function renderInputs(workflowObject: WorkflowWithMetadata) {
-    const inputsMetadata = workflowObject['_comfyuimini_meta'].input_options;
+    const userInputsMetadata = workflowObject['_comfyuimini_meta'].input_options;
 
-    const transformedNodeList = Object.entries(workflowObject)
-        .filter(([id]) => !id.startsWith('_'))
-        .map(([id, value]) => {
-            return { id, ...value };
-        });
-
-    for (const nodeInfo of transformedNodeList) {
-        const nodeInputsMetadata = inputsMetadata.filter(inputMetadata => inputMetadata.node_id === nodeInfo.id);
-
-        if (nodeInputsMetadata == undefined) {
-            console.error(`No input metadata found for node ${nodeInfo.id}`);
+    let renderedInputs = '';
+    for (const userInputMetadata of userInputsMetadata) {
+        if (userInputMetadata.disabled) {
             continue;
         }
 
-        renderNodeInputs(nodeInfo, nodeInputsMetadata);
-    }
-}
+        const inputNode = workflowObject[userInputMetadata.node_id];
+        // Can be number or string, but not a list as we can only add user metadata to editable inputs
+        const defaultValue = inputNode.inputs[userInputMetadata.input_name_in_node].toString();
 
-interface DataForRenderer {
-    node_id: string;
-    input_name_in_node: string;
-    title: string;
-    default: string;
-}
+        const comfyInputInfo = inputsInfoObject[inputNode.class_type][userInputMetadata.input_name_in_node];
 
-function renderNodeInputs(nodeObject: WorkflowNode, nodeInputsMetadata: InputOption[]) {
-    const inputInfo = inputsInfoObject[nodeObject.class_type];
+        const renderedInput = renderInput(userInputMetadata, defaultValue, comfyInputInfo);
 
-    if (inputInfo == undefined) {
-        return;
+        renderedInputs += renderedInput;
     }
 
-    for (const [inputName, inputDefaultFromWorkflow] of Object.entries(nodeObject.inputs)) {
-        const inputOptionsFromComfyUI = inputInfo[inputName];
+    inputsContainer.innerHTML = renderedInputs;
+}
 
-        if (inputOptionsFromComfyUI == undefined) {
-            continue;
+export function renderInput(userInputMetadata: InputOption, defaultValue: string, comfyInputInfo: NormalisedInputInfo) {
+    const inputType = comfyInputInfo.type;
+
+    const baseRenderOptions: BaseRenderConfig = {
+        node_id: userInputMetadata.node_id,
+        input_name_in_node: userInputMetadata.input_name_in_node,
+        title: userInputMetadata.title,
+        default: defaultValue,
+    };
+
+    switch (inputType) {
+        case 'STRING': {
+            console.log(comfyInputInfo);
+
+            const textRenderOptions = {
+                multiline: comfyInputInfo.multiline,
+                ...baseRenderOptions,
+            };
+
+            return renderTextInput(textRenderOptions);
         }
 
-        const inputMetadata = nodeInputsMetadata.find((input) => input.input_name_in_node === inputName);
+        case 'INT':
+        case 'FLOAT': {
+            const numberRenderOptions = {
+                step: comfyInputInfo.step,
+                min: comfyInputInfo.min,
+                max: comfyInputInfo.max,
+                ...baseRenderOptions,
+            };
 
-        if (!inputMetadata) {
-            console.error(`No input metadata found for input ${inputName} in node ${nodeObject.class_type}`);
-            continue;
+            return renderNumberInput(numberRenderOptions);
         }
 
-        if (inputMetadata.disabled) {
-            continue;
+        case 'ARRAY': {
+            const selectRenderOptions = {
+                list: comfyInputInfo.list,
+                imageUpload: comfyInputInfo.imageUpload,
+                ...baseRenderOptions,
+            };
+
+            return renderSelectInput(selectRenderOptions);
         }
 
-        const renderer = inputRenderers[inputOptionsFromComfyUI.type];
-
-        if (!renderer) {
-            throw new Error(`No renderer found for input type ${inputOptionsFromComfyUI.type}`);
+        default: {
+            console.error(`No renderer found for input type ${inputType}`);
+            return `No renderer found for input type ${inputType}`;
         }
-
-        let dataForRenderer: InputOptionsBase = inputMetadata as InputOptionsBase;
-        dataForRenderer = { ...dataForRenderer, ...inputOptionsFromComfyUI };
-        dataForRenderer.default = inputDefaultFromWorkflow.toString();
-
-        // @ts-ignore - Fix later
-        const inputHtml = renderer(dataForRenderer);
-
-        inputsContainer.innerHTML += inputHtml;
     }
 }
