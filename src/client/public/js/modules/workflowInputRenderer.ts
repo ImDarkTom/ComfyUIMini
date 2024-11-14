@@ -46,8 +46,6 @@ export function renderInput(userInputMetadata: InputOption, defaultValue: string
 
     switch (inputType) {
         case 'STRING': {
-            console.log(comfyInputInfo);
-
             const textRenderOptions = {
                 multiline: comfyInputInfo.multiline,
                 ...baseRenderOptions,
