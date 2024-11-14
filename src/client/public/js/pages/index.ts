@@ -1,11 +1,11 @@
-import { getAllWorkflows } from "../modules/getLocalWorkflow.js";
+import { getAllWorkflows } from '../modules/getLocalWorkflow.js';
 
 declare global {
     interface Window {
         editWorkflow: (type: string, workflowTitle: string) => void;
         deleteWorkflow: (type: string, workflowTitle: string) => void;
         downloadWorkflow: (type: string, workflowTitle: string) => void;
-        openActionSheet: (buttonElement: HTMLElement, event: Event) => void;    
+        openActionSheet: (buttonElement: HTMLElement, event: Event) => void;
     }
 }
 
@@ -50,7 +50,7 @@ function deleteLocalWorkflow(workflowTitle: string) {
 
 async function deleteServerWorkflow(workflowTitle: string) {
     const response = await fetch(`/edit/${workflowTitle}`, {
-        method: 'DELETE'
+        method: 'DELETE',
     });
 
     if (response.status !== 200) {
@@ -60,7 +60,7 @@ async function deleteServerWorkflow(workflowTitle: string) {
 }
 
 window.downloadWorkflow = downloadWorkflow;
-async function downloadWorkflow(type: string,workflowTitle: string) {
+async function downloadWorkflow(type: string, workflowTitle: string) {
     if (type === 'local') {
         downloadLocalWorkflow(workflowTitle);
     } else if (type === 'server') {
@@ -148,7 +148,7 @@ function openActionSheet(buttonElement: HTMLElement, event: Event) {
         console.error('Could not find workflow type');
         return;
     }
-    
+
     const workflowFilename = cardWrapperElem.getAttribute('data-filename');
     if (!workflowFilename) {
         console.error('Could not find workflow filename');
@@ -184,13 +184,21 @@ async function loadLocalWorkflows() {
 
     const workflowsList = getAllWorkflows();
 
-    const workflowInfo = workflowsList.map((workflow) => ({
-        title: workflow._comfyuimini_meta.title,
-        filename: workflow._comfyuimini_meta.title,
-        description: workflow._comfyuimini_meta.description,
-        type: 'local', 
-        icon: 'phone',
-    }));
+    const workflowInfo = workflowsList.map((workflow) => {
+        if (typeof workflow === 'string') {
+            workflow = JSON.parse(workflow);
+        }
+
+        const workflowMetadata = workflow['_comfyuimini_meta'];
+
+        return {
+            title: workflowMetadata.title,
+            filename: workflowMetadata.title,
+            description: workflowMetadata.description,
+            type: 'local',
+            icon: 'phone',
+        };
+    });
 
     const response = await fetch('/render/home/workflow-list', {
         method: 'POST',
