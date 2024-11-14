@@ -12,7 +12,7 @@ router.get('/theme', async (req, res) => {
         return;
     }
 
-    const themesList = ['dark', 'light', 'midnight', 'whiteout', 'aurora'];
+    const themesList = ['dark', 'light', 'midnight', 'whiteout', 'aurora', 'nord'];
 
     if (themesList.includes(requestTheme)) {
         res.cookie('theme', requestTheme, {
