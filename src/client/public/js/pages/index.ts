@@ -185,10 +185,6 @@ async function loadLocalWorkflows() {
     const workflowsList = getAllWorkflows();
 
     const workflowInfo = workflowsList.map((workflow) => {
-        if (typeof workflow === 'string') {
-            workflow = JSON.parse(workflow);
-        }
-
         const workflowMetadata = workflow['_comfyuimini_meta'];
 
         return {
