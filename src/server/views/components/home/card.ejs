@@ -1,0 +1,16 @@
+<a href="/workflow/<%= workflowMetadata.type %>/<%= workflowMetadata.filename %>" class="card-wrapper" data-type="<%= workflowMetadata.type %>" data-filename="<%= workflowMetadata.filename %>">
+    <div class="card">
+        <div class="card-info">
+            <span class="card-title"><%= workflowMetadata.title %></span>
+            <span class="card-description"><%= workflowMetadata.description %></span>
+        </div>
+        <div class="card-icons">
+            <div class="card-icon-container type-icon">
+                <span class="card-icon icon <%= workflowMetadata.icon %>"></span>
+            </div>
+            <div class="card-icon-container settings-icon">
+                <span class="card-icon icon settings" onclick="openActionSheet(this, event)"></span>
+            </div>
+        </div>
+    </div>
+</a>

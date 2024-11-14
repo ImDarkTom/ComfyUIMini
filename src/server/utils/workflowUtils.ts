@@ -228,9 +228,21 @@ function writeServerWorkflow(filename: string, workflowObject: object): boolean 
     }
 }
 
+function deleteServerWorkflow(filename: string): boolean {
+    try {
+        fs.unlinkSync(path.join(paths.workflows, filename));
+        return true;
+    } catch (error) {
+        console.error('Error when deleting workflow from file:', error);
+        return false;
+    }
+}
+
+
 export {
     serverWorkflowsCheck,
     readServerWorkflow,
     writeServerWorkflow,
+    deleteServerWorkflow,
     fetchedWorkflowMetadata as serverWorkflowMetadata,
 };

@@ -2,140 +2,105 @@ import { getAllWorkflows } from "../modules/getLocalWorkflow.js";
 
 declare global {
     interface Window {
-        editWorkflow: (type: string, title: string) => void;
-        renameWorkflow: (name: string) => void;
-        deleteWorkflow: (name: string) => void;
-        downloadWorkflow: (workflowTitle: string) => void;
+        editWorkflow: (type: string, workflowTitle: string) => void;
+        deleteWorkflow: (type: string, workflowTitle: string) => void;
+        downloadWorkflow: (type: string, workflowTitle: string) => void;
+        openActionSheet: (buttonElement: HTMLElement, event: Event) => void;    
     }
 }
 
 window.editWorkflow = editWorkflow;
-function editWorkflow(type: string, title: string) {
-    window.location.href = `/edit/${type}/${title}`;
+function editWorkflow(type: string, workflowTitle: string) {
+    window.location.href = `/edit/${type}/${workflowTitle}`;
 }
 
-window.renameWorkflow = renameWorkflow;
-export function renameWorkflow(name: string) {
-    const workflowsList = getAllWorkflows();
-
-    const workflowNames = workflowsList.map((workflow) => {
-        return workflow['_comfyuimini_meta'].title;
-    });
-
-    if (!workflowNames.includes(name)) {
+window.deleteWorkflow = deleteWorkflow;
+export async function deleteWorkflow(type: string, workflowTitle: string) {
+    if (!confirm(`Are you sure you want to delete ${type} workflow '${workflowTitle}'?`)) {
         return;
     }
 
-    const newName = prompt('Rename workflow: ', name);
-
-    if (!newName || newName == null || newName == undefined) {
+    if (type === 'local') {
+        deleteLocalWorkflow(workflowTitle);
+    } else if (type === 'server') {
+        await deleteServerWorkflow(workflowTitle);
+    } else {
+        alert(`Error when deleting workflow. Invalid workflow type: ${type}`);
         return;
     }
-
-    const selectedWorkflow = workflowsList.find((workflow) => workflow['_comfyuimini_meta'].title === name);
-
-    if (!selectedWorkflow) {
-        alert('Unable to find workflow with name ' + name);
-        return;
-    }
-
-    selectedWorkflow['_comfyuimini_meta'].title = newName;
-
-    const updatedWorkflowsList = workflowsList.map((workflow) => {
-        return JSON.stringify(workflow);
-    });
-
-    localStorage.setItem('workflows', JSON.stringify(updatedWorkflowsList));
 
     location.reload();
 }
 
-window.deleteWorkflow = deleteWorkflow;
-export function deleteWorkflow(name: string) {
+function deleteLocalWorkflow(workflowTitle: string) {
     const workflowsList = getAllWorkflows();
 
     const selectedWorkflowIndex = workflowsList.findIndex((workflow) => {
-        return workflow['_comfyuimini_meta'].title === name;
+        return workflow['_comfyuimini_meta'].title === workflowTitle;
     });
 
     if (selectedWorkflowIndex === -1) {
         return;
     }
 
-    if (confirm(`Are you sure you want to delete '${name}'?`)) {
-        workflowsList.splice(selectedWorkflowIndex, 1);
+    workflowsList.splice(selectedWorkflowIndex, 1);
 
-        localStorage.setItem('workflows', JSON.stringify(workflowsList));
-
-        location.reload();
-    }
+    localStorage.setItem('workflows', JSON.stringify(workflowsList));
 }
 
-function loadLocalWorkflows() {
-    const workflowsGridElem = document.querySelector('.workflow-grid') as HTMLElement;
+async function deleteServerWorkflow(workflowTitle: string) {
+    const response = await fetch(`/edit/${workflowTitle}`, {
+        method: 'DELETE'
+    });
 
-    const workflowsList = getAllWorkflows();
-
-    for (const workflow of workflowsList) {
-        const title = workflow['_comfyuimini_meta'].title;
-
-        const bottomSheetOptions = [
-            {
-                icon: '🏷️',
-                text: 'Rename',
-                function: `renameWorkflow`,
-                functionParams: [title],
-            },
-            {
-                icon: '✏',
-                text: 'Edit',
-                function: 'editWorkflow',
-                functionParams: ['local', title],
-            },
-            {
-                icon: '💾',
-                text: 'Download',
-                function: 'downloadWorkflow',
-                functionParams: [title],
-            },
-            {
-                icon: '❌',
-                text: 'Delete workflow',
-                function: `deleteWorkflow`,
-                functionParams: [title],
-            },
-        ];
-
-        const gridItemHtml = `
-        <a href="/workflow/local/${title}" class="workflow-grid-link">
-            <div class="workflow-grid-item">
-                <div class="workflow-icon-container">
-                    <div class="icon phone workflow-icon"></div>
-                </div>
-                <div class="workflow-text-info">
-                    <span class="workflow-title">${title}</span>
-                    <span class="workflow-description">${workflow['_comfyuimini_meta'].description}</span>
-                </div>
-                <span class="workflow-settings-icon icon settings" onclick='loadBottomSheet(${JSON.stringify(bottomSheetOptions)}, event)'></span>
-            </div>
-        </a>
-        `;
-
-        workflowsGridElem.innerHTML += gridItemHtml;
+    if (response.status !== 200) {
+        alert(`Error when deleting server workflow: Status code ${response.status}, check logs for more info.`);
+        return;
     }
 }
 
 window.downloadWorkflow = downloadWorkflow;
-function downloadWorkflow(workflowTitle: string) {
-    function sanitizeFilename(filename: string) {
-        const sanitized = filename
-            .replace(/[/\\?%*:|"<>]/g, '_')
-            .replace(/^\s+|\s+$/g, '')
-            .replace(/\s+/g, '_');
+async function downloadWorkflow(type: string,workflowTitle: string) {
+    if (type === 'local') {
+        downloadLocalWorkflow(workflowTitle);
+    } else if (type === 'server') {
+        await downloadServerWorkflow(workflowTitle);
+    } else {
+        alert(`Error when downloading workflow. Invalid workflow type: ${type}`);
+        return;
+    }
+}
 
-        return sanitized;
+function sanitizeFilename(filename: string) {
+    const sanitized = filename
+        .replace(/[/\\?%*:|"<>]/g, '_')
+        .replace(/^\s+|\s+$/g, '')
+        .replace(/\s+/g, '_');
+
+    return sanitized;
+}
+
+async function downloadServerWorkflow(workflowTitle: string) {
+    const response = await fetch(`/download/${workflowTitle}`);
+
+    if (response.status !== 200) {
+        alert(`Error when downloading server workflow: ${response.status}: ${await response.text()}`);
+        return;
     }
 
+    const blob = await response.blob();
+
+    const link = document.createElement('a');
+
+    link.href = URL.createObjectURL(blob);
+    link.download = workflowTitle;
+
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+}
+
+function downloadLocalWorkflow(workflowTitle: string) {
     const workflowsList = getAllWorkflows();
 
     const workflowNames = workflowsList.map((workflow) => {
@@ -165,6 +130,83 @@ function downloadWorkflow(workflowTitle: string) {
     link.click();
 
     URL.revokeObjectURL(link.href);
+}
+
+window.openActionSheet = openActionSheet;
+function openActionSheet(buttonElement: HTMLElement, event: Event) {
+    event.preventDefault();
+
+    const cardWrapperElem = buttonElement.closest('.card-wrapper');
+
+    if (!cardWrapperElem) {
+        console.error('Could not find card element');
+        return;
+    }
+
+    const workflowType = cardWrapperElem.getAttribute('data-type');
+    if (!workflowType) {
+        console.error('Could not find workflow type');
+        return;
+    }
+    
+    const workflowFilename = cardWrapperElem.getAttribute('data-filename');
+    if (!workflowFilename) {
+        console.error('Could not find workflow filename');
+        return;
+    }
+
+    const bottomSheetOptions: Entry[] = [
+        {
+            icon: '✏',
+            text: 'Edit',
+            function: 'editWorkflow',
+            functionParams: [workflowType, workflowFilename],
+        },
+        {
+            icon: '💾',
+            text: 'Download',
+            function: 'downloadWorkflow',
+            functionParams: [workflowType, workflowFilename],
+        },
+        {
+            icon: '❌',
+            text: 'Delete workflow',
+            function: 'deleteWorkflow',
+            functionParams: [workflowType, workflowFilename],
+        },
+    ];
+
+    loadBottomSheet(bottomSheetOptions, event);
+}
+
+async function loadLocalWorkflows() {
+    const workflowsGridElem = document.querySelector('.workflow-grid') as HTMLElement;
+
+    const workflowsList = getAllWorkflows();
+
+    const workflowInfo = workflowsList.map((workflow) => ({
+        title: workflow._comfyuimini_meta.title,
+        filename: workflow._comfyuimini_meta.title,
+        description: workflow._comfyuimini_meta.description,
+        type: 'local', 
+        icon: 'phone',
+    }));
+
+    const response = await fetch('/render/home/workflow-list', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowInfo),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch workflow list');
+    }
+
+    const workflowListHtml = await response.text();
+
+    workflowsGridElem.innerHTML += workflowListHtml;
 }
 
 loadLocalWorkflows();

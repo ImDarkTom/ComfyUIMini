@@ -13,7 +13,7 @@
     <div class="main-container">
         <div class="workflow-grid">
             <% for (const workflowMetadata of serverWorkflowMetadata) { %>
-                <%- include('../partials/workflow-grid-item', { workflowMetadata }) %>
+                <%- include('../components/home/card', { workflowMetadata }) %>
             <% }; %>
         </div>
     </div>

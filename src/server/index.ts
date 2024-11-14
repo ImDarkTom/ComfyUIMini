@@ -15,6 +15,7 @@ import settingsRouter from './routes/settingsRouter';
 import { comfyUICheck } from './utils/comfyAPIUtils';
 import { serverWorkflowsCheck } from './utils/workflowUtils';
 import getLocalIp from './utils/localIp';
+import renderRouter from './routes/renderRouter';
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,7 @@ app.set('views', paths.views);
 app.use('/', mainRouter);
 app.use('/comfyui', comfyUIRouter);
 app.use('/setsetting', settingsRouter);
+app.use('/render', renderRouter);
 app.use(express.static(paths.public));
 app.use(express.static(paths.clientJs));
 
