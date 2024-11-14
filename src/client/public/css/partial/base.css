@@ -1,62 +1,6 @@
-/* http://meyerweb.com/eric/tools/css/reset/ 
-   v2.0 | 20110126
-   License: none (public domain)
-*/
-
-/* prettier-ignore */
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-size: 100%;
-	font: inherit;
-	vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-/* prettier-ignore */
-article, aside, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section {
-	display: block;
-}
-body {
-    line-height: 1;
-}
-ol,
-ul {
-    list-style: none;
-}
-blockquote,
-q {
-    quotes: none;
-}
-/* prettier-ignore */
-blockquote:before, blockquote:after,
-q:before, q:after {
-	content: '';
-	content: none;
-}
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-/* End of CSS Reset */
-
-body {
-    height: 100vh;
-    width: 100vw;
-}
+@import url('reset.css');
+@import url('icons.css');
+@import url('popup.css');
 
 @font-face {
     font-family: 'Futura';
@@ -68,6 +12,8 @@ body {
 }
 
 body {
+    height: 100vh;
+    width: 100vw;
     font-family: 'Futura', sans-serif;
     background-color: var(--background-primary-color);
     color: var(--text-primary-color);
@@ -88,55 +34,4 @@ button {
     box-sizing: border-box;
     padding: 0.5rem;
     padding-bottom: 10vh; /* adjust for action bar height */
-}
-
-/* popup */
-.popup-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.popup-window {
-    background-color: var(--background-tertiary-color);
-    width: 90%;
-    height: 30%;
-    border-radius: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.popup-message {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.1rem;
-}
-
-.popup-message a {
-    color: var(--text-secondary-color);
-}
-
-.popup-continue-button {
-    width: 50%;
-    background-color: var(--background-secondary-color);
-    height: 3rem;
-    margin-bottom: 1rem;
-    border-radius: 0.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    user-select: none;
 }
