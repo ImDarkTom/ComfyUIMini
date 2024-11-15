@@ -35,10 +35,10 @@ if %errorlevel% neq 0 (
 echo Building...
 call npm run build
 if %errorlevel% neq 0 (
-    echo Build failed. Check the console for more information.
+    echo Build failed. Check the output for more information.
     pause
     exit /b
 )
 
-echo Update complete. Run 'npm start' to launch the app
+echo Update complete. Run the 'start.bat' script or the 'npm start' command to launch the app
 pause

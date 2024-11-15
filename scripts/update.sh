@@ -35,4 +35,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Update complete. Run 'npm start' to launch the app"
+echo "Update complete. Run the 'start.sh' script or the 'npm start' command to launch the app"
