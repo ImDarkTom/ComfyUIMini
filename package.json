@@ -19,7 +19,7 @@
         "url": "https://github.com/ImDarkTom/ComfyUIMini.git"
     },
     "engines": {
-        "node": ">=16"
+        "node": ">=20"
     },
     "license": "AGPL-3.0",
     "dependencies": {
