@@ -57,6 +57,28 @@ function startEventListeners() {
 
     cancelGenerationButtonElem.addEventListener('click', cancelRun);
     inputsContainer.addEventListener('click', handleInputContainerClick);
+
+    document.querySelectorAll('select.workflow-input.has-image-upload').forEach((selectElement) => {
+        selectElement.addEventListener('change', (e: Event) => {
+            const target = e.target as HTMLSelectElement;
+
+            const selectedOption = target.options[target.selectedIndex];
+            const selectedValue = selectedOption.value;
+
+            if (!selectedValue) {
+                return;
+            }
+
+            const innerInputWrapperElem = target.closest('.inner-input-wrapper');
+
+            if (!innerInputWrapperElem) {
+                return;
+            }
+
+            const imagePreviewElem = innerInputWrapperElem.querySelector('.input-image-preview') as HTMLImageElement;
+            imagePreviewElem.src = `/comfyui/image?filename=${selectedValue}&subfolder=&type=input`;
+        });
+    });
 }
 
 function fileUploadEventListener(element: HTMLElement) {

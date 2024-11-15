@@ -104,18 +104,29 @@ textarea.workflow-input {
     background-color: var(--background-secondary-color);
 }
 
+.workflow-input-container.has-image-upload .inner-input-wrapper {
+    flex-direction: column;
+}
+
 .workflow-input-container .file-input {
     display: none;
 }
 
 .workflow-input-container .file-input-label {
     height: var(--input-height);
-    width: var(--input-height);
     background-color: var(--background-tertiary-color);
-    box-sizing: border-box;
+    padding: 0;
+    border: 0;
     border-radius: 0.5rem;
-    margin: 0 0 0 0.5rem;
-    padding: 0.5rem;
+    margin: 0.5rem 0;
+    box-sizing: border-box;
+}
+
+.input-image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0.5rem;
 }
 
 .workflow-input-container .file-input-label:active {

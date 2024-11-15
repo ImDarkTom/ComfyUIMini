@@ -20,8 +20,8 @@ export interface SelectRenderConfig extends BaseRenderConfig {
     imageUpload?: boolean;
 }
 
-const createInputContainer = (id: string, title: string, inputHtml: string): string => `
-    <div class="workflow-input-container">
+const createInputContainer = (id: string, title: string, inputHtml: string, additionalClass?: string): string => `
+    <div class="workflow-input-container ${additionalClass}">
         <label for="${id}">${title}</label>
         <div class="inner-input-wrapper">
             ${inputHtml}
@@ -35,9 +35,12 @@ const createInputContainer = (id: string, title: string, inputHtml: string): str
  * @returns {string}
  */
 export function renderSelectInput(inputOptions: SelectRenderConfig): string {
+    const hasImageUpload = inputOptions.imageUpload;
+
     function renderUploadMenu(inputId: string) {
         return `<label for="${inputId}-file_input" class="file-input-label"><span class="icon upload"></span></label>
-        <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">`;
+        <input type="file" id="${inputId}-file_input" data-select-id="${inputId}" class="file-input" accept="image/jpeg,image/png,image/webp">
+        <img src="/comfyui/image?filename=${inputOptions.default}&subfolder=&type=input" class="input-image-preview">`;
     }
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
@@ -61,8 +64,9 @@ export function renderSelectInput(inputOptions: SelectRenderConfig): string {
     return createInputContainer(
         id,
         inputOptions.title,
-        `<select id="${id}" class="workflow-input">${createSelectOptions(inputOptions.list)}</select>
-        ${inputOptions.imageUpload === true ? renderUploadMenu(id) : ''}`
+        `<select id="${id}" class="workflow-input ${hasImageUpload ? 'has-image-upload' : ''}">${createSelectOptions(inputOptions.list)}</select>
+        ${hasImageUpload === true ? renderUploadMenu(id) : ''}`,
+        hasImageUpload ? 'has-image-upload' : ''
     );
 }
 
