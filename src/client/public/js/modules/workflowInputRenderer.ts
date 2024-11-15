@@ -1,18 +1,27 @@
 import { InputOption, WorkflowWithMetadata } from '@shared/types/Workflow.js';
 import { BaseRenderConfig, renderNumberInput, renderSelectInput, renderTextInput } from './inputRenderers.js';
 import { NormalisedInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
+import { getSavedInputValue } from './savedInputValues.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 
 const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
 const inputsInfoObject: ProcessedObjectInfo = await inputsInfoResponse.json();
 
+interface WorkflowDataObject {
+    type: string;
+    identifier: string;
+    json: WorkflowWithMetadata;
+    title: string;
+}
+
 /**
  *
- * @param {WorkflowWithMetadata} workflowObject The workflow object to render inputs for.
+ * @param {WorkflowDataObject} workflowObject The workflow object to render inputs for.
  */
-export function renderInputs(workflowObject: WorkflowWithMetadata) {
-    const userInputsMetadata = workflowObject['_comfyuimini_meta'].input_options;
+export function renderInputs(workflowObject: WorkflowDataObject) {
+    const workflowJson = workflowObject.json;
+    const userInputsMetadata = workflowJson['_comfyuimini_meta'].input_options;
 
     let renderedInputs = '';
     for (const userInputMetadata of userInputsMetadata) {
@@ -20,9 +29,17 @@ export function renderInputs(workflowObject: WorkflowWithMetadata) {
             continue;
         }
 
-        const inputNode = workflowObject[userInputMetadata.node_id];
-        // Can be number or string, but not a list as we can only add user metadata to editable inputs
-        const defaultValue = inputNode.inputs[userInputMetadata.input_name_in_node].toString();
+        const inputNode = workflowJson[userInputMetadata.node_id];
+
+        // Can be number or string, but not a list as we can only save editable inputs with the import page.
+        const savedDefaultValue = getSavedInputValue(
+            workflowObject.type,
+            workflowObject.identifier,
+            userInputMetadata.node_id,
+            userInputMetadata.input_name_in_node
+        );
+
+        const defaultValue = savedDefaultValue ?? inputNode.inputs[userInputMetadata.input_name_in_node].toString();
 
         const comfyInputInfo = inputsInfoObject[inputNode.class_type][userInputMetadata.input_name_in_node];
 

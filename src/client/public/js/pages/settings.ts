@@ -20,3 +20,9 @@ async function setGalleryItemsPerPage(inputElement: HTMLInputElement) {
 
     openPopupWindow(responseJson.message);
 }
+
+function clearSavedInputValues() {
+    localStorage.setItem('savedInputs', JSON.stringify({}));
+
+    openPopupWindow('Saved input values cleared.');
+}

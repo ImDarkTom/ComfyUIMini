@@ -1,14 +1,27 @@
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { handleError } from '../common/errorHandler.js';
 import { renderInputs } from '../modules/workflowInputRenderer.js';
-import { FinishGenerationMessage, PreviewMessage, ProgressMessage, TotalImagesMessage } from '@shared/types/WebSocket.js';
+import {
+    FinishGenerationMessage,
+    PreviewMessage,
+    ProgressMessage,
+    TotalImagesMessage,
+} from '@shared/types/WebSocket.js';
+import { saveInputValues } from '../modules/savedInputValues.js';
+import { Workflow } from '@shared/types/Workflow.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 const outputImagesContainer = document.querySelector('.output-images-container') as HTMLElement;
-const totalImagesProgressInnerElem = document.querySelector('.total-images-progress .progress-bar-inner') as HTMLElement;
+const totalImagesProgressInnerElem = document.querySelector(
+    '.total-images-progress .progress-bar-inner'
+) as HTMLElement;
 const totalImagesProgressTextElem = document.querySelector('.total-images-progress .progress-bar-text') as HTMLElement;
-const currentImageProgressInnerElem = document.querySelector('.current-image-progress .progress-bar-inner') as HTMLElement;
-const currentImageProgressTextElem = document.querySelector('.current-image-progress .progress-bar-text') as HTMLElement;
+const currentImageProgressInnerElem = document.querySelector(
+    '.current-image-progress .progress-bar-inner'
+) as HTMLElement;
+const currentImageProgressTextElem = document.querySelector(
+    '.current-image-progress .progress-bar-text'
+) as HTMLElement;
 const cancelGenerationButtonElem = document.querySelector('.cancel-run-button') as HTMLButtonElement;
 const runButton = document.querySelector('.run-workflow') as HTMLButtonElement;
 
@@ -23,7 +36,7 @@ const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
 function loadWorkflow() {
-    renderInputs(workflowDataObject["json"]);
+    renderInputs(workflowDataObject);
 
     startEventListeners();
 }
@@ -36,10 +49,11 @@ async function fetchLocalWorkflow() {
     }
 }
 
-
 function startEventListeners() {
     runButton.addEventListener('click', runWorkflow);
-    document.querySelectorAll('.workflow-input-container .file-input').forEach((element) => fileUploadEventListener(element as HTMLElement));
+    document
+        .querySelectorAll('.workflow-input-container .file-input')
+        .forEach((element) => fileUploadEventListener(element as HTMLElement));
 
     cancelGenerationButtonElem.addEventListener('click', cancelRun);
     inputsContainer.addEventListener('click', handleInputContainerClick);
@@ -59,14 +73,14 @@ function fileUploadEventListener(element: HTMLElement) {
 
         if (target.files.length > 0) {
             const file = target.files[0];
-            
+
             const formData = new FormData();
             formData.append('image', file);
 
             try {
                 const response = await fetch('/comfyui/upload/image', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
                 });
 
                 const responseJson = await response.json();
@@ -90,7 +104,6 @@ function fileUploadEventListener(element: HTMLElement) {
                 }
 
                 addOptionToSelect(linkedSelect as HTMLSelectElement, responseJson.externalResponse.name);
-
             } catch (err) {
                 console.error(err);
             }
@@ -183,7 +196,7 @@ function setProgressBar(type: 'total' | 'current', percentage: string) {
     barElem.style.width = percentage;
 }
 
-function fillWorkflowWithUserParams() {
+function fillWorkflowWithUserParams(): Workflow {
     const workflowModified = workflowDataObject.json;
     // ComfyUI can't process the workflow if it contains the additional metadata.
     delete workflowModified['_comfyuimini_meta'];
@@ -225,6 +238,8 @@ export async function runWorkflow() {
     completedImageCount = 0;
 
     const filledWorkflow = fillWorkflowWithUserParams();
+    saveInputValues(workflowDataObject.type, workflowDataObject.identifier, filledWorkflow);
+
     ws.send(JSON.stringify(filledWorkflow));
 
     cancelGenerationButtonElem.classList.remove('disabled');
@@ -277,7 +292,7 @@ function updateProgressBars(messageData: ProgressMessage) {
 function updateImagePreview(messageData: PreviewMessage) {
     const currentSkeletonLoaderElem =
         outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[
-        totalImageCount - completedImageCount - 1
+            totalImageCount - completedImageCount - 1
         ];
 
     if (!currentSkeletonLoaderElem) {
