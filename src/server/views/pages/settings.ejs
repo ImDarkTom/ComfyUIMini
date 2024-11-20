@@ -3,14 +3,14 @@
 <head>
     <%- include('../partials/head', { title: "Settings", theme }) %>
     <link rel="stylesheet" href="/css/settings.css">
-    <script src="/js/pages/settings.js" defer></script>
+    <script src="/js/pages/settings.js" type="module" defer></script>
     <script src="/js/common/popupWindow.js" defer></script>
 </head>
 <body>
     <div class="main-container">
         <div class="option-container">
             <label for="select-theme">Theme</label>
-            <select id="select-theme" onchange="changeTheme(this)">
+            <select id="select-theme">
                 <option value="" disabled selected>Select a theme</option>
                     <optgroup label="Dark">
                         <option value="aurora">Aurora</option>
@@ -27,10 +27,10 @@
         <div class="option-container">
             <label for="gallery-items-per-page">Gallery items per page</label>
             <input type="number" id="gallery-items-per-page" min="1" max="100" value="20">
-            <input type="button" value="Set gallery items per page" onclick="setGalleryItemsPerPage(document.getElementById('gallery-items-per-page'))">
+            <input type="button" value="Set gallery items per page" id="set-gallery-items-per-page">
         </div>
         <div class="option-container">
-            <input type="button" value="Clear saved input values" onclick="clearSavedInputValues()">
+            <input type="button" value="Clear saved input values" id="clear-saved-input-values">
         </div>
     </div>
     <%- include('../partials/actionBar', {

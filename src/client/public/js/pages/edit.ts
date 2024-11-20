@@ -2,7 +2,7 @@ import { WorkflowWithMetadata } from '@shared/types/Workflow.js';
 import { handleError } from '../common/errorHandler.js';
 import { getAllWorkflows, getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
-import { getSavedInputs } from '../modules/savedInputValues.js';
+import { clearSavedInputValuesForWorkflow } from '../modules/savedInputValues.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 const titleInput = document.getElementById('title-input') as HTMLInputElement;
@@ -41,9 +41,7 @@ function loadWorkflow() {
 export async function saveWorkflow() {
     const updatedWorkflowObject = workflowEditor.updateJsonWithUserInput();
 
-    const savedInputs = getSavedInputs();
-    savedInputs[workflowType][workflowFilename] = undefined;
-    localStorage.setItem('savedInputs', JSON.stringify(savedInputs));
+    clearSavedInputValuesForWorkflow(workflowType, workflowFilename);
 
     if (workflowType === 'local') {
         const workflows: WorkflowWithMetadata[] = getAllWorkflows();

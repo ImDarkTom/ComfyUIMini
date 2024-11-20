@@ -66,3 +66,21 @@ export function getSavedInputValue(
 
     return savedInputs[workflowType][workflowIdentifier][nodeId][inputName];
 }
+
+export function clearSavedInputValuesForWorkflow(workflowType: string, workflowIdentifier: string) {
+    const savedInputs = getSavedInputs();
+
+    if (!savedInputs[workflowType]) {
+        savedInputs[workflowType] = {};
+    }
+
+    if (savedInputs[workflowType][workflowIdentifier]) {
+        delete savedInputs[workflowType][workflowIdentifier];
+    }
+
+    localStorage.setItem('savedInputs', JSON.stringify(savedInputs));
+}
+
+export function clearAllSavedInputValues() {
+    localStorage.setItem('savedInputs', JSON.stringify({}));
+}
