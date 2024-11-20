@@ -78,8 +78,38 @@ export class WorkflowEditor {
             return null;
         }
 
-        for (const [nodeId, node] of Object.entries(this.workflowObject)) {
-            await this.renderNodeInputs(nodeId, node);
+        if (this.workflowObject._comfyuimini_meta) {
+            for (const inputOption of (this.workflowObject._comfyuimini_meta as WorkflowMetadata).input_options) {
+                if (inputOption.disabled) {
+                    continue;
+                }
+
+                const inputNode = this.workflowObject[inputOption.node_id];
+
+                const comfyMetadataForInput = await this.getComfyMetadataForInputType(
+                    inputOption.input_name_in_node,
+                    inputOption.node_id
+                );
+
+                if (!comfyMetadataForInput) {
+                    continue;
+                }
+
+                const inputConfig: InputConfig = {
+                    nodeId: inputOption.node_id,
+                    comfyMetadata: comfyMetadataForInput,
+                    inputName: inputOption.input_name_in_node,
+                    title: inputOption.title,
+                    default: inputNode.inputs[inputOption.input_name_in_node].toString(),
+                    disabled: false,
+                };
+
+                await this.renderInput(inputConfig);
+            }
+        } else {
+            for (const [nodeId, node] of Object.entries(this.workflowObject)) {
+                await this.renderNodeInputs(nodeId, node);
+            }
         }
 
         this.startInputEventListeners();

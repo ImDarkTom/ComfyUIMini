@@ -43,6 +43,11 @@ export function renderInputs(workflowObject: WorkflowDataObject) {
 
         const comfyInputInfo = inputsInfoObject[inputNode.class_type][userInputMetadata.input_name_in_node];
 
+        if (!comfyInputInfo) {
+            console.warn(`No input info found for ${userInputMetadata.input_name_in_node} in ${inputNode.class_type}`);
+            continue;
+        }
+
         const renderedInput = renderInput(userInputMetadata, defaultValue, comfyInputInfo);
 
         renderedInputs += renderedInput;
