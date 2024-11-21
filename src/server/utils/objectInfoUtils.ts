@@ -1,5 +1,5 @@
 import { fetchRawObjectInfo } from './comfyAPIUtils';
-import { NormalisedInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo';
+import { NormalisedComfyInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo';
 
 async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
     const rawObjectInfo = await fetchRawObjectInfo();
@@ -43,10 +43,10 @@ async function getProcessedObjectInfo(): Promise<ProcessedObjectInfo | null> {
  * that determines if the input has an upload input or is just a list of options.
  *
  * @param {any} inputInfo
- * @returns {NormalisedInputInfo}
+ * @returns {NormalisedComfyInputInfo}
  */
-function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
-    const normalisedInfo: Partial<NormalisedInputInfo> = {
+function getNormalisedInfo(inputInfo: any): NormalisedComfyInputInfo {
+    const normalisedInfo: Partial<NormalisedComfyInputInfo> = {
         userAccessible: false,
     };
 
@@ -61,7 +61,7 @@ function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
             normalisedInfo.tooltip = inputInfo[1]?.tooltip;
         }
 
-        return normalisedInfo as NormalisedInputInfo;
+        return normalisedInfo as NormalisedComfyInputInfo;
     }
 
     if (['INT', 'FLOAT', 'STRING'].includes(inputInfo[0])) {
@@ -76,10 +76,10 @@ function getNormalisedInfo(inputInfo: any): NormalisedInputInfo {
         normalisedInfo.multiline = inputInfo[1]?.multiline;
         normalisedInfo.dynamicPrompts = inputInfo[1]?.dynamicPrompts;
 
-        return normalisedInfo as NormalisedInputInfo;
+        return normalisedInfo as NormalisedComfyInputInfo;
     }
 
-    return normalisedInfo as NormalisedInputInfo;
+    return normalisedInfo as NormalisedComfyInputInfo;
 }
 
 export { getProcessedObjectInfo };

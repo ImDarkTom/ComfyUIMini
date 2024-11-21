@@ -1,6 +1,6 @@
 import { InputOption, WorkflowWithMetadata } from '@shared/types/Workflow.js';
 import { BaseRenderConfig, renderNumberInput, renderSelectInput, renderTextInput } from './inputRenderers.js';
-import { NormalisedInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
+import { NormalisedComfyInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
 import { getSavedInputValue } from './savedInputValues.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
@@ -56,7 +56,11 @@ export function renderInputs(workflowObject: WorkflowDataObject) {
     inputsContainer.innerHTML = renderedInputs;
 }
 
-export function renderInput(userInputMetadata: InputOption, defaultValue: string, comfyInputInfo: NormalisedInputInfo) {
+export function renderInput(
+    userInputMetadata: InputOption,
+    defaultValue: string,
+    comfyInputInfo: NormalisedComfyInputInfo
+) {
     const inputType = comfyInputInfo.type;
 
     const baseRenderOptions: BaseRenderConfig = {
