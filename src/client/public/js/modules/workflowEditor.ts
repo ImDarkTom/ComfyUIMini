@@ -80,10 +80,6 @@ export class WorkflowEditor {
 
         if (this.workflowObject._comfyuimini_meta) {
             for (const inputOption of (this.workflowObject._comfyuimini_meta as WorkflowMetadata).input_options) {
-                if (inputOption.disabled) {
-                    continue;
-                }
-
                 const inputNode = this.workflowObject[inputOption.node_id];
 
                 const comfyMetadataForInput = await this.getComfyMetadataForInputType(
@@ -101,7 +97,7 @@ export class WorkflowEditor {
                     inputName: inputOption.input_name_in_node,
                     title: inputOption.title,
                     default: inputNode.inputs[inputOption.input_name_in_node].toString(),
-                    disabled: false,
+                    disabled: inputOption.disabled ?? false,
                 };
 
                 await this.renderInput(inputConfig);
