@@ -6,7 +6,8 @@
         "allowJs": false,
         "checkJs": false,
         "rootDir": "../",
-        "outDir": "../../dist"
+        "outDir": "../../dist",
+        "sourceMap": true
     },
     "include": ["./**/*", "../shared/**/*"],
     "exclude": ["../server/**/*"]
