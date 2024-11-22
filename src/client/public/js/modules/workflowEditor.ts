@@ -1,19 +1,26 @@
-import { WorkflowInstance } from '@shared/classes/WorkflowInstance';
 import { NormalisedComfyInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo';
 import {
     AnyWorkflow,
     InputOption,
     Workflow,
     WorkflowMetadata,
-    WorkflowNode,
     WorkflowWithMetadata,
 } from '@shared/types/Workflow';
 
+function getInputOptionsList(workflow: WorkflowWithMetadata): InputOption[] {
+    return workflow._comfyuimini_meta.input_options.map((inputOption) => ({
+        title: inputOption.title,
+        node_id: inputOption.node_id,
+        input_name_in_node: inputOption.input_name_in_node,
+        disabled: inputOption.disabled ?? false,
+    }));
+}
+
 export class WorkflowEditor {
     containerElem: HTMLElement;
-    workflowObject: WorkflowWithMetadata;
     titleInput: HTMLInputElement;
     descriptionInput: HTMLTextAreaElement;
+    workflowObject?: WorkflowWithMetadata | null;
     private inputCount: number;
     private comfyInputsInfo: ProcessedObjectInfo | null;
 
@@ -26,7 +33,7 @@ export class WorkflowEditor {
      */
     constructor(
         containerElem: HTMLElement,
-        workflowObject: AnyWorkflow,
+        workflowObject: AnyWorkflow | null,
         titleInput: HTMLInputElement,
         descriptionInput: HTMLTextAreaElement
     ) {
@@ -37,11 +44,7 @@ export class WorkflowEditor {
         this.inputCount = 0;
         this.comfyInputsInfo = null;
 
-        if (this.workflowHasMetadata(workflowObject)) {
-            this.workflowObject = workflowObject;
-        } else {
-            this.workflowObject = this.generateMetadataForWorkflow(workflowObject);
-        }
+        this.setWorkflowObject(workflowObject);
     }
 
     private generateMetadataForWorkflow(workflow: Workflow): WorkflowWithMetadata {
@@ -86,16 +89,31 @@ export class WorkflowEditor {
 
     /**
      *
-     * @param {AnyWorkflow} newWorkflowObject The new workflow object to set.
+     * @param {AnyWorkflow | null} newWorkflowObject The new workflow to set as the workflowObject.
      */
-    setWorkflowObject(newWorkflowObject: AnyWorkflow) {
-        this.workflowObject = newWorkflowObject;
+    setWorkflowObject(newWorkflowObject: AnyWorkflow | null): void {
+        if (newWorkflowObject === null) {
+            return;
+        }
+
+        if (this.workflowHasMetadata(newWorkflowObject)) {
+            this.workflowObject = newWorkflowObject;
+        } else {
+            this.workflowObject = this.generateMetadataForWorkflow(newWorkflowObject);
+        }
+    }
+
+    ensureWorkflowObject(): asserts this is { workflowObject: WorkflowWithMetadata } {
+        if (this.workflowObject === null) {
+            throw new Error('Workflow object is null');
+        }
     }
 
     /**
      * Renders the workflow inputs.
      */
     async renderWorkflow() {
+        this.ensureWorkflowObject();
         this.inputCount = 0;
 
         const blankMetadata: WorkflowMetadata = {
@@ -121,14 +139,14 @@ export class WorkflowEditor {
      * Loops through every node and renders each input.
      */
     async renderAllInputs() {
+        this.ensureWorkflowObject();
+
         if (this.workflowObject.version !== undefined) {
             // for workflows not imported in api format
             return null;
         }
 
-        const workflowInstance = new WorkflowInstance(this.workflowObject as WorkflowWithMetadata);
-
-        const allUserInputOptions = workflowInstance.getInputOptionsList();
+        const allUserInputOptions = getInputOptionsList(this.workflowObject);
 
         for (const userInputOptions of allUserInputOptions) {
             const comfyMetadataForInputType = await this.getComfyMetadataForInputType(
@@ -158,6 +176,8 @@ export class WorkflowEditor {
      * @returns {Promise<NormalisedComfyInputInfo | null>} The metadata for the input type.
      */
     async getComfyMetadataForInputType(inputType: string, nodeId: string): Promise<NormalisedComfyInputInfo | null> {
+        this.ensureWorkflowObject();
+
         if (!this.comfyInputsInfo) {
             const comfyObjectMetadata = await fetch('/comfyui/inputsinfo');
             const comfyObjectMetadataJson: ProcessedObjectInfo = await comfyObjectMetadata.json();
@@ -167,7 +187,13 @@ export class WorkflowEditor {
 
         const nodeClassType = this.workflowObject[nodeId].class_type;
 
-        const comfyInputTypeInfo = this.comfyInputsInfo[nodeClassType][inputType];
+        const comfyInputNodeInfo = this.comfyInputsInfo[nodeClassType];
+
+        if (!comfyInputNodeInfo) {
+            return null;
+        }
+
+        const comfyInputTypeInfo = comfyInputNodeInfo[inputType];
 
         if (comfyInputTypeInfo) {
             return comfyInputTypeInfo;
@@ -190,7 +216,10 @@ export class WorkflowEditor {
 
         const nodeId = userInputOptions.node_id;
         const inputNameInNode = userInputOptions.input_name_in_node;
-        const inputTitle = userInputOptions.title;
+
+        const inputTypeText = `[${nodeId}] ${nodeClass}: ${inputNameInNode}`;
+
+        const inputTitle = userInputOptions.title || inputTypeText;
 
         const idPrefix = `${nodeId}-${inputNameInNode}`;
 
@@ -200,7 +229,7 @@ export class WorkflowEditor {
                     <div class="input-top-container">
                         <span class="input-counter">${this.inputCount}.</span>
                         <div class="icon eye hide-input-button" id="hide-button-${idPrefix}"></div>
-                        <span class="input-type-text">[${nodeId}] ${nodeClass}: ${inputNameInNode}</span>
+                        <span class="input-type-text">${inputTypeText}</span>
                     </div>
                     <label for="${idPrefix}-title">Title</label>
                     <input type="text" id="${idPrefix}-title" placeholder="${inputTitle}" value="${inputTitle}" class="workflow-input workflow-input-title">
@@ -310,7 +339,7 @@ export class WorkflowEditor {
     startInputEventListeners() {
         this.containerElem.addEventListener('click', (e) => {
             // @ts-ignore
-            const targetHasClass = (/** @type {string} */ className) => e.target.classList.contains(className);
+            const targetHasClass = (className: string) => e.target.classList.contains(className);
 
             if (targetHasClass('move-arrow-up')) {
                 // @ts-ignore
@@ -331,6 +360,8 @@ export class WorkflowEditor {
      * @returns {object} The exported workflow object.
      */
     updateJsonWithUserInput(): WorkflowWithMetadata {
+        this.ensureWorkflowObject();
+
         const inputOptionsList = [];
 
         const modifiedWorkflow = this.workflowObject;
