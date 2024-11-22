@@ -27,7 +27,7 @@ const descriptionInput = getElementOrThrow('#description-input') as HTMLTextArea
 const saveToBrowserButton = getElementOrThrow('#save-to-browser') as HTMLButtonElement;
 const downloadWorkflowButton = getElementOrThrow('#download-workflow') as HTMLButtonElement;
 
-const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
+const workflowEditor = new WorkflowEditor(inputsContainer, null, titleInput, descriptionInput);
 
 workflowFileInput.addEventListener('change', () => {
     if (!workflowFileInput.files) {

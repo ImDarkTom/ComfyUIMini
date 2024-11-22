@@ -1,4 +1,4 @@
-import { WorkflowWithMetadata } from '@shared/types/Workflow.js';
+import { WorkflowWithMetadata } from '@shared/types/Workflow';
 import { handleError } from '../common/errorHandler.js';
 import { getAllWorkflows, getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
@@ -15,7 +15,7 @@ const workflowFilename = document.body.getAttribute('data-workflow-filename') ||
 
 const saveButton = document.getElementById('save') as HTMLButtonElement;
 
-const workflowEditor = new WorkflowEditor(inputsContainer, {}, titleInput, descriptionInput);
+const workflowEditor = new WorkflowEditor(inputsContainer, null, titleInput, descriptionInput);
 
 function loadWorkflow() {
     try {
@@ -31,7 +31,6 @@ function loadWorkflow() {
         } else {
             workflowEditor.setWorkflowObject(JSON.parse(workflowTextAttrib));
         }
-
         workflowEditor.renderWorkflow();
     } catch (error) {
         handleError(error);

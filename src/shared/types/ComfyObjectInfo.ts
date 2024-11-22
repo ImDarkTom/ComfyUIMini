@@ -11,7 +11,7 @@ export interface ObjectInfoPartial {
     };
 }
 
-export interface NormalisedInputInfo {
+export interface NormalisedComfyInputInfo {
     type: 'ARRAY' | 'STRING' | 'INT' | 'FLOAT';
     userAccessible: boolean;
     list: string[];
@@ -27,6 +27,6 @@ export interface NormalisedInputInfo {
 
 export interface ProcessedObjectInfo {
     [nodeName: string]: {
-        [inputName: string]: NormalisedInputInfo;
+        [inputName: string]: NormalisedComfyInputInfo;
     };
 }

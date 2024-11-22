@@ -30,7 +30,7 @@ export interface Workflow {
 
 export type WorkflowWithMetadata = Workflow & {
     _comfyuimini_meta: WorkflowMetadata;
-}
+};
 
 export type AnyWorkflow = WorkflowWithMetadata | Workflow;
 
