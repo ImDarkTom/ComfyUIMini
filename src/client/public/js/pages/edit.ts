@@ -3,6 +3,7 @@ import { handleError } from '../common/errorHandler.js';
 import { getAllWorkflows, getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
 import { clearSavedInputValuesForWorkflow } from '../modules/savedInputValues.js';
+import { WorkflowInstance } from '@shared/classes/Workflow.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 const titleInput = document.getElementById('title-input') as HTMLInputElement;
@@ -18,6 +19,8 @@ const saveButton = document.getElementById('save') as HTMLButtonElement;
 const workflowEditor = new WorkflowEditor(inputsContainer, null, titleInput, descriptionInput);
 
 function loadWorkflow() {
+    let workflowInstance;
+
     try {
         if (workflowTextAttrib == '') {
             const workflow = getLocalWorkflow(workflowOriginalTitle);
@@ -27,10 +30,17 @@ function loadWorkflow() {
                 return;
             }
 
-            workflowEditor.setWorkflowObject(workflow);
+            workflowInstance = new WorkflowInstance(workflow);
         } else {
-            workflowEditor.setWorkflowObject(JSON.parse(workflowTextAttrib));
+            const parsedWorkflowFromAttrib = JSON.parse(workflowTextAttrib);
+            workflowInstance = new WorkflowInstance(parsedWorkflowFromAttrib);
         }
+
+        if (!workflowInstance) {
+            throw new Error('Could not get workflow to initialize editor');
+        }
+
+        workflowEditor.workflowObject = workflowInstance;
         workflowEditor.renderWorkflow();
     } catch (error) {
         handleError(error);

@@ -8,6 +8,7 @@ const paths = {
     workflows: path.join(baseDir, 'workflows'),
     config: path.join(baseDir, 'config'),
     clientJs: path.join(baseDir, 'dist', 'client', 'public'),
+    shared: path.join(baseDir, 'dist', 'shared'),
 };
 
 export default paths;

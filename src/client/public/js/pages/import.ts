@@ -1,3 +1,4 @@
+import { WorkflowInstance } from '@shared/classes/Workflow.js';
 import { getAllWorkflows } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
 
@@ -61,7 +62,12 @@ workflowFileInput.addEventListener('change', () => {
             return;
         }
 
-        workflowEditor.setWorkflowObject(importingWorkflowJson);
+        try {
+            workflowEditor.workflowObject = new WorkflowInstance(importingWorkflowJson);
+        } catch (error) {
+            openPopupWindow(`Could not import workflow: ${error}`);
+            return;
+        }
 
         workflowEditor.renderWorkflow();
     });

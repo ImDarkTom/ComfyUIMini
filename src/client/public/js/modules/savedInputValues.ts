@@ -1,15 +1,5 @@
 import { Workflow } from '@shared/types/Workflow';
 
-export interface SavedInputs {
-    [workflowType: string]: {
-        [workflowIdentifier: string]: {
-            [workflowNodeId: string]: {
-                [inputName: string]: string;
-            };
-        };
-    };
-}
-
 export const getSavedInputs = () => JSON.parse(localStorage.getItem('savedInputs') || '{}');
 
 export function saveInputValues(workflowType: string, workflowIdentifier: string, filledWorkflow: Workflow) {
