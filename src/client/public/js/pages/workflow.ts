@@ -32,7 +32,9 @@ workflowDataObject['json'] = workflowDataObject.json ? workflowDataObject.json :
 let totalImageCount = 0;
 let completedImageCount = 0;
 
-const ws = new WebSocket(`ws://${window.location.host}/ws`);
+// Use wss:// when the page is served over HTTPS
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
 function loadWorkflow() {
