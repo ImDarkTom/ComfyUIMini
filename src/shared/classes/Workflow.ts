@@ -12,7 +12,7 @@ export class WorkflowInstance {
     workflow!: WorkflowWithMetadata;
 
     constructor(workflow: AnyWorkflow) {
-        this.validateWorkflowObject(workflow);
+        WorkflowInstance.validateWorkflowObject(workflow);
         this.setWorkflowObject(workflow);
     }
 
@@ -59,45 +59,11 @@ export class WorkflowInstance {
     /** --------------
      * PRIVATE METHODS
     --------------- */
-    private validateWorkflowObject(workflow: AnyWorkflow): void {
-        if (!workflow || typeof workflow !== 'object') {
-            throw new Error('Invalid workflow: must be a non-null object');
-        }
-
-        if (Object.keys(workflow).length === 0) {
-            throw new Error('Invalid workflow: must not be empty');
-        }
-
-        for (const [nodeId, node] of Object.entries(workflow)) {
-            if (nodeId.startsWith('_')) {
-                continue;
-            }
-
-            if (typeof node !== 'object') {
-                throw new Error(`Invalid workflow: node '${nodeId}' is not an object`);
-            }
-
-            if (Object.keys(node).length === 0) {
-                throw new Error(`Invalid workflow: node '${nodeId}' is empty`);
-            }
-
-            if (node.class_type === undefined) {
-                throw new Error(`Invalid workflow: node '${nodeId}' does not have a class_type`);
-            }
-
-            if (node.inputs === undefined) {
-                throw new Error(`Invalid workflow: node '${nodeId}' does not have inputs`);
-            }
-        }
-
-        // TODO: Add stricter validation
-    }
-
     private setWorkflowObject(workflow: AnyWorkflow): void {
         if (this.workflowHasMetadata(workflow)) {
             this.workflow = workflow;
         } else {
-            this.workflow = this.generateMetadataForWorkflow(workflow);
+            this.workflow = WorkflowInstance.generateMetadataForWorkflow(workflow);
         }
     }
 
@@ -105,11 +71,55 @@ export class WorkflowInstance {
         return (workflow as WorkflowWithMetadata)._comfyuimini_meta !== undefined;
     }
 
-    private generateMetadataForWorkflow(workflow: Workflow): WorkflowWithMetadata {
-        // Duplicated from autoGenerateMetadata in metadataUtils.ts, move to method in WorkflowInstace in the future.
+    static validateWorkflowObject(workflow: AnyWorkflow, returnErrorMessage: boolean = false): string | void {
+        try {
+            if (!workflow || typeof workflow !== 'object') {
+                throw new Error('Invalid workflow: must be a non-null object');
+            }
 
+            if (Object.keys(workflow).length === 0) {
+                throw new Error('Invalid workflow: must not be empty (no keys in object)');
+            }
+
+            if ('version' in workflow) {
+                throw new Error('Invalid workflow: workflow not exported in API format (version string in workflow)');
+            }
+
+            for (const [nodeId, node] of Object.entries(workflow)) {
+                if (nodeId.startsWith('_')) {
+                    continue;
+                }
+
+                if (typeof node !== 'object') {
+                    throw new Error(`Invalid workflow: node '${nodeId}' is not an object`);
+                }
+
+                if (Object.keys(node).length === 0) {
+                    throw new Error(`Invalid workflow: node '${nodeId}' is empty`);
+                }
+
+                if (node.class_type === undefined) {
+                    throw new Error(`Invalid workflow: node '${nodeId}' does not have a class_type`);
+                }
+
+                if (node.inputs === undefined) {
+                    throw new Error(`Invalid workflow: node '${nodeId}' does not have inputs`);
+                }
+            }
+
+            // TODO: Add stricter validation
+        } catch (error) {
+            if (returnErrorMessage) {
+                return (error as Error).message;
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    static generateMetadataForWorkflow(workflow: Workflow, filename?: string): WorkflowWithMetadata {
         const metadata: WorkflowMetadata = {
-            title: 'Unnamed Workflow',
+            title: filename ?? 'Unnamed Workflow',
             description: '',
             format_version: '2',
             input_options: [],
