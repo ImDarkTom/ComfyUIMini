@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import config from 'config';
 import logger from './logger';
-import { autoGenerateMetadata } from './metadataUtils';
 import paths from './paths';
 import { Workflow, WorkflowFileReadError, WorkflowWithMetadata } from '@shared/types/Workflow';
 import { WorkflowInstance } from '@shared/classes/Workflow';

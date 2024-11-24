@@ -43,11 +43,11 @@ export class WorkflowInstance {
         return filledWorkflow;
     }
 
-    getNode(nodeId: string): WorkflowNode {
+    public getNode(nodeId: string): WorkflowNode {
         return this.workflow[nodeId];
     }
 
-    getInputOptionsList(): InputOption[] {
+    public getInputOptionsList(): InputOption[] {
         return this.workflow._comfyuimini_meta.input_options.map((inputOption) => ({
             title: inputOption.title,
             node_id: inputOption.node_id,
@@ -56,22 +56,11 @@ export class WorkflowInstance {
         }));
     }
 
-    /** --------------
-     * PRIVATE METHODS
-    --------------- */
-    private setWorkflowObject(workflow: AnyWorkflow): void {
-        if (this.workflowHasMetadata(workflow)) {
-            this.workflow = workflow;
-        } else {
-            this.workflow = WorkflowInstance.generateMetadataForWorkflow(workflow);
-        }
-    }
+    /** -------------
+     * STATIC METHODS
+    -------------- */
 
-    private workflowHasMetadata(workflow: AnyWorkflow): workflow is WorkflowWithMetadata {
-        return (workflow as WorkflowWithMetadata)._comfyuimini_meta !== undefined;
-    }
-
-    static validateWorkflowObject(workflow: AnyWorkflow, returnErrorMessage: boolean = false): string | void {
+    public static validateWorkflowObject(workflow: AnyWorkflow, returnErrorMessage: boolean = false): string | void {
         try {
             if (!workflow || typeof workflow !== 'object') {
                 throw new Error('Invalid workflow: must be a non-null object');
@@ -86,25 +75,7 @@ export class WorkflowInstance {
             }
 
             for (const [nodeId, node] of Object.entries(workflow)) {
-                if (nodeId.startsWith('_')) {
-                    continue;
-                }
-
-                if (typeof node !== 'object') {
-                    throw new Error(`Invalid workflow: node '${nodeId}' is not an object`);
-                }
-
-                if (Object.keys(node).length === 0) {
-                    throw new Error(`Invalid workflow: node '${nodeId}' is empty`);
-                }
-
-                if (node.class_type === undefined) {
-                    throw new Error(`Invalid workflow: node '${nodeId}' does not have a class_type`);
-                }
-
-                if (node.inputs === undefined) {
-                    throw new Error(`Invalid workflow: node '${nodeId}' does not have inputs`);
-                }
+                WorkflowInstance.validateNode(node, nodeId);
             }
 
             // TODO: Add stricter validation
@@ -117,7 +88,29 @@ export class WorkflowInstance {
         }
     }
 
-    static generateMetadataForWorkflow(workflow: Workflow, filename?: string): WorkflowWithMetadata {
+    private static validateNode(node: WorkflowNode, nodeId: string): void {
+        if (nodeId.startsWith('_')) {
+            return;
+        }
+
+        if (typeof node !== 'object') {
+            throw new Error(`Invalid workflow: node '${nodeId}' is not an object`);
+        }
+
+        if (Object.keys(node).length === 0) {
+            throw new Error(`Invalid workflow: node '${nodeId}' is empty`);
+        }
+
+        if (node.class_type === undefined) {
+            throw new Error(`Invalid workflow: node '${nodeId}' does not have a class_type`);
+        }
+
+        if (node.inputs === undefined) {
+            throw new Error(`Invalid workflow: node '${nodeId}' does not have inputs`);
+        }
+    }
+
+    public static generateMetadataForWorkflow(workflow: Workflow, filename?: string): WorkflowWithMetadata {
         const metadata: WorkflowMetadata = {
             title: filename ?? 'Unnamed Workflow',
             description: '',
@@ -130,6 +123,8 @@ export class WorkflowInstance {
                 continue;
             }
 
+            const nodeTitle = node['_meta'].title;
+
             for (const [inputName, inputValue] of Object.entries(node.inputs)) {
                 if (Array.isArray(inputValue)) {
                     // Inputs that come from other nodes come as an array
@@ -139,7 +134,7 @@ export class WorkflowInstance {
                 metadata.input_options.push({
                     node_id: nodeId,
                     input_name_in_node: inputName,
-                    title: `[${nodeId}] ${inputName}`,
+                    title: `[${nodeId}] ${nodeTitle}: ${inputName}`,
                     disabled: false,
                 });
             }
@@ -149,5 +144,20 @@ export class WorkflowInstance {
             ...workflow,
             _comfyuimini_meta: metadata,
         } as WorkflowWithMetadata;
+    }
+
+    /** --------------
+     * PRIVATE METHODS
+    --------------- */
+    private setWorkflowObject(workflow: AnyWorkflow): void {
+        if (WorkflowInstance.workflowHasMetadata(workflow)) {
+            this.workflow = workflow;
+        } else {
+            this.workflow = WorkflowInstance.generateMetadataForWorkflow(workflow);
+        }
+    }
+
+    private static workflowHasMetadata(workflow: AnyWorkflow): workflow is WorkflowWithMetadata {
+        return (workflow as WorkflowWithMetadata)._comfyuimini_meta !== undefined;
     }
 }
