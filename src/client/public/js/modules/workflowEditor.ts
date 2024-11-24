@@ -139,11 +139,6 @@ export class WorkflowEditor {
     private async renderAllInputs() {
         this.ensureWorkflowObject();
 
-        if (this.workflowObject.version !== undefined) {
-            // for workflows not imported in api format
-            return null;
-        }
-
         const allUserInputOptions = this.workflowObject.getInputOptionsList();
 
         for (const userInputOptions of allUserInputOptions) {
@@ -173,7 +168,10 @@ export class WorkflowEditor {
      * @param nodeId The ID of the node in the workflow.
      * @returns The metadata for the input type or null if not found.
      */
-    private async getComfyMetadataForInputType(inputType: string, nodeId: string): Promise<NormalisedComfyInputInfo | null> {
+    private async getComfyMetadataForInputType(
+        inputType: string,
+        nodeId: string
+    ): Promise<NormalisedComfyInputInfo | null> {
         this.ensureWorkflowObject();
 
         if (!this.comfyInputsInfo) {
@@ -260,7 +258,11 @@ export class WorkflowEditor {
      * @param defaultValue The default value for the input from the workflow object.
      * @returns The rendered HTML for the default value input.
      */
-    private static renderDefaultValueInput(inputConfig: NormalisedComfyInputInfo, idPrefix: string, defaultValue: string): string {
+    private static renderDefaultValueInput(
+        inputConfig: NormalisedComfyInputInfo,
+        idPrefix: string,
+        defaultValue: string
+    ): string {
         const inputDefault = defaultValue ?? inputConfig.default ?? '';
 
         let inputHTML = `<label for="${idPrefix}-default">Default</label>`;
@@ -299,7 +301,7 @@ export class WorkflowEditor {
     private startInputEventListeners() {
         this.containerElem.addEventListener('click', (e: MouseEvent) => {
             const target = e.target;
-            
+
             if (!target || !(target instanceof HTMLElement)) {
                 return;
             }

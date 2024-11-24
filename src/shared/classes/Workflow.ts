@@ -12,7 +12,6 @@ export class WorkflowInstance {
     workflow!: WorkflowWithMetadata;
 
     constructor(workflow: AnyWorkflow) {
-        WorkflowInstance.validateWorkflowObject(workflow);
         this.setWorkflowObject(workflow);
     }
 
@@ -43,10 +42,21 @@ export class WorkflowInstance {
         return filledWorkflow;
     }
 
+    /**
+     * Gets a node based off node ID.
+     *
+     * @param nodeId The id of the node to get.
+     * @returns The workflow node.
+     */
     public getNode(nodeId: string): WorkflowNode {
         return this.workflow[nodeId];
     }
 
+    /**
+     * Gets the list of options for every input in the user metadata.
+     *
+     * @returns The list of options for each input in the workflow.
+     */
     public getInputOptionsList(): InputOption[] {
         return this.workflow._comfyuimini_meta.input_options.map((inputOption) => ({
             title: inputOption.title,
@@ -60,6 +70,13 @@ export class WorkflowInstance {
      * STATIC METHODS
     -------------- */
 
+    /**
+     * Checks if a workflow is valid.
+     *
+     * @param workflow The workflow to validate.
+     * @param returnErrorMessage If true, returns a string with the error message instead of throwing an error.
+     * @returns Error message string if `returnErrorMessage` is true, otherwise throws an error.
+     */
     public static validateWorkflowObject(workflow: AnyWorkflow, returnErrorMessage: boolean = false): string | void {
         try {
             if (!workflow || typeof workflow !== 'object') {
@@ -77,8 +94,6 @@ export class WorkflowInstance {
             for (const [nodeId, node] of Object.entries(workflow)) {
                 WorkflowInstance.validateNode(node, nodeId);
             }
-
-            // TODO: Add stricter validation
         } catch (error) {
             if (returnErrorMessage) {
                 return (error as Error).message;
@@ -88,6 +103,13 @@ export class WorkflowInstance {
         }
     }
 
+    /**
+     * Checks if a node is valid.
+     *
+     * @param node The node to validate.
+     * @param nodeId The ID of the node.
+     * @returns Throws an error if the node is invalid. Otherwise, returns nothing.
+     */
     private static validateNode(node: WorkflowNode, nodeId: string): void {
         if (nodeId.startsWith('_')) {
             return;
@@ -105,11 +127,26 @@ export class WorkflowInstance {
             throw new Error(`Invalid workflow: node '${nodeId}' does not have a class_type`);
         }
 
+        if (node._meta === undefined) {
+            throw new Error(`Invalid workflow: node '${nodeId}' does not have a '_meta' property`);
+        }
+
+        if (node._meta.title === undefined) {
+            throw new Error(`Invalid workflow: node '${nodeId}' does not have title in '_meta'`);
+        }
+
         if (node.inputs === undefined) {
             throw new Error(`Invalid workflow: node '${nodeId}' does not have inputs`);
         }
     }
 
+    /**
+     * Auto-generates metadata for a workflow object.
+     *
+     * @param workflow The workflow to generate metadata for.
+     * @param filename The optional filename to use for the title of the workflow.
+     * @returns The workflow with the generated metadata.
+     */
     public static generateMetadataForWorkflow(workflow: Workflow, filename?: string): WorkflowWithMetadata {
         const metadata: WorkflowMetadata = {
             title: filename ?? 'Unnamed Workflow',
@@ -149,7 +186,15 @@ export class WorkflowInstance {
     /** --------------
      * PRIVATE METHODS
     --------------- */
+
+    /**
+     * Validates and sets the workflow object to be used throughout the class.
+     *
+     * @param workflow The workflow object to set as the new workflow.
+     */
     private setWorkflowObject(workflow: AnyWorkflow): void {
+        WorkflowInstance.validateWorkflowObject(workflow);
+
         if (WorkflowInstance.workflowHasMetadata(workflow)) {
             this.workflow = workflow;
         } else {
@@ -157,6 +202,12 @@ export class WorkflowInstance {
         }
     }
 
+    /**
+     * Assert if a workflow has metadata.
+     *
+     * @param workflow The workflow to check metadata for.
+     * @returns Assertion if the workflow has metadata, and is therefore an instance of WorkflowWithMetadata.
+     */
     private static workflowHasMetadata(workflow: AnyWorkflow): workflow is WorkflowWithMetadata {
         return (workflow as WorkflowWithMetadata)._comfyuimini_meta !== undefined;
     }
