@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('../partials/head', { title: workflow.title, theme }) %>
+    <%- include('../partials/head', { title: title, theme }) %>
     <link rel="stylesheet" href="/css/workflow.css">
     <script src="/js/pages/workflow.js" defer type="module"></script>
     <script src="/js/common/popupWindow.js" defer></script>
@@ -27,13 +27,15 @@
                 { action: "/", icon: "home", text: "Home", type: "link" },
                 { action: ["/js/pages/workflow.js", "cancelRun"], icon: "stop", text: "Cancel", type: "function" },
                 { action: ["/js/pages/workflow.js", "runWorkflow"], icon: "generate", text: "Generate", type: "function" },
-                { action: `/edit/${workflow.type}/${workflow.identifier}`, icon: "edit", text: "Edit", type: "link" },
+                { action: `/edit/${type}/${identifier}`, icon: "edit", text: "Edit", type: "link" },
                 { action: "/settings", icon: "settings", text: "Settings", type: "link" },
             ] 
         }) %>
     </div>
     <script>
             const workflowDataFromEjs = <%- JSON.stringify(workflow) %>;
+            const passedWorkflowIdentifier= <%- JSON.stringify(identifier) %>;
+            const passedWorkflowType = <%- JSON.stringify(type) %>;
     </script>
 </body>
 </html>

@@ -19,9 +19,10 @@ export class WorkflowInstance {
         return this.workflow._comfyuimini_meta;
     }
 
-    fillWorkflowWithUserInputs(inputValues: NodeInputValues): Workflow {
-        // TODO: Implement into main workflow page
-        const filledWorkflow = this.workflow;
+    public fillWorkflowWithUserInputs(inputValues: NodeInputValues): Workflow {
+        const filledWorkflow = structuredClone(this.workflow);
+
+        delete (filledWorkflow as Workflow)._comfyuimini_meta;
 
         for (const [nodeId, nodeInputs] of Object.entries(inputValues)) {
             if (!filledWorkflow[nodeId]) {

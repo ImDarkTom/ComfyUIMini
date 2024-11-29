@@ -139,6 +139,7 @@ export class WorkflowEditor {
     private async renderAllInputs() {
         this.ensureWorkflowObject();
 
+        // TODO: Replace with function that gets all inputs not just ones in metadata
         const allUserInputOptions = this.workflowObject.getInputOptionsList();
 
         for (const userInputOptions of allUserInputOptions) {

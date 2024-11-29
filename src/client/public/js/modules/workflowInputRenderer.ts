@@ -8,19 +8,8 @@ const inputsContainer = document.querySelector('.inputs-container') as HTMLEleme
 const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
 const inputsInfoObject: ProcessedObjectInfo = await inputsInfoResponse.json();
 
-interface WorkflowDataObject {
-    type: string;
-    identifier: string;
-    json: WorkflowWithMetadata;
-    title: string;
-}
-
-/**
- *
- * @param {WorkflowDataObject} workflowObject The workflow object to render inputs for.
- */
-export function renderInputs(workflowObject: WorkflowDataObject) {
-    const workflowJson = workflowObject.json;
+export function renderInputs(workflowObject: WorkflowWithMetadata, workflowType: string, workflowIdentifier: string) {
+    const workflowJson = workflowObject;
     const userInputsMetadata = workflowJson['_comfyuimini_meta'].input_options;
 
     let renderedInputs = '';
@@ -33,8 +22,8 @@ export function renderInputs(workflowObject: WorkflowDataObject) {
 
         // Can be number or string, but not a list as we can only save editable inputs with the import page.
         const savedDefaultValue = getSavedInputValue(
-            workflowObject.type,
-            workflowObject.identifier,
+            workflowType,
+            workflowIdentifier,
             userInputMetadata.node_id,
             userInputMetadata.input_name_in_node
         );

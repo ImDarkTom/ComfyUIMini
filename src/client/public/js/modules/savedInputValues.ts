@@ -1,33 +1,60 @@
+import { NodeInputValues } from '@shared/types/SavedInputs';
 import { Workflow } from '@shared/types/Workflow';
 
 export const getSavedInputs = () => JSON.parse(localStorage.getItem('savedInputs') || '{}');
 
-export function saveInputValues(workflowType: string, workflowIdentifier: string, filledWorkflow: Workflow) {
-    const savedInputs = getSavedInputs();
+export class SaveInputValues {
+    static fromWorkflow(workflowType: string, workflowIdentifier: string, filledWorkflow: Workflow) {
+        const savedInputs = getSavedInputs();
 
-    if (!savedInputs[workflowType]) {
-        savedInputs[workflowType] = {};
-    }
-
-    if (!savedInputs[workflowType][workflowIdentifier]) {
-        savedInputs[workflowType][workflowIdentifier] = {};
-    }
-
-    for (const [nodeId, nodeInfo] of Object.entries(filledWorkflow)) {
-        if (!savedInputs[workflowType][workflowIdentifier][nodeId]) {
-            savedInputs[workflowType][workflowIdentifier][nodeId] = {};
+        if (!savedInputs[workflowType]) {
+            savedInputs[workflowType] = {};
         }
 
-        for (const [inputName, inputValue] of Object.entries(nodeInfo.inputs)) {
-            if (Array.isArray(inputValue)) {
-                continue;
+        if (!savedInputs[workflowType][workflowIdentifier]) {
+            savedInputs[workflowType][workflowIdentifier] = {};
+        }
+    
+        for (const [nodeId, nodeInfo] of Object.entries(filledWorkflow)) {
+            if (!savedInputs[workflowType][workflowIdentifier][nodeId]) {
+                savedInputs[workflowType][workflowIdentifier][nodeId] = {};
+            }
+    
+            for (const [inputName, inputValue] of Object.entries(nodeInfo.inputs)) {
+                if (Array.isArray(inputValue)) {
+                    continue;
+                }
+    
+                savedInputs[workflowType][workflowIdentifier][nodeId][inputName] = inputValue;
+            }
+        }
+    
+        localStorage.setItem('savedInputs', JSON.stringify(savedInputs));
+    }
+
+    static fromNodeInputValues(workflowType: string, workflowIdentifier: string, nodeInputValues: NodeInputValues) {
+        const savedInputs = getSavedInputs();
+
+        if (!savedInputs[workflowType]) {
+            savedInputs[workflowType] = {};
+        }
+
+        if (!savedInputs[workflowType][workflowIdentifier]) {
+            savedInputs[workflowType][workflowIdentifier] = {};
+        }
+        
+        for (const [workflowNodeId, nodeInputs] of Object.entries(nodeInputValues)) {
+            if (!savedInputs[workflowType][workflowIdentifier][workflowNodeId]) {
+                savedInputs[workflowType][workflowIdentifier][workflowNodeId] = {};
             }
 
-            savedInputs[workflowType][workflowIdentifier][nodeId][inputName] = inputValue;
+            for (const [inputName, inputValue] of Object.entries(nodeInputs)) {
+                savedInputs[workflowType][workflowIdentifier][workflowNodeId][inputName] = inputValue;
+            }
         }
-    }
 
-    localStorage.setItem('savedInputs', JSON.stringify(savedInputs));
+        localStorage.setItem('savedInputs', JSON.stringify(savedInputs));
+    }
 }
 
 export function getSavedInputValue(

@@ -1,90 +1,137 @@
-import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
-import { handleError } from '../common/errorHandler.js';
-import { renderInputs } from '../modules/workflowInputRenderer.js';
+// --- Imports ---
+// External dependencies
 import {
     FinishGenerationMessage,
     PreviewMessage,
     ProgressMessage,
     TotalImagesMessage,
 } from '@shared/types/WebSocket.js';
-import { saveInputValues } from '../modules/savedInputValues.js';
-import { Workflow } from '@shared/types/Workflow.js';
+import { WorkflowWithMetadata } from '@shared/types/Workflow.js';
+import { NodeInputValues } from '@shared/types/SavedInputs.js';
+import { WorkflowInstance } from '@shared/classes/Workflow.js';
 
-const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
-const outputImagesContainer = document.querySelector('.output-images-container') as HTMLElement;
-const totalImagesProgressInnerElem = document.querySelector(
-    '.total-images-progress .progress-bar-inner'
-) as HTMLElement;
-const totalImagesProgressTextElem = document.querySelector('.total-images-progress .progress-bar-text') as HTMLElement;
-const currentImageProgressInnerElem = document.querySelector(
-    '.current-image-progress .progress-bar-inner'
-) as HTMLElement;
-const currentImageProgressTextElem = document.querySelector(
-    '.current-image-progress .progress-bar-text'
-) as HTMLElement;
-const cancelGenerationButtonElem = document.querySelector('.cancel-run-button') as HTMLButtonElement;
-const runButton = document.querySelector('.run-workflow') as HTMLButtonElement;
+// Internal modules
+import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
+import { renderInputs } from '../modules/workflowInputRenderer.js';
+import { SaveInputValues } from '../modules/savedInputValues.js';
 
-// @ts-ignore - We get this from EJS via an inline script tag
-const workflowDataObject = workflowDataFromEjs;
-workflowDataObject['json'] = workflowDataObject.json ? workflowDataObject.json : await fetchLocalWorkflow();
+// --- DOM Elements ---
+const elements = {
+    inputsContainer: document.querySelector('.inputs-container') as HTMLElement,
+    outputImagesContainer: document.querySelector('.output-images-container') as HTMLElement,
+    progressBar: {
+        current: {
+            innerElem: document.querySelector('.current-image-progress .progress-bar-inner') as HTMLElement,
+            textElem: document.querySelector('.current-image-progress .progress-bar-text') as HTMLElement,
+        },
+        total: {
+            innerElem: document.querySelector('.total-images-progress .progress-bar-inner') as HTMLElement,
+            textElem: document.querySelector('.total-images-progress .progress-bar-text') as HTMLElement,
+        }
+    },
+    runButton: document.querySelector('.run-workflow') as HTMLButtonElement,
+    cancelRunButton: document.querySelector('.cancel-run-button') as HTMLButtonElement,
+    get allFileInputs() {
+        return document.querySelectorAll('.workflow-input-container .file-input') as NodeListOf<HTMLElement>
+    },
+    get allSelectsWithImageUploads() {
+        return document.querySelectorAll('select.workflow-input.has-image-upload') as NodeListOf<HTMLSelectElement>
+    },
+    get allWorkflowInputContainers() { 
+        return document.querySelectorAll('.workflow-input-container') as NodeListOf<HTMLElement>
+    },
+};
 
+// --- Variables ---
 let totalImageCount = 0;
 let completedImageCount = 0;
 
+// @ts-ignore
+const workflowIdentifier = passedWorkflowIdentifier;
+// @ts-ignore
+const workflowType = passedWorkflowType;
+
+// Workflow data from EJS via inline script tag
+// @ts-ignore
+const workflowObject: WorkflowWithMetadata = workflowDataFromEjs ? workflowDataFromEjs : fetchLocalWorkflow();
+
+// --- Initialise WebSocket ---
 // Use wss:// when the page is served over HTTPS
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
 ws.onopen = () => console.log('Connected to WebSocket client');
 
 function loadWorkflow() {
-    renderInputs(workflowDataObject);
+    renderInputs(workflowObject, workflowType, workflowIdentifier);
 
     startEventListeners();
 }
 
-async function fetchLocalWorkflow() {
-    try {
-        return getLocalWorkflow(workflowDataObject.identifier);
-    } catch (error) {
-        handleError(error);
+/**
+ * Fetches the current local workflow from localStorage.
+ * If the workflow is not found, an error is thrown.
+ * 
+ * @returns The workflow object
+ */
+function fetchLocalWorkflow(): WorkflowWithMetadata {
+    const localWorkflow = getLocalWorkflow(workflowIdentifier);
+
+    if (!localWorkflow) {
+        const errorMessage = `Workflow '${workflowIdentifier}' not found.`;
+        openPopupWindow(errorMessage);
+        throw new Error(errorMessage);
     }
+
+    return localWorkflow;
 }
 
+/**
+ * Starts the event listeners for the various elements on the page.
+ */
 function startEventListeners() {
-    runButton.addEventListener('click', runWorkflow);
-    document
-        .querySelectorAll('.workflow-input-container .file-input')
-        .forEach((element) => fileUploadEventListener(element as HTMLElement));
+    elements.runButton.addEventListener('click', runWorkflow);
+    elements.cancelRunButton.addEventListener('click', cancelRun);
 
-    cancelGenerationButtonElem.addEventListener('click', cancelRun);
-    inputsContainer.addEventListener('click', handleInputContainerClick);
+    elements.inputsContainer.addEventListener('click', handleInputContainerClick);
 
-    document.querySelectorAll('select.workflow-input.has-image-upload').forEach((selectElement) => {
-        selectElement.addEventListener('change', (e: Event) => {
-            const target = e.target as HTMLSelectElement;
+    elements.allFileInputs.forEach((element) => fileUploadEventListener(element));
+    elements.allSelectsWithImageUploads.forEach((selectElement) => imageSelectEventListener(selectElement));
+}
 
-            const selectedOption = target.options[target.selectedIndex];
-            const selectedValue = selectedOption.value;
+/**
+ * Handles updating the preview for a image select element.
+ * 
+ * @param selectElement The select element to listen to.
+ */
+function imageSelectEventListener(selectElement: HTMLSelectElement) {
+    selectElement.addEventListener('change', (e: Event) => {
+        const target = e.target as HTMLSelectElement;
 
-            if (!selectedValue) {
-                return;
-            }
+        const selectedOption = target.options[target.selectedIndex];
+        const selectedValue = selectedOption.value;
 
-            const innerInputWrapperElem = target.closest('.inner-input-wrapper');
+        if (!selectedValue) {
+            return;
+        }
 
-            if (!innerInputWrapperElem) {
-                return;
-            }
+        const innerInputWrapperElem = target.closest('.inner-input-wrapper');
 
-            const imagePreviewElem = innerInputWrapperElem.querySelector('.input-image-preview') as HTMLImageElement;
-            imagePreviewElem.src = `/comfyui/image?filename=${selectedValue}&subfolder=&type=input`;
-        });
+        if (!innerInputWrapperElem) {
+            return;
+        }
+
+        const imagePreviewElem = innerInputWrapperElem.querySelector('.input-image-preview') as HTMLImageElement;
+        imagePreviewElem.src = `/comfyui/image?filename=${selectedValue}&subfolder=&type=input`;
     });
 }
 
-function fileUploadEventListener(element: HTMLElement) {
-    element.addEventListener('change', async (e) => {
+/**
+ * Handles uploading an image file to the server for image select inputs.
+ * 
+ * @param inputElement The file input element to listen to.
+ */
+function fileUploadEventListener(inputElement: HTMLElement) {
+    inputElement.addEventListener('change', async (e) => {
         const target = e.target;
 
         if (!target || !(target instanceof HTMLInputElement)) {
@@ -113,7 +160,7 @@ function fileUploadEventListener(element: HTMLElement) {
                     console.error(responseJson.error);
                 }
 
-                const selectId = element.getAttribute('data-select-id');
+                const selectId = inputElement.getAttribute('data-select-id');
 
                 if (!selectId) {
                     console.error('No linked select attribute found');
@@ -135,6 +182,13 @@ function fileUploadEventListener(element: HTMLElement) {
     });
 }
 
+/**
+ * Adds a new select option to a select element.
+ * Used to add new images to existing selects when a new image is uploaded for image inputs.
+ * 
+ * @param selectElem The select to add the option to.
+ * @param option The option to add.
+ */
 function addOptionToSelect(selectElem: HTMLSelectElement, option: string) {
     const optionElem = document.createElement('option');
     optionElem.value = option;
@@ -143,8 +197,14 @@ function addOptionToSelect(selectElem: HTMLSelectElement, option: string) {
     selectElem.appendChild(optionElem);
 }
 
-function handleInputContainerClick(e: MouseEvent) {
-    const target = e.target as HTMLElement;
+/**
+ * Handles clicks on elements inside the input container.
+ * 
+ * @param event The click mouse event.
+ * @returns Nothing.
+ */
+function handleInputContainerClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
 
     if (target.classList.contains('randomise-input-toggle')) {
         toggleRandomiseInput(target);
@@ -167,6 +227,11 @@ function handleInputContainerClick(e: MouseEvent) {
     }
 }
 
+/**
+ * Toggles on/off the randomisation of an input on workflow run.
+ * 
+ * @param toggleElement The toggle element that was clicked.
+ */
 function toggleRandomiseInput(toggleElement: HTMLElement) {
     const toggleElemContainer = toggleElement.parentNode as HTMLElement;
 
@@ -179,6 +244,12 @@ function toggleRandomiseInput(toggleElement: HTMLElement) {
     }
 }
 
+/**
+ * Randomises an input field.
+ * 
+ * @param inputId The input to randomise.
+ * @returns Nothing.
+ */
 function randomiseInput(inputId: string) {
     const input = document.getElementById(inputId);
 
@@ -201,46 +272,53 @@ function randomiseInput(inputId: string) {
     (input as HTMLInputElement).value = randomNumber.toString();
 }
 
-function generateRandomNum(min: number, max: number, step: number) {
+/**
+ * Generates a random number between min and max with a step.
+ * 
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @param step The step size i.e. the difference between each number.
+ * @returns The random number generated.
+ */
+function generateRandomNum(min: number, max: number, step: number): number {
     const range = (max - min) / step;
     return Math.min(min + step * Math.floor(Math.random() * range), max);
 }
 
+/**
+ * Generates a random number seed.
+ * 
+ * @returns A random seed.
+ */
 function generateSeed() {
     return Math.floor(Math.random() * 1e16)
         .toString()
         .padStart(16, '0');
 }
 
+/**
+ * Updates a progress bar with a new percentage.
+ * Percentage should include the % symbol.
+ * 
+ * @param type Which progress bar to change.
+ * @param percentage What percentage to set the progress bar to.
+ */
 function setProgressBar(type: 'total' | 'current', percentage: string) {
-    const textElem = type === 'total' ? totalImagesProgressTextElem : currentImageProgressTextElem;
-    const barElem = type === 'total' ? totalImagesProgressInnerElem : currentImageProgressInnerElem;
+    const textElem = type === 'total' ? elements.progressBar.total.textElem : elements.progressBar.current.textElem;
+    const barElem = type === 'total' ? elements.progressBar.total.innerElem : elements.progressBar.current.innerElem;
 
     textElem.textContent = percentage;
     barElem.style.width = percentage;
 }
 
-function fillWorkflowWithUserParams(): Workflow {
-    const workflowModified = workflowDataObject.json;
-    // ComfyUI can't process the workflow if it contains the additional metadata.
-    delete workflowModified['_comfyuimini_meta'];
+function generateNodeInputValues(): NodeInputValues {
+    let collectingInputValues: NodeInputValues = {};
 
-    document.querySelectorAll('.workflow-input-container').forEach((inputContainer) => {
+    elements.allWorkflowInputContainers.forEach((inputContainer) => {
         const randomiseButtonsContainer = inputContainer.querySelector('.randomise-buttons-container');
 
         if (randomiseButtonsContainer) {
-            if (randomiseButtonsContainer.classList.contains('randomise-off')) {
-                return;
-            }
-
-            const randomisedInputId = randomiseButtonsContainer.getAttribute('data-linked-input-id');
-
-            if (!randomisedInputId) {
-                console.error('No linked input id found');
-                return;
-            }
-
-            randomiseInput(randomisedInputId);
+            handleInputRandomise(randomiseButtonsContainer);
         }
 
         const inputElem = inputContainer.querySelector('.workflow-input') as HTMLInputElement;
@@ -248,10 +326,29 @@ function fillWorkflowWithUserParams(): Workflow {
         const [_, nodeId, nodeInputName] = inputElem.id.split('-');
         const inputValue = inputElem.value;
 
-        workflowModified[nodeId].inputs[nodeInputName] = inputValue;
+        if (!collectingInputValues[nodeId]) {
+            collectingInputValues[nodeId] = {};
+        }
+
+        collectingInputValues[nodeId][nodeInputName] = inputValue;
     });
 
-    return workflowModified;
+    return collectingInputValues;
+}
+
+function handleInputRandomise(randomiseButtonContainer: Element) {
+    if (randomiseButtonContainer.classList.contains('randomise-off')) {
+        return;
+    }
+
+    const randomisedInputId = randomiseButtonContainer.getAttribute('data-linked-input-id');
+
+    if (!randomisedInputId) {
+        console.error('No linked input id found');
+        return;
+    }
+
+    randomiseInput(randomisedInputId);
 }
 
 export async function runWorkflow() {
@@ -261,44 +358,47 @@ export async function runWorkflow() {
     totalImageCount = 0;
     completedImageCount = 0;
 
-    const filledWorkflow = fillWorkflowWithUserParams();
-    saveInputValues(workflowDataObject.type, workflowDataObject.identifier, filledWorkflow);
+    const filledNodeInputValues = generateNodeInputValues();
+    SaveInputValues.fromNodeInputValues(workflowType, workflowIdentifier, filledNodeInputValues);
 
+    const filledWorkflow = new WorkflowInstance(workflowObject).fillWorkflowWithUserInputs(filledNodeInputValues);
     ws.send(JSON.stringify(filledWorkflow));
 
-    cancelGenerationButtonElem.classList.remove('disabled');
+    elements.cancelRunButton.classList.remove('disabled');
 
-    ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
+    ws.onmessage = handleWebSocketMessage;
+}
 
-        switch (message.type) {
-            case 'progress':
-                updateProgressBars(message.data);
-                break;
+function handleWebSocketMessage(event: MessageEvent<any>) {
+    const message = JSON.parse(event.data);
 
-            case 'preview':
-                updateImagePreview(message.data);
-                break;
+    switch (message.type) {
+        case 'progress':
+            updateProgressBars(message.data);
+            break;
 
-            case 'total_images':
-                setupImagePlaceholders(message.data);
-                break;
+        case 'preview':
+            updateImagePreview(message.data);
+            break;
 
-            case 'completed':
-                finishGeneration(message.data);
-                break;
+        case 'total_images':
+            setupImagePlaceholders(message.data);
+            break;
 
-            case 'error':
-                console.error('Error:', message.message);
-                openPopupWindow(message.message);
-                break;
+        case 'completed':
+            finishGeneration(message.data);
+            break;
 
-            default:
-                console.warn('Unknown WebSocket message type:', message.type);
-                console.log(message);
-                break;
-        }
-    };
+        case 'error':
+            console.error('Error:', message.message);
+            openPopupWindow(message.message);
+            break;
+
+        default:
+            console.warn('Unknown WebSocket message type:', message.type);
+            console.log(message);
+            break;
+    }
 }
 
 function updateProgressBars(messageData: ProgressMessage) {
@@ -315,7 +415,7 @@ function updateProgressBars(messageData: ProgressMessage) {
 
 function updateImagePreview(messageData: PreviewMessage) {
     const currentSkeletonLoaderElem =
-        outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[
+        elements.outputImagesContainer.querySelectorAll('.image-placeholder-skeleton')[
             totalImageCount - completedImageCount - 1
         ];
 
@@ -338,7 +438,7 @@ function updateImagePreview(messageData: PreviewMessage) {
 
 function setupImagePlaceholders(messageData: TotalImagesMessage) {
     totalImageCount = messageData;
-    outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
+    elements.outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
 }
 
 function finishGeneration(messageData: FinishGenerationMessage) {
@@ -346,11 +446,11 @@ function finishGeneration(messageData: FinishGenerationMessage) {
     setProgressBar('current', '100%');
     setProgressBar('total', '100%');
     // ---
-    cancelGenerationButtonElem.classList.add('disabled');
+    elements.cancelRunButton.classList.add('disabled');
 
     const allImageUrls = Object.values(messageData).map((item) => item[0]);
 
-    outputImagesContainer.innerHTML = allImageUrls.map(urlToImageElem).join('');
+    elements.outputImagesContainer.innerHTML = allImageUrls.map(urlToImageElem).join('');
 }
 
 function urlToImageElem(imageUrl: string) {
@@ -358,12 +458,12 @@ function urlToImageElem(imageUrl: string) {
 }
 
 export function cancelRun() {
-    if (cancelGenerationButtonElem.classList.contains('disabled')) {
+    if (elements.cancelRunButton.classList.contains('disabled')) {
         return;
     }
 
     fetch('/comfyui/interrupt');
-    cancelGenerationButtonElem.classList.add('disabled');
+    elements.cancelRunButton.classList.add('disabled');
 }
 
 loadWorkflow();
