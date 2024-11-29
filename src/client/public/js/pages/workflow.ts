@@ -27,18 +27,18 @@ const elements = {
         total: {
             innerElem: document.querySelector('.total-images-progress .progress-bar-inner') as HTMLElement,
             textElem: document.querySelector('.total-images-progress .progress-bar-text') as HTMLElement,
-        }
+        },
     },
     runButton: document.querySelector('.run-workflow') as HTMLButtonElement,
     cancelRunButton: document.querySelector('.cancel-run-button') as HTMLButtonElement,
     get allFileInputs() {
-        return document.querySelectorAll('.workflow-input-container .file-input') as NodeListOf<HTMLElement>
+        return document.querySelectorAll('.workflow-input-container .file-input') as NodeListOf<HTMLElement>;
     },
     get allSelectsWithImageUploads() {
-        return document.querySelectorAll('select.workflow-input.has-image-upload') as NodeListOf<HTMLSelectElement>
+        return document.querySelectorAll('select.workflow-input.has-image-upload') as NodeListOf<HTMLSelectElement>;
     },
-    get allWorkflowInputContainers() { 
-        return document.querySelectorAll('.workflow-input-container') as NodeListOf<HTMLElement>
+    get allWorkflowInputContainers() {
+        return document.querySelectorAll('.workflow-input-container') as NodeListOf<HTMLElement>;
     },
 };
 
@@ -70,7 +70,7 @@ function loadWorkflow() {
 /**
  * Fetches the current local workflow from localStorage.
  * If the workflow is not found, an error is thrown.
- * 
+ *
  * @returns The workflow object
  */
 function fetchLocalWorkflow(): WorkflowWithMetadata {
@@ -100,7 +100,7 @@ function startEventListeners() {
 
 /**
  * Handles updating the preview for a image select element.
- * 
+ *
  * @param selectElement The select element to listen to.
  */
 function imageSelectEventListener(selectElement: HTMLSelectElement) {
@@ -127,7 +127,7 @@ function imageSelectEventListener(selectElement: HTMLSelectElement) {
 
 /**
  * Handles uploading an image file to the server for image select inputs.
- * 
+ *
  * @param inputElement The file input element to listen to.
  */
 function fileUploadEventListener(inputElement: HTMLElement) {
@@ -185,7 +185,7 @@ function fileUploadEventListener(inputElement: HTMLElement) {
 /**
  * Adds a new select option to a select element.
  * Used to add new images to existing selects when a new image is uploaded for image inputs.
- * 
+ *
  * @param selectElem The select to add the option to.
  * @param option The option to add.
  */
@@ -199,7 +199,7 @@ function addOptionToSelect(selectElem: HTMLSelectElement, option: string) {
 
 /**
  * Handles clicks on elements inside the input container.
- * 
+ *
  * @param event The click mouse event.
  * @returns Nothing.
  */
@@ -229,7 +229,7 @@ function handleInputContainerClick(event: MouseEvent) {
 
 /**
  * Toggles on/off the randomisation of an input on workflow run.
- * 
+ *
  * @param toggleElement The toggle element that was clicked.
  */
 function toggleRandomiseInput(toggleElement: HTMLElement) {
@@ -246,7 +246,7 @@ function toggleRandomiseInput(toggleElement: HTMLElement) {
 
 /**
  * Randomises an input field.
- * 
+ *
  * @param inputId The input to randomise.
  * @returns Nothing.
  */
@@ -274,7 +274,7 @@ function randomiseInput(inputId: string) {
 
 /**
  * Generates a random number between min and max with a step.
- * 
+ *
  * @param min The minimum value.
  * @param max The maximum value.
  * @param step The step size i.e. the difference between each number.
@@ -287,7 +287,7 @@ function generateRandomNum(min: number, max: number, step: number): number {
 
 /**
  * Generates a random number seed.
- * 
+ *
  * @returns A random seed.
  */
 function generateSeed() {
@@ -299,7 +299,7 @@ function generateSeed() {
 /**
  * Updates a progress bar with a new percentage.
  * Percentage should include the % symbol.
- * 
+ *
  * @param type Which progress bar to change.
  * @param percentage What percentage to set the progress bar to.
  */

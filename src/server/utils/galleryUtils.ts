@@ -69,28 +69,28 @@ function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
     const imageOutputPath = config.get('output_dir');
 
     if (!imageOutputPath || !(typeof imageOutputPath === 'string')) {
-        return { 
+        return {
             error: 'Output directory not set properly in config.',
             scanned: { subfolders: [], images: [] },
-            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 }
+            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 },
         };
     }
 
     if (!fs.existsSync(imageOutputPath)) {
-        return { 
+        return {
             error: 'Invalid output directory.',
             scanned: { subfolders: [], images: [] },
-            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 }
+            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 },
         };
     }
 
     const targetPath = path.join(imageOutputPath, subfolder);
 
     if (!fs.existsSync(targetPath)) {
-        return { 
+        return {
             error: 'Invalid subfolder path.',
             scanned: { subfolders: [], images: [] },
-            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 }
+            pageInfo: { prevPage: 0, currentPage: 0, nextPage: 0, totalPages: 0 },
         };
     }
 
@@ -141,6 +141,4 @@ function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
     };
 }
 
-export {
-    getGalleryPageData
-}
+export { getGalleryPageData };

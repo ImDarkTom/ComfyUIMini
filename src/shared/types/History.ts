@@ -3,13 +3,13 @@ export interface HistoryResponse {
         outputs: {
             [nodeId: string]: {
                 images: ImageInfo[];
-            }
-        }
-    }
+            };
+        };
+    };
 }
 
 export interface ImageInfo {
     filename: string;
     subfolder: string;
-    type: "output" | "input" | "temp";
+    type: 'output' | 'input' | 'temp';
 }
