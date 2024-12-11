@@ -3,7 +3,8 @@
     "version": "1.6.0",
     "main": "dist/server/index.js",
     "scripts": {
-        "start": "node .",
+        "start": "tsc -p src/client/tsconfig.json && tsx --tsconfig src/server/tsconfig.json src/server/index.ts",
+        "start:old": "node .",
         "start:dev": "npm run dev",
         "build": "rimraf dist && npm run build:server && npm run build:client",
         "build:server": "tsc -p src/server/tsconfig.json",
