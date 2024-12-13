@@ -10,6 +10,7 @@
         "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
         "dev:server": "tsx watch --tsconfig src/server/tsconfig.json src/server/index.ts",
         "dev:client": "tsc -w -p src/client/tsconfig.json",
+        "lint": "eslint .",
         "format": "prettier --write ."
     },
     "keywords": [],
@@ -42,7 +43,11 @@
     },
     "description": "",
     "devDependencies": {
+        "@eslint/js": "^9.16.0",
         "concurrently": "^9.1.0",
-        "prettier": "^3.3.3"
+        "eslint": "^9.16.0",
+        "globals": "^15.13.0",
+        "prettier": "^3.3.3",
+        "typescript-eslint": "^8.18.0"
     }
 }
