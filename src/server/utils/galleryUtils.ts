@@ -127,6 +127,7 @@ function getGalleryPageData(page = 0, subfolder = '', itemsPerPage = 20) {
             .readdirSync(imageOutputPath)
             .filter((item) => fs.statSync(path.join(imageOutputPath, item)).isDirectory());
     } catch (error) {
+        console.log('Error getting subfolders:', error);
         subfolders = [];
     }
 

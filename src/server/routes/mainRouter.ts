@@ -4,6 +4,7 @@ import themeMiddleware from '../middleware/themeMiddleware';
 import { writeServerWorkflow, readServerWorkflow, serverWorkflowMetadata, deleteServerWorkflow } from '../utils/workflowUtils';
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '@shared/types/Requests';
+import { getAppVersion } from 'server/utils/getAppVersion';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.use(cookieParser());
 router.use(themeMiddleware);
 router.use(express.json());
 
-const appVersion = require('../../../package.json').version;
+const appVersion = getAppVersion();
 
 router.get('/', (req: RequestWithTheme, res) => {
     const formattedWorkflowMetadata = Object.values(serverWorkflowMetadata).map((workflowMetadata) => ({

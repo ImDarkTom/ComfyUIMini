@@ -10,9 +10,10 @@ import logger from './logger';
 import { Workflow } from '@shared/types/Workflow';
 import { HistoryResponse } from '@shared/types/History';
 import { ObjectInfoPartial } from '@shared/types/ComfyObjectInfo';
+import { getAppVersion } from './getAppVersion';
 
 const clientId = crypto.randomUUID();
-const appVersion = require('../../../package.json').version;
+const appVersion = getAppVersion();
 const comfyUiUrl: string = config.get('comfyui_url');
 
 const httpsAgent = new https.Agent({
@@ -81,7 +82,7 @@ async function getModelTypesList(): Promise<string[]> {
 
         return response.data;
     } catch (error) {
-        logger.warn('Could not get model types list from ComfyUI');
+        logger.warn('Could not get model types list from ComfyUI:', error);
         return [];
     }
 }
@@ -142,7 +143,7 @@ function bufferIsText(buffer: Buffer) {
         const text = buffer.toString('utf8');
         JSON.parse(text);
         return true;
-    } catch (error) {
+    } catch {
         return false;
     }
 }

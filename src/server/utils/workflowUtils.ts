@@ -87,7 +87,7 @@ function checkIfObjectIsValidWorkflow(workflowJson: { [key: string]: any }): boo
  * @returns {ServerWorkflowMetadataList} An object containing the metadata for each workflow.
  */
 function getServerWorkflowMetadata(jsonFileList: string[]): ServerWorkflowMetadataList {
-    let accumulatedWorkflowMetadata: ServerWorkflowMetadataList = {};
+    const accumulatedWorkflowMetadata: ServerWorkflowMetadataList = {};
 
     for (const jsonFilename of jsonFileList) {
         const jsonFileContents = fs.readFileSync(path.join(paths.workflows, jsonFilename), 'utf8');
