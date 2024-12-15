@@ -21,7 +21,17 @@
             <div class="current-image-progress progress-bar"><span class="progress-bar-text">0%</span><div class="progress-bar-inner"></div></div>
         </div>
         <h2 class="category-title">Output</h2>
-        <div class="output-images-container"></div>
+        <div class="output-images-container">
+            <div class="image-placeholder-hint">Press 'Run workflow' to generate an image</div>
+        </div>
+        <div class="previous-outputs-container">
+            <div class="previous-outputs-toggler">
+                <span class="previous-outputs-toggler-icon">^^^</span>
+                <span class="previous-outputs-toggler-text">Show previous outputs</span>
+                <span class="previous-outputs-toggler-icon">^^^</span>
+            </div>
+            <div class="previous-outputs-list hidden"></div>
+        </div>
         <%- include('../partials/actionBar', {
             buttons: [
                 { action: "/", icon: "home", text: "Home", type: "link" },

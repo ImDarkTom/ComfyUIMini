@@ -40,6 +40,9 @@ const elements = {
     get allWorkflowInputContainers() {
         return document.querySelectorAll('.workflow-input-container') as NodeListOf<HTMLElement>;
     },
+    previousOutputsToggler: document.querySelector('.previous-outputs-toggler') as HTMLElement,
+    previousOutputsList: document.querySelector('.previous-outputs-list') as HTMLElement,
+    previousOutputsTogglerIcon: document.querySelectorAll('.previous-outputs-toggler-icon') as NodeListOf<HTMLElement>,
 };
 
 // --- Variables ---
@@ -63,6 +66,7 @@ ws.onopen = () => console.log('Connected to WebSocket client');
 
 function loadWorkflow() {
     renderInputs(workflowObject, workflowType, workflowIdentifier);
+    loadPreviousOutputs();
 
     startEventListeners();
 }
@@ -96,6 +100,64 @@ function startEventListeners() {
 
     elements.allFileInputs.forEach((element) => fileUploadEventListener(element));
     elements.allSelectsWithImageUploads.forEach((selectElement) => imageSelectEventListener(selectElement));
+
+    elements.previousOutputsToggler.addEventListener('click', togglePreviousOutputs);
+}
+
+function togglePreviousOutputs() {
+    const previousOutputsList = elements.previousOutputsList;
+
+    if (previousOutputsList.classList.contains('hidden')) {
+        elements.previousOutputsTogglerIcon.forEach((icon) => icon.classList.add('open'));
+        expandElement(previousOutputsList);
+    } else {
+        elements.previousOutputsTogglerIcon.forEach((icon) => icon.classList.remove('open'));
+        collapseElement(previousOutputsList);
+    }
+}
+
+/**
+ * Collapses an element, element has to have a style for the hidden class variant.
+ * @param element The element to collapse.
+ */
+function collapseElement(element: HTMLElement) {
+    element.style.height = `${element.scrollHeight}px`;
+
+    element.classList.add('collapsing');
+    
+    requestAnimationFrame(() => {
+        element.style.height = '0';
+    });
+
+    element.addEventListener('transitionend', function handler() {
+        element.classList.add('hidden');
+        element.classList.remove('collapsing');
+        
+
+        element.removeEventListener('transitionend', handler);
+    });
+}
+
+function expandElement(element: HTMLElement) {
+    element.classList.add('expanding');
+    element.classList.remove('hidden');
+
+    requestAnimationFrame(() => {
+        element.style.height = `${element.scrollHeight}px`;
+        element.style.opacity = '1';
+        element.style.paddingTop = '0.5rem';
+        element.style.paddingBottom = '0.5rem';
+    });
+    
+
+    element.addEventListener('transitionend', function handler() {
+        element.classList.remove('expanding');
+
+        element.removeAttribute('style');
+        element.style.height = `auto`;
+
+        element.removeEventListener('transitionend', handler);
+    });
 }
 
 /**
@@ -438,7 +500,51 @@ function updateImagePreview(messageData: PreviewMessage) {
 
 function setupImagePlaceholders(messageData: TotalImagesMessage) {
     totalImageCount = messageData;
+
+    addCurrentImageToPreviousOutputs();
+
     elements.outputImagesContainer.innerHTML = `<div class="image-placeholder-skeleton"></div>`.repeat(totalImageCount);
+}
+
+function loadPreviousOutputs() {
+    const savedPreviousOutputs = sessionStorage.getItem('previousOutputs');
+
+    if (!savedPreviousOutputs) {
+        return;
+    }
+
+    const parsedPreviousOutputs = JSON.parse(savedPreviousOutputs).reverse();
+
+    parsedPreviousOutputs.forEach((url: string) => addItemToPreviousOutputsListElem(url));
+}
+
+function addCurrentImageToPreviousOutputs() {
+    const allCurrentOutputs = elements.outputImagesContainer.querySelectorAll('.output-image');
+
+    if (allCurrentOutputs.length === 0) {
+        return;
+    }
+
+    const allCurrentOutputsArray = Array.from(allCurrentOutputs) as HTMLImageElement[];
+
+    allCurrentOutputsArray.reverse().map((outputImage) => addItemToPreviousOutputsListElem(outputImage.src));
+}
+
+function addItemToPreviousOutputsList(imageUrl: string) {
+    const savedPreviousOutputs = sessionStorage.getItem('previousOutputs') || '[]';
+    const parsedPreviousOutputs = JSON.parse(savedPreviousOutputs);
+
+    parsedPreviousOutputs.unshift(imageUrl);
+
+    sessionStorage.setItem('previousOutputs', JSON.stringify(parsedPreviousOutputs));
+}
+
+function addItemToPreviousOutputsListElem(imageUrl: string) {
+    elements.previousOutputsList.innerHTML= `
+        <a href="${imageUrl}" target="_blank" class="previous-output-item">
+            <img src="${imageUrl}" alt="Previously generated image" class="previous-output-img" loading="lazy">
+        </a>
+    ` + elements.previousOutputsList.innerHTML;
 }
 
 function finishGeneration(messageData: FinishGenerationMessage) {
@@ -449,6 +555,8 @@ function finishGeneration(messageData: FinishGenerationMessage) {
     elements.cancelRunButton.classList.add('disabled');
 
     const allImageUrls = Object.values(messageData).map((item) => item[0]);
+
+    allImageUrls.forEach((url) => addItemToPreviousOutputsList(url));
 
     elements.outputImagesContainer.innerHTML = allImageUrls.map(urlToImageElem).join('');
 }

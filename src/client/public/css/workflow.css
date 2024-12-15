@@ -196,6 +196,79 @@ textarea.workflow-input {
     margin-bottom: 0.5rem;
 }
 
+.previous-outputs-container {
+    width: 100%;
+    background-color: var(--background-tertiary-color);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.previous-outputs-toggler {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--background-primary-color);
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.previous-outputs-toggler-icon {
+    transition: transform 0.5s ease;
+}
+
+.previous-outputs-toggler-icon.open {
+    transform: rotateX(180deg);
+}
+
+.previous-outputs-list {
+    overflow: hidden;
+    height: auto;
+    opacity: 1;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border-radius: 0 0 0.5rem 0.5rem;
+    transition: height 0.5s ease, opacity 0.5s ease, padding 0.5s ease;
+}
+
+.previous-outputs-list.expanding {
+    height: 0px;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.previous-outputs-list.collapsing {
+    height: 0px;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.previous-outputs-list.hidden {
+    display: none;
+    height: 0;
+    opacity: 0;
+}
+
+.previous-output-item {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.previous-output-item:last-child {
+    margin-bottom: 0;
+}
+
+.previous-output-img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
 .progress-bar-label {
     margin: 0.5rem 0;
     user-select: none;
@@ -226,6 +299,22 @@ textarea.workflow-input {
     font-size: 1.5rem;
     padding-left: 0.5rem;
     user-select: none;
+}
+
+.image-placeholder-hint {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1/1;
+    background-color: var(--background-tertiary-color);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.2rem;
+    box-sizing: border-box;
+    padding: 0.5rem;
 }
 
 .image-placeholder-skeleton {
