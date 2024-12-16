@@ -15,27 +15,6 @@
     }
 }
 
-.header {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    justify-content: left;
-    margin: 0.5rem 0.5rem 0 0.5rem;
-    box-sizing: border-box;
-}
-
-.header-icon {
-    height: 3rem;
-    width: 3rem;
-}
-
-.version-text {
-    color: var(--text-secondary-color);
-    font-size: 1rem;
-    display: flex;
-    align-items: start;
-}
-
 .card-wrapper {
     color: var(--text-primary-color);
     text-decoration: none;

@@ -6,14 +6,13 @@ import paths from './paths';
 import { Workflow, WorkflowFileReadError, WorkflowWithMetadata } from '@shared/types/Workflow';
 import { WorkflowInstance } from '@shared/classes/Workflow';
 
-type ServerWorkflowMetadataList = Record<
-    string,
-    {
-        title: string;
-        filename: string;
-        description: string;
-    }
->;
+export interface ServerWorkflowMetadata {
+    title: string;
+    filename: string;
+    description: string;
+}
+
+export type ServerWorkflowMetadataList = Record<string, ServerWorkflowMetadata>;
 
 let fetchedWorkflowMetadata: ServerWorkflowMetadataList = {};
 

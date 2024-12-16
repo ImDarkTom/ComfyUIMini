@@ -1,18 +1,20 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import themeMiddleware from '../middleware/themeMiddleware';
-import { writeServerWorkflow, readServerWorkflow, serverWorkflowMetadata, deleteServerWorkflow } from '../utils/workflowUtils';
+import {
+    writeServerWorkflow,
+    readServerWorkflow,
+    serverWorkflowMetadata,
+    deleteServerWorkflow,
+} from '../utils/workflowUtils';
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '@shared/types/Requests';
-import { getAppVersion } from 'server/utils/getAppVersion';
 
 const router = express.Router();
 
 router.use(cookieParser());
 router.use(themeMiddleware);
 router.use(express.json());
-
-const appVersion = getAppVersion();
 
 router.get('/', (req: RequestWithTheme, res) => {
     const formattedWorkflowMetadata = Object.values(serverWorkflowMetadata).map((workflowMetadata) => ({
@@ -23,7 +25,6 @@ router.get('/', (req: RequestWithTheme, res) => {
 
     res.render('pages/index', {
         serverWorkflowMetadata: formattedWorkflowMetadata,
-        appVersion: appVersion,
         theme: req.theme,
     });
 });
@@ -94,7 +95,7 @@ router.put('/edit/:fileName', (req, res) => {
 
 router.delete('/edit/:fileName', (req, res) => {
     const workflowFilename = req.params.fileName;
-    
+
     const finishedSuccessfully = deleteServerWorkflow(workflowFilename);
 
     if (finishedSuccessfully) {
@@ -106,7 +107,7 @@ router.delete('/edit/:fileName', (req, res) => {
 
 router.get('/download/:fileName', (req, res) => {
     const workflowFilename = req.params.fileName;
-    
+
     const workflowFile = readServerWorkflow(workflowFilename);
 
     if ('error' in workflowFile) {
@@ -186,6 +187,19 @@ router.get('/gallery/:subfolder?', (req: RequestWithTheme, res) => {
 
 router.get('/settings', (req: RequestWithTheme, res) => {
     res.render('pages/settings', { theme: req.theme });
+});
+
+router.get('/allserverworkflows', async (req, res) => {
+    const infoList = Object.entries(serverWorkflowMetadata).map((workflowMetadata) => {
+        return {
+            title: workflowMetadata[1].title,
+            icon: 'server',
+            type: 'server',
+            identifier: workflowMetadata[1].filename,
+        };
+    });
+
+    res.json(infoList);
 });
 
 export default router;

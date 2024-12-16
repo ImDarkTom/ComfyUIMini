@@ -7,6 +7,7 @@
     <script src="/js/common/popupWindow.js" defer></script>
 </head>
 <body>
+    <%- include('../partials/navbar') %>
     <div class="main-container">
         <div class="file-select-container">
             <label for="file-input" class="file-input-label">Select a workflow file</label>
@@ -29,6 +30,7 @@
             </div>
         </div>
     </div>
+    <%- include('../partials/sidebar', { activePage: 'import' }) %>
     <%- include('../partials/actionBar', {
         buttons: [
             { action: "/", icon: "home", text: "Home", type: "link" },

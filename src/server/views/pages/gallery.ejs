@@ -10,6 +10,7 @@
     data-error="<%= error %>"
 <% } %>
 >
+    <%- include('../partials/navbar') %>
     <div class="main-container">
         <div id="subfolders-list">
             <a href="/gallery" class="subfolder-link">(Default)</a>
@@ -35,6 +36,7 @@
             </div>
         </div>
     </div>
+    <%- include('../partials/sidebar', { activePage: 'gallery' }) %>
     <%- include('../partials/actionBar', {
         buttons: [
             { action: "/", icon: "home", text: "Home", type: "link" },

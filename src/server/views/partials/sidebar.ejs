@@ -1,0 +1,30 @@
+<div id="sidebar" class="hidden">
+    <div id="sidebar-list">
+        <a href="/" class="sidebar-list-item <%= activePage === 'home' ? 'active' : '' %>">
+            <span class="icon home"></span>
+            <span class="sidebar-list-item-text">Home</span>
+        </a>
+        <a href="/import" class="sidebar-list-item <%= activePage === 'import' ? 'active' : '' %>">
+            <span class="icon import"></span>
+            <span class="sidebar-list-item-text">Import</span>
+        </a>
+        <div class="sidebar-list-item sidebar-list-item-dropdown <%= activePage === 'workflow' ? 'active' : '' %>">
+            <span class="icon server"></span>
+            <span class="sidebar-list-item-text">Workflows</span>
+            <span class="dropdown-arrow">▼</span>
+        </div>
+        <div class="sidebar-dropdown-list hidden">
+            <span>Loading workflows...</span>
+        </div>
+        <a href="/gallery" class="sidebar-list-item <%= activePage === 'gallery' ? 'active' : '' %>">
+            <span class="icon gallery"></span>
+            <span class="sidebar-list-item-text">Gallery</span>
+        </a>
+        <a href="/settings" class="sidebar-list-item <%= activePage === 'settings' ? 'active' : '' %>">
+            <span class="icon settings"></span>
+            <span class="sidebar-list-item-text">Settings</span>
+        </a>
+    </div>
+</div>
+<div id="sidebar-overlay" class="hidden"></div>
+<script src="/js/sidebar.js" type="module" defer></script>

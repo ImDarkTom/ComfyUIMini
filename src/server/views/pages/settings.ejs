@@ -7,6 +7,7 @@
     <script src="/js/common/popupWindow.js" defer></script>
 </head>
 <body>
+    <%- include('../partials/navbar') %>
     <div class="main-container">
         <div class="option-container">
             <label for="select-theme">Theme</label>
@@ -33,6 +34,7 @@
             <input type="button" value="Clear saved input values" id="clear-saved-input-values">
         </div>
     </div>
+    <%- include('../partials/sidebar', { activePage: 'settings' }) %>
     <%- include('../partials/actionBar', {
         buttons: [
             { action: "/", icon: "home", text: "Home", type: "link" },

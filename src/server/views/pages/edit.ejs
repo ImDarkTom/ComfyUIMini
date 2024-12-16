@@ -12,6 +12,7 @@
     data-workflow-filename="<%= workflowFilename %>"  
     data-workflow-text="<%= workflowText || '' %>"
     >
+    <%- include('../partials/navbar') %>
     <div class="main-container">
         <div class="edit-container">
             <div class="properties-container">
@@ -28,6 +29,7 @@
             </div>
         </div>
     </div>
+    <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
     <%- include('../partials/actionBar', {
         buttons: [
             { action: "/", icon: "home", text: "Home", type: "link" },
