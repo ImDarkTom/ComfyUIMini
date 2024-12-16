@@ -9,6 +9,12 @@
 <body>
     <%- include('../partials/navbar') %>
     <div class="main-container">
+        <span class="title-text">
+            <h1 class="workflow-title"><%= title %></h1>
+            <a class="edit-button-container" href="/edit/<%= type %>/<%= identifier %>">
+                <span class="icon edit"></span>
+            </a>
+        </span>
         <h2 class="category-title">Inputs</h2>
         <div class="inputs-container"></div>
         <div class="run-button-wrapper">
@@ -40,14 +46,5 @@
             const passedWorkflowType = <%- JSON.stringify(type) %>;
     </script>
     <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
-    <%- include('../partials/actionBar', {
-        buttons: [
-            { action: "/", icon: "home", text: "Home", type: "link" },
-            { action: ["/js/pages/workflow.js", "cancelRun"], icon: "stop", text: "Cancel", type: "function" },
-            { action: ["/js/pages/workflow.js", "runWorkflow"], icon: "generate", text: "Generate", type: "function" },
-            { action: `/edit/${type}/${identifier}`, icon: "edit", text: "Edit", type: "link" },
-            { action: "/settings", icon: "settings", text: "Settings", type: "link" },
-        ] 
-    }) %>
 </body>
 </html>
