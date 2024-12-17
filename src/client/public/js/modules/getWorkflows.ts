@@ -13,8 +13,8 @@ async function getAllWorkflowsInfo(): Promise<WorkflowInfo[]> {
     let workflowsInfoList = allLocalWorkflows.map((workflow) => {
         return {
             title: workflow._comfyuimini_meta.title,
-            icon: 'phone' as 'phone',
-            type: 'local' as 'local',
+            icon: 'phone' as const,
+            type: 'local' as const,
             identifier: workflow._comfyuimini_meta.title,
         };
     });

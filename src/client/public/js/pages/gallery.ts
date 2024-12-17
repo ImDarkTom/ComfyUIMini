@@ -1,5 +1,4 @@
 const pageInput = document.getElementById('page-input') as HTMLInputElement;
-const paginationContainer = document.querySelector('.pagination-container') as HTMLElement;
 
 if (document.body.hasAttribute('data-error')) {
     alert(document.body.getAttribute('data-error'));

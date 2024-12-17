@@ -43,14 +43,18 @@ const logger = winston.createLogger({
 
 winston.addColors(customLevels.colors);
 
+interface OptionalLogConfig {
+    [key: string]: boolean;
+}
+
 /**
  * Logs an optional message depending on if the `type` is set to true in the config.
  *
- * @param {string} type Type of optional log from config.
- * @param {string} message Text to log.
+ * @param type Type of optional log from config.
+ * @param message Text to log.
  */
 function logOptional(type: string, message: string) {
-    const optionalLogConfigs: any = config.get('optional_log');
+    const optionalLogConfigs: OptionalLogConfig | undefined = config.get('optional_log');
 
     if (!optionalLogConfigs || optionalLogConfigs[type] === undefined) {
         return;

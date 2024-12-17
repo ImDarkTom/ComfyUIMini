@@ -83,7 +83,7 @@ export class WorkflowEditor {
                 continue;
             }
 
-            let inputOptions: InputOption = {} as InputOption;
+            const inputOptions: InputOption = {} as InputOption;
             inputOptions['node_id'] = inputNodeId;
             inputOptions['input_name_in_node'] = inputNameInNode;
 
@@ -270,11 +270,9 @@ export class WorkflowEditor {
 
         switch (inputConfig.type) {
             case 'ARRAY':
-                const optionsList = inputConfig.list;
-
                 inputHTML += `<select id="${idPrefix}-default" class="workflow-input workflow-input-default">`;
 
-                for (const option of optionsList) {
+                for (const option of inputConfig.list) {
                     inputHTML += `<option value="${option}" ${inputDefault == option ? 'selected' : ''}>${option}</option>`;
                 }
 

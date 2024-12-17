@@ -50,13 +50,13 @@ const elements = {
 let totalImageCount = 0;
 let completedImageCount = 0;
 
-// @ts-ignore
+// @ts-expect-error - passedWorkflowIdentifier is fetched via the inline script supplied by EJS
 const workflowIdentifier = passedWorkflowIdentifier;
-// @ts-ignore
+// @ts-expect-error - passedWorkflowType is fetched via the inline script supplied by EJS
 const workflowType = passedWorkflowType;
 
 // Workflow data from EJS via inline script tag
-// @ts-ignore
+// @ts-expect-error - workflowDataFromEjs is fetched via the inline script supplied by EJS
 const workflowObject: WorkflowWithMetadata = workflowDataFromEjs ? workflowDataFromEjs : fetchLocalWorkflow();
 
 // --- Initialise WebSocket ---
@@ -373,7 +373,7 @@ function setProgressBar(type: 'total' | 'current', percentage: string) {
 }
 
 function generateNodeInputValues(): NodeInputValues {
-    let collectingInputValues: NodeInputValues = {};
+    const collectingInputValues: NodeInputValues = {};
 
     elements.allWorkflowInputContainers.forEach((inputContainer) => {
         const randomiseButtonsContainer = inputContainer.querySelector('.randomise-buttons-container');
@@ -384,7 +384,7 @@ function generateNodeInputValues(): NodeInputValues {
 
         const inputElem = inputContainer.querySelector('.workflow-input') as HTMLInputElement;
 
-        const [_, nodeId, nodeInputName] = inputElem.id.split('-');
+        const [, nodeId, nodeInputName] = inputElem.id.split('-');
         const inputValue = inputElem.value;
 
         if (!collectingInputValues[nodeId]) {
@@ -430,6 +430,7 @@ export async function runWorkflow() {
     ws.onmessage = handleWebSocketMessage;
 }
 
+// TODO: Setup type for message for both client and server
 function handleWebSocketMessage(event: MessageEvent<any>) {
     const message = JSON.parse(event.data);
 
