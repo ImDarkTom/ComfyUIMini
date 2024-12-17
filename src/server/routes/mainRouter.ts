@@ -9,6 +9,7 @@ import {
 } from '../utils/workflowUtils';
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '@shared/types/Requests';
+import loadAndRenderWorkflow from 'server/utils/loadAndRenderWorkflow';
 
 const router = express.Router();
 
@@ -37,47 +38,12 @@ router.get('/edit/:type/:identifier', (req: RequestWithTheme, res) => {
     const workflowType = req.params.type;
     const workflowIdentifier = req.params.identifier;
 
-    switch (workflowType) {
-        case 'local':
-            res.render('pages/edit', {
-                workflowTitle: workflowIdentifier,
-                workflowText: '',
-                workflowType: 'local',
-                workflowFilename: '',
-                theme: req.theme,
-            });
-            break;
-
-        case 'server':
-            const workflowFileJson = readServerWorkflow(workflowIdentifier);
-
-            if ('error' in workflowFileJson) {
-                if (workflowFileJson.error === 'notFound') {
-                    res.status(404).send('Workflow not found.');
-                    break;
-                } else if (workflowFileJson.error === 'invalidJson') {
-                    res.status(400).send('Invalid workflow file.');
-                    break;
-                } else {
-                    res.status(500).send('Internal Server Error');
-                    break;
-                }
-            }
-
-            const workflowTitle = workflowFileJson['_comfyuimini_meta'].title;
-
-            res.render('pages/edit', {
-                workflowTitle: workflowTitle,
-                workflowText: JSON.stringify(workflowFileJson),
-                workflowType: 'server',
-                workflowFilename: workflowIdentifier,
-                theme: req.theme,
-            });
-            break;
-        default:
-            res.status(400).send('Invalid workflow type');
-            break;
+    if (workflowType !== 'local' && workflowType !== 'server') {
+        res.status(400).send('Invalid workflow type');
+        return;
     }
+
+    loadAndRenderWorkflow(workflowType, workflowIdentifier, req, res, 'pages/edit');
 });
 
 router.put('/edit/:fileName', (req, res) => {
@@ -131,48 +97,12 @@ router.get('/workflow/:type/:identifier', (req: RequestWithTheme, res) => {
     const workflowType = req.params.type;
     const workflowIdentifier = req.params.identifier;
 
-    switch (workflowType) {
-        case 'local':
-            res.render('pages/workflow', {
-                workflow: null,
-                title: workflowIdentifier,
-                identifier: workflowIdentifier,
-                type: 'local',
-                theme: req.theme,
-            });
-            break;
-
-        case 'server':
-            const workflowFileJson = readServerWorkflow(workflowIdentifier);
-
-            if ('error' in workflowFileJson) {
-                if (workflowFileJson.error === 'notFound') {
-                    res.status(404).send('Workflow not found.');
-                    break;
-                } else if (workflowFileJson.error === 'invalidJson') {
-                    res.status(400).send('Invalid workflow file.');
-                    break;
-                } else {
-                    res.status(500).send('Internal Server Error');
-                    break;
-                }
-            }
-
-            const workflowTitle = workflowFileJson['_comfyuimini_meta'].title;
-
-            res.render('pages/workflow', {
-                workflow: workflowFileJson,
-                title: workflowTitle,
-                identifier: workflowIdentifier,
-                type: 'server',
-                theme: req.theme,
-            });
-            break;
-
-        default:
-            res.status(400).send('Invalid workflow type');
-            break;
+    if (workflowType !== 'local' && workflowType !== 'server') {
+        res.status(400).send('Invalid workflow type');
+        return;
     }
+
+    loadAndRenderWorkflow(workflowType, workflowIdentifier, req, res, 'pages/workflow');
 });
 
 router.get('/gallery/:subfolder?', (req: RequestWithTheme, res) => {

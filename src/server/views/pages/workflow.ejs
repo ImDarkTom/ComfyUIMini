@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('../partials/head', { title: title, theme }) %>
+    <%- include('../partials/head', { title: workflowTitle, theme }) %>
     <link rel="stylesheet" href="/css/workflow.css">
     <script src="/js/pages/workflow.js" defer type="module"></script>
     <script src="/js/common/popupWindow.js" defer></script>
@@ -11,8 +11,8 @@
     <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
     <div class="main-container">
         <span class="title-text">
-            <h1 class="workflow-title"><%= title %></h1>
-            <a class="edit-button-container" href="/edit/<%= type %>/<%= identifier %>">
+            <h1 class="workflow-title"><%= workflowTitle %></h1>
+            <a class="edit-button-container" href="/edit/<%= workflowType %>/<%= workflowIdentifier %>">
                 <span class="icon edit"></span>
             </a>
         </span>
@@ -42,9 +42,9 @@
         </div>
     </div>
     <script>
-            const workflowDataFromEjs = <%- JSON.stringify(workflow) %>;
-            const passedWorkflowIdentifier= <%- JSON.stringify(identifier) %>;
-            const passedWorkflowType = <%- JSON.stringify(type) %>;
+            const workflowDataFromEjs = <%- workflowText %>;
+            const passedWorkflowIdentifier= <%- JSON.stringify(workflowIdentifier) %>;
+            const passedWorkflowType = <%- JSON.stringify(workflowType) %>;
     </script>
 </body>
 </html>

@@ -1,3 +1,5 @@
+export type WorkflowType = 'local' | 'server';
+
 export interface InputOption {
     node_id: string;
     input_name_in_node: string;
