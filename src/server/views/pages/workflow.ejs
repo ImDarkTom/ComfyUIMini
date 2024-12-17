@@ -8,6 +8,7 @@
 </head>
 <body>
     <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
     <div class="main-container">
         <span class="title-text">
             <h1 class="workflow-title"><%= title %></h1>
@@ -45,6 +46,5 @@
             const passedWorkflowIdentifier= <%- JSON.stringify(identifier) %>;
             const passedWorkflowType = <%- JSON.stringify(type) %>;
     </script>
-    <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
 </body>
 </html>

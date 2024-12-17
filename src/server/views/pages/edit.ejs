@@ -13,6 +13,7 @@
     data-workflow-text="<%= workflowText || '' %>"
     >
     <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
     <div class="main-container">
         <div class="edit-container">
             <div class="properties-container">
@@ -29,15 +30,6 @@
             </div>
         </div>
     </div>
-    <%- include('../partials/sidebar', { activePage: 'workflow' }) %>
-    <%- include('../partials/actionBar', {
-        buttons: [
-            { action: "/", icon: "home", text: "Home", type: "link" },
-            { action: ["/js/common/scroll.js", "scrollToBottom"], icon: "arrow-down", text: "Bottom", type: "function" },
-            { action: ["/js/pages/edit.js", "saveWorkflow"], icon: "save", text: "Save", type: "function" },
-            { action: ["/js/common/scroll.js", "scrollToTop"], icon: "arrow-up", text: "Top", type: "function" },
-            { action: "/settings", icon: "settings", text: "Settings", type: "link" },
-        ] 
-    }) %>
+    <%- include('../partials/scrollbuttons') %>
 </body>
 </html>

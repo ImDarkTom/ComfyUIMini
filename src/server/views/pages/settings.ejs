@@ -8,6 +8,7 @@
 </head>
 <body>
     <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar', { activePage: 'settings' }) %>
     <div class="main-container">
         <div class="option-container">
             <label for="select-theme">Theme</label>
@@ -34,6 +35,5 @@
             <input type="button" value="Clear saved input values" id="clear-saved-input-values">
         </div>
     </div>
-    <%- include('../partials/sidebar', { activePage: 'settings' }) %>
 </body>
 </html>

@@ -8,6 +8,7 @@
 </head>
 <body>
     <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar', { activePage: 'import' }) %>
     <div class="main-container">
         <div class="file-select-container">
             <label for="file-input" class="file-input-label">Select a workflow file</label>
@@ -30,15 +31,6 @@
             </div>
         </div>
     </div>
-    <div id="scroll-buttons">
-        <div id="scroll-top" class="scroll-button">
-            <span class="icon arrow-up"></span>
-        </div>
-        <div id="scroll-bottom" class="scroll-button">
-            <span class="icon arrow-down"></span>
-        </div>
-    </div>
-    <script src="/js/scrollbuttons.js" defer type="module"></script>
-    <%- include('../partials/sidebar', { activePage: 'import' }) %>
+    <%- include('../partials/scrollbuttons') %>
 </body>
 </html>

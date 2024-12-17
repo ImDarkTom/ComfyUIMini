@@ -4,7 +4,7 @@
     grid-template-columns: 1fr;
     width: 100%;
     height: 100%;
-    padding-bottom: 5rem; /* so navbar doesnt cut off bottom image */
+    padding-bottom: 5.5rem; /* so pagination doesnt cut off bottom image */
 }
 
 @media screen and (min-width: 420px) {
@@ -37,25 +37,19 @@
 
 .pagination-container {
     width: 100%;
+    height: 6rem;
+    box-sizing: border-box;
     padding: 1rem;
     position: fixed;
-    bottom: 10vh;
+    bottom: 0;
     left: 0;
     z-index: 1;
     transition: transform 0.3s ease-in-out;
 }
 
-.pagination-container.slide-down {
-    transform: translateY(100%);
-}
-
-.pagination-container.hidden {
-    display: none;
-}
-
 .pagination-controls {
-    height: 4rem;
-    width: calc(100% - 2rem);
+    width: 100%;
+    height: 100%;
     border-radius: 0.5rem;
     background-color: var(--background-secondary-color);
     display: flex;
@@ -86,25 +80,32 @@
 
 #subfolders-list {
     width: 100%;
+    gap: 0.5rem;
     display: flex;
     flex-direction: row;
     overflow-y: auto;
     white-space: nowrap;
-    margin: 0.5rem;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
 }
 
-#subfolders-list .subfolder-link::before {
+.subfolder-link::before {
     content: '📁';
     padding-right: 0.5ch;
 }
 
-#subfolders-list .subfolder-link {
+.subfolder-link {
     flex: 0 0 auto;
     color: var(--text-primary-color);
     text-decoration: none;
     font-size: 1.2rem;
     padding: 0.5rem;
     background-color: var(--background-secondary-color);
-    margin: 0.5rem 0.5rem 0.5rem 0;
+    margin: 0.5rem 0;
     border-radius: 0.5rem;
+}
+
+#scroll-buttons {
+    margin-bottom: 5.5rem !important;
+    /* to account for pagination */
 }
