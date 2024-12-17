@@ -14,6 +14,7 @@ import { WorkflowInstance } from '@shared/classes/Workflow.js';
 import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { renderInputs } from '../modules/workflowInputRenderer.js';
 import { SaveInputValues } from '../modules/savedInputValues.js';
+import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 
 // --- DOM Elements ---
 const elements = {
@@ -82,7 +83,7 @@ function fetchLocalWorkflow(): WorkflowWithMetadata {
 
     if (!localWorkflow) {
         const errorMessage = `Workflow '${workflowIdentifier}' not found.`;
-        openPopupWindow(errorMessage);
+        openPopupWindow(PopupWindowType.ERROR, errorMessage);
         throw new Error(errorMessage);
     }
 
@@ -124,7 +125,7 @@ function collapseElement(element: HTMLElement) {
     element.style.height = `${element.scrollHeight}px`;
 
     element.classList.add('collapsing');
-    
+
     requestAnimationFrame(() => {
         element.style.height = '0';
     });
@@ -132,7 +133,6 @@ function collapseElement(element: HTMLElement) {
     element.addEventListener('transitionend', function handler() {
         element.classList.add('hidden');
         element.classList.remove('collapsing');
-        
 
         element.removeEventListener('transitionend', handler);
     });
@@ -148,7 +148,6 @@ function expandElement(element: HTMLElement) {
         element.style.paddingTop = '0.5rem';
         element.style.paddingBottom = '0.5rem';
     });
-    
 
     element.addEventListener('transitionend', function handler() {
         element.classList.remove('expanding');
@@ -453,7 +452,7 @@ function handleWebSocketMessage(event: MessageEvent<any>) {
 
         case 'error':
             console.error('Error:', message.message);
-            openPopupWindow(message.message);
+            openPopupWindow(PopupWindowType.ERROR, message.message);
             break;
 
         default:
@@ -540,7 +539,8 @@ function addItemToPreviousOutputsList(imageUrl: string) {
 }
 
 function addItemToPreviousOutputsListElem(imageUrl: string) {
-    elements.previousOutputsList.innerHTML= `
+    elements.previousOutputsList.innerHTML =
+        `
         <a href="${imageUrl}" target="_blank" class="previous-output-item">
             <img src="${imageUrl}" alt="Previously generated image" class="previous-output-img" loading="lazy">
         </a>

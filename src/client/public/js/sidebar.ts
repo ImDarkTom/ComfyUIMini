@@ -36,7 +36,7 @@ function closeSidebar() {
         elements.overlay.classList.remove('slide-out');
         elements.overlay.classList.add('hidden');
 
-        document.body.classList.remove('sidebar-open');
+        document.body.classList.remove('locked');
 
         elements.sidebar.removeEventListener('transitionend', handle);
     });
@@ -53,7 +53,7 @@ function openSidebar() {
         elements.sidebar.classList.remove('slide-in');
         elements.overlay.classList.remove('slide-in');
 
-        document.body.classList.add('sidebar-open');
+        document.body.classList.add('locked');
 
         elements.sidebar.removeEventListener('transitionend', handle);
     });

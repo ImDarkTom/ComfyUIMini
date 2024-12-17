@@ -1,3 +1,4 @@
+import { BottomSheetEntry, loadBottomSheet } from '../common/actionSheet.js';
 import { getAllWorkflows } from '../modules/getLocalWorkflow.js';
 
 declare global {
@@ -155,7 +156,7 @@ function openActionSheet(buttonElement: HTMLElement, event: Event) {
         return;
     }
 
-    const bottomSheetOptions: Entry[] = [
+    const bottomSheetOptions: BottomSheetEntry[] = [
         {
             icon: '✏',
             text: 'Edit',

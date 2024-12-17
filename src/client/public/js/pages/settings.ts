@@ -1,3 +1,4 @@
+import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 import { clearAllSavedInputValues } from '../modules/savedInputValues.js';
 
 const themeSelectElem = document.getElementById('select-theme') as HTMLSelectElement;
@@ -19,7 +20,7 @@ themeSelectElem.addEventListener('change', async (e) => {
     if (response.status === 200) {
         location.reload();
     } else {
-        openPopupWindow(responseText);
+        openPopupWindow(PopupWindowType.ERROR, responseText);
     }
 });
 
@@ -36,17 +37,17 @@ saveGalleryItemsPerPageButton.addEventListener('click', async (e) => {
     const responseJson = await response.json();
 
     if (response.status === 200) {
-        openPopupWindow(responseJson.message);
+        openPopupWindow(PopupWindowType.INFO, responseJson.message);
     } else {
-        openPopupWindow(responseJson.error);
+        openPopupWindow(PopupWindowType.ERROR, responseJson.error);
     }
 });
 
 clearSavedInputValuesButton.addEventListener('click', () => {
     try {
         clearAllSavedInputValues();
-        openPopupWindow('Cleared all saved input values.');
+        openPopupWindow(PopupWindowType.INFO, 'Cleared all saved input values.');
     } catch (error) {
-        openPopupWindow('An error occured while clearing saved input values.');
+        openPopupWindow(PopupWindowType.ERROR, 'An error occured while clearing saved input values', error);
     }
 });

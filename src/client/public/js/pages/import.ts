@@ -1,6 +1,7 @@
 import { WorkflowInstance } from '@shared/classes/Workflow.js';
 import { getAllWorkflows } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
+import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 
 /**
  *
@@ -57,6 +58,7 @@ workflowFileInput.addEventListener('change', () => {
 
         if (importingWorkflowJson.version !== undefined) {
             openPopupWindow(
+                PopupWindowType.WARNING,
                 "<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>"
             );
             return;
@@ -65,7 +67,7 @@ workflowFileInput.addEventListener('change', () => {
         try {
             workflowEditor.workflowObject = new WorkflowInstance(importingWorkflowJson);
         } catch (error) {
-            openPopupWindow(`Could not import workflow: ${error}`);
+            openPopupWindow(PopupWindowType.WARNING, 'Could not import workflow', error);
             return;
         }
 

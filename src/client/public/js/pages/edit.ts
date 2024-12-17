@@ -1,9 +1,9 @@
 import { WorkflowWithMetadata } from '@shared/types/Workflow';
-import { handleError } from '../common/errorHandler.js';
 import { getAllWorkflows, getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { WorkflowEditor } from '../modules/workflowEditor.js';
 import { clearSavedInputValuesForWorkflow } from '../modules/savedInputValues.js';
 import { WorkflowInstance } from '@shared/classes/Workflow.js';
+import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 const titleInput = document.getElementById('title-input') as HTMLInputElement;
@@ -43,7 +43,7 @@ function loadWorkflow() {
         workflowEditor.workflowObject = workflowInstance;
         workflowEditor.renderWorkflow();
     } catch (error) {
-        handleError(error);
+        openPopupWindow(PopupWindowType.ERROR, 'An error occured while loading workflow', error);
     }
 }
 
@@ -79,7 +79,7 @@ export async function saveWorkflow() {
         });
 
         if (response.status !== 200) {
-            openPopupWindow(`An error occured while saving workflow: ${await response.text()}`);
+            openPopupWindow(PopupWindowType.ERROR, 'An error occured while saving workflow', await response.text());
             return;
         }
 

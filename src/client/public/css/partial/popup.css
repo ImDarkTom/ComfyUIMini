@@ -15,35 +15,54 @@
     background-color: var(--background-tertiary-color);
     width: 90%;
     height: 30%;
-    border-radius: 0.5rem;
+    border-radius: 1rem;
+    box-sizing: border-box;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    gap: 0.5rem;
+}
+
+.popup-message-type {
+    font-weight: bold;
+    font-size: 1.25rem;
     text-align: center;
+    padding: 0.5rem;
+}
+
+.popup-message-type.error {
+    color: red;
+}
+
+.popup-message-type.warning {
+    color: orange;
 }
 
 .popup-message {
     flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.1rem;
 }
 
 .popup-message a {
     color: var(--text-secondary-color);
 }
 
+.popup-error {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--background-primary-color);
+    font-family: monospace;
+    overflow: auto;
+}
+
 .popup-continue-button {
     width: 50%;
     background-color: var(--background-secondary-color);
     height: 3rem;
-    margin-bottom: 1rem;
     border-radius: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
     user-select: none;
+    margin: auto;
 }

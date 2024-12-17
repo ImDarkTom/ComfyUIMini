@@ -41,12 +41,12 @@ button {
 .main-container {
     box-sizing: border-box;
     padding: 0.5rem;
-    padding-top: calc(3rem + 1rem + 3px); 
+    padding-top: calc(3rem + 1rem + 3px);
     /* 3px is to account for the navbar's box shadow */
 }
 
-/* sidebar */
-body.sidebar-open {
+/* used by sidebar, popup window, and any other times body scroll has to be paused */
+body.locked {
     overflow: hidden;
 }
 
