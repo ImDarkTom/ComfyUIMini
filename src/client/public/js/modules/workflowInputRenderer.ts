@@ -2,10 +2,16 @@ import { InputOption, WorkflowWithMetadata } from '@shared/types/Workflow.js';
 import { BaseRenderConfig, renderNumberInput, renderSelectInput, renderTextInput } from './inputRenderers.js';
 import { NormalisedComfyInputInfo, ProcessedObjectInfo } from '@shared/types/ComfyObjectInfo.js';
 import { getSavedInputValue } from './savedInputValues.js';
+import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 
 const inputsContainer = document.querySelector('.inputs-container') as HTMLElement;
 
 const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
+
+if (!inputsInfoResponse.ok) {
+    openPopupWindow(PopupWindowType.ERROR, 'Could not fetch inputs info', inputsInfoResponse.statusText);
+}
+
 const inputsInfoObject: ProcessedObjectInfo = await inputsInfoResponse.json();
 
 export function renderInputs(workflowObject: WorkflowWithMetadata, workflowType: string, workflowIdentifier: string) {
