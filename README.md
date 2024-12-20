@@ -27,66 +27,7 @@ A mobile-friendly WebUI to run ComfyUI workflows.
 
 ## Installation
 
-1. **Download**
-
-You can download the latest release from the [releases page](https://github.com/ImDarkTom/ComfyUIMini/releases) (more stable)
-or clone the repository (more up-to-date).
-
-```bash
-git clone https://github.com/ImDarkTom/ComfyUIMini.git
-cd ./ComfyUIMini
-```
-
-2. **Setup**
-**(a) Install script**
-
-_Windows_:
-```bash
-.\scripts\install.bat
-```
-
-_Linux/MacOS_:
-```bash
-chmod +x ./scripts/install.sh
-./scripts/install.sh
-```
-
-**(b) Manually**
-
-```bash
-npm install
-npm run build
-```
-
-
-3. **Run the app**
-
-```bash
-npm start
-```
-
-or 
-
-_Windows:_
-
-```bash
-.\scripts\start.bat
-```
-
-_Linux/MacOS:_
-
-```bash
-chmod +x ./scripts/start.sh
-./scripts/start.sh
-```
-
-> **Note**: You may experience a crash on first launch, this should be resolve by launching again.
-
-You can change the ComfyUI url/port as well as the port the app runs on in the _/config/default.json_ file.
-
-After sucessfully running you should see text along the lines of `Running on http://<local-ip>:<port>` in the console, put this url into any device on your network and you should be able to access the UI.
-
-For updating, you can run the update script in the `./scripts/` directory for your respective platform (`.bat` for Windows, `.sh` for Linux and MacOS). 
+You can find a guide to installing and running the app on the **[getting started](https://github.com/ImDarkTom/ComfyUIMini/wiki/Getting-Started)** page.
 
 ## FAQ
 
