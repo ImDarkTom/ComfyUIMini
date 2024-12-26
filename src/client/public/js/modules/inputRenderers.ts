@@ -91,14 +91,25 @@ export function renderTextInput(inputOptions: TextRenderConfig): string {
  */
 export function renderNumberInput(inputOptions: NumberRenderConfig): string {
     const showRandomiseToggle = inputOptions.input_name_in_node === 'seed';
+    const showResolutionSelector =
+        inputOptions.input_name_in_node === 'width' || inputOptions.input_name_in_node === 'height';
+
+    const hasAdditionalButton = showRandomiseToggle || showResolutionSelector;
 
     const id = `input-${inputOptions.node_id}-${inputOptions.input_name_in_node}`;
     const { default: defaultValue, step, min, max } = inputOptions;
 
     const randomiseToggleHTML = `
-    <div class="randomise-buttons-container" data-linked-input-id="${id}">
+    <div class="randomise-buttons-container additional-input-buttons-container" data-linked-input-id="${id}">
         <span class="randomise-now-button">↻</span>
         <span class="randomise-input-toggle"></span>
+    </div>`;
+
+    const resolutionSelectorHTML = `
+    <div class="resolution-selector-container additional-input-buttons-container" data-node-id="${inputOptions.node_id}">
+        <span class="resolution-selector-button">
+            <span class="icon resize"></span>
+        </span> 
     </div>`;
 
     return createInputContainer(
@@ -109,13 +120,14 @@ export function renderNumberInput(inputOptions: NumberRenderConfig): string {
             id="${id}" 
             type="number" 
             placeholder="${defaultValue}" 
-            class="workflow-input ${showRandomiseToggle ? 'has-random-toggle' : ''}" 
+            class="workflow-input ${hasAdditionalButton ? 'has-additional-button' : ''}" 
             value="${defaultValue}"
             ${step !== undefined ? `step="${step}"` : ''}
             ${min !== undefined ? `min="${min}"` : ''} 
             ${max !== undefined ? `max="${max}"` : ''}
         >
         ${showRandomiseToggle ? randomiseToggleHTML : ''}
+        ${showResolutionSelector ? resolutionSelectorHTML : ''}
     `
     );
 }

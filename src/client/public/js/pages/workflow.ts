@@ -15,6 +15,7 @@ import { getLocalWorkflow } from '../modules/getLocalWorkflow.js';
 import { renderInputs } from '../modules/workflowInputRenderer.js';
 import { SaveInputValues } from '../modules/savedInputValues.js';
 import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
+import { showResolutionSelector } from '../modules/resolutionSelector.js';
 
 // --- DOM Elements ---
 const elements = {
@@ -44,6 +45,9 @@ const elements = {
     previousOutputsToggler: document.querySelector('.previous-outputs-toggler') as HTMLElement,
     previousOutputsList: document.querySelector('.previous-outputs-list') as HTMLElement,
     previousOutputsTogglerIcon: document.querySelectorAll('.previous-outputs-toggler-icon') as NodeListOf<HTMLElement>,
+    get allResolutionSelectors() {
+        return document.querySelectorAll('.resolution-selector-container') as NodeListOf<HTMLElement>;
+    },
 };
 
 // --- Variables ---
@@ -103,6 +107,32 @@ function startEventListeners() {
     elements.allSelectsWithImageUploads.forEach((selectElement) => imageSelectEventListener(selectElement));
 
     elements.previousOutputsToggler.addEventListener('click', togglePreviousOutputs);
+
+    elements.allResolutionSelectors.forEach((resolutionSelector) =>
+        resolutionSelectorEventListener(resolutionSelector)
+    );
+}
+
+function resolutionSelectorEventListener(resolutionSelector: HTMLElement) {
+    resolutionSelector.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+
+        if (!target.classList.contains('resolution-selector-button') && !target.classList.contains('icon')) {
+            return;
+        }
+
+        let targetParent = target.parentNode;
+        if (target.classList.contains('icon')) {
+            targetParent = targetParent?.parentNode || null;
+        }
+
+        if (!targetParent) {
+            console.error('No parent node found');
+            return;
+        }
+
+        showResolutionSelector((targetParent as HTMLElement).getAttribute('data-node-id') as string);
+    });
 }
 
 function togglePreviousOutputs() {

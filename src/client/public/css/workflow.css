@@ -83,17 +83,17 @@ textarea.workflow-input {
     flex-direction: row;
 }
 
-.workflow-input.has-random-toggle {
-    /* styles for workflow-input if there is a randomise button */
+.workflow-input.has-additional-button {
+    /* styles for workflow-input if there is an additional button */
     border-radius: 0.5rem 0 0 0.5rem;
 }
 
-.randomise-buttons-container {
+.additional-input-buttons-container {
     display: flex;
     flex-direction: row;
 }
 
-.randomise-buttons-container span {
+.additional-input-buttons-container > span {
     justify-content: center;
     align-items: center;
     user-select: none;
@@ -107,14 +107,16 @@ textarea.workflow-input {
     font-size: var(--input-font-size);
 }
 
+.additional-input-buttons-container > span:last-child {
+    display: flex;
+    border-radius: 0 0.5rem 0.5rem 0;
+    justify-content: center;
+    align-items: center;
+}
+
 .randomise-now-button {
     display: none;
     font-size: 1.5rem !important;
-}
-
-.randomise-input-toggle {
-    display: flex;
-    border-radius: 0 0.5rem 0.5rem 0;
 }
 
 .randomise-input-toggle::before {
@@ -260,7 +262,10 @@ textarea.workflow-input {
     padding: 0.5rem;
     box-sizing: border-box;
     border-radius: 0 0 0.5rem 0.5rem;
-    transition: height 0.5s ease, opacity 0.5s ease, padding 0.5s ease;
+    transition:
+        height 0.5s ease,
+        opacity 0.5s ease,
+        padding 0.5s ease;
 }
 
 .previous-outputs-list.expanding {
@@ -374,4 +379,107 @@ textarea.workflow-input {
     padding: 0.5rem;
     border-radius: 1rem; /* 0.5 default plus padding */
     opacity: 0.5;
+}
+
+.resolution-selector-button .icon {
+    font-size: 1.5rem;
+    height: calc(var(--input-height) - 1rem);
+    width: calc(var(--input-height) - 1rem);
+    margin: 0.5rem;
+}
+
+/* resolution selector */
+#resolution-selector-overlay {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#resolution-selector-overlay.hidden {
+    display: none;
+}
+
+#resolution-selector {
+    width: 90%;
+    height: 50%;
+    background-color: var(--background-tertiary-color);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+#resolution-selector.hidden {
+    display: none;
+}
+
+.resolution-scale-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 1rem;
+}
+
+.resolution-scale-buttons input {
+    display: none;
+}
+
+.resolution-scale-buttons label {
+    background-color: var(--background-secondary-color);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    transition:
+        background-color 0.25s ease,
+        box-shadow 0.25s ease;
+    cursor: pointer;
+    box-shadow: 0 0 0.5rem var(--background-primary-color) inset;
+}
+
+.resolution-scale-buttons input:checked + label {
+    background-color: var(--background-tertirary-color);
+    box-shadow: 0 0 0.5rem var(--background-primary-color);
+}
+
+.resolution-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.resolution-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-secondary-color);
+    padding: 0.5rem;
+    box-sizing: border-box;
+    aspect-ratio: 1/1;
+    border-radius: 0.5rem;
+}
+
+.resolution-label {
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.resolution-dimensions {
+    font-size: 0.8rem;
+    color: var(--text-secondary-color);
 }
