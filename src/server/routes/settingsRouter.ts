@@ -12,7 +12,7 @@ router.get('/theme', async (req, res) => {
         return;
     }
 
-    const themesList = ['dark', 'light', 'midnight', 'whiteout', 'aurora', 'nord'];
+    const themesList = ['dark', 'light', 'midnight', 'whiteout', 'aurora', 'nord', 'conifer'];
 
     if (themesList.includes(requestTheme)) {
         res.cookie('theme', requestTheme, {
@@ -33,7 +33,7 @@ router.get('/galleryitemsperpage', async (req, res): Promise<void> => {
 
     if (isNaN(requestCount) || requestCount < 1) {
         res.status(400).send({ error: 'Invalid number, must be a valid integer greater than 0.' });
-        return
+        return;
     }
 
     res.cookie('galleryItemsPerPage', requestCount.toString(), {
