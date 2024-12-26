@@ -354,8 +354,14 @@ textarea.workflow-input {
 .image-placeholder-skeleton {
     width: 100%;
     height: auto;
-    aspect-ratio: 1/1;
-    background: linear-gradient(-45deg, #222222 0%, #222222 40%, #333333 50%, #222222 60%, #222222 100%);
+    background: linear-gradient(
+        -45deg,
+        var(--background-secondary-color) 0%,
+        var(--background-secondary-color) 40%,
+        var(--background-tertiary-color) 50%,
+        var(--background-secondary-color) 60%,
+        var(--background-secondary-color) 100%
+    );
     animation: wave 1s linear infinite reverse;
     background-size: 600% 100%;
     border-radius: 0.5rem;
@@ -379,6 +385,7 @@ textarea.workflow-input {
     padding: 0.5rem;
     border-radius: 1rem; /* 0.5 default plus padding */
     opacity: 0.5;
+    filter: saturate(2); /* compensate for opacity */
 }
 
 .resolution-selector-button .icon {
