@@ -477,8 +477,8 @@ textarea.workflow-input {
     background-color: var(--background-secondary-color);
     padding: 0.5rem;
     box-sizing: border-box;
-    aspect-ratio: 1/1;
     border-radius: 0.5rem;
+    height: 5rem;
 }
 
 .resolution-label {
