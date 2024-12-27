@@ -9,31 +9,58 @@
     <%- include('../partials/navbar') %>
     <%- include('../partials/sidebar', { activePage: 'settings' }) %>
     <div class="main-container">
-        <div class="option-container">
-            <label for="select-theme">Theme</label>
-            <select id="select-theme">
-                <option value="" disabled selected>Select a theme</option>
-                    <optgroup label="Dark">
-                        <option value="aurora">Aurora</option>
-                        <option value="conifer">Conifer</option>
-                        <option value="dark">Dark (Default)</option>
-                        <option value="nord">Nord</option>
-                        <option value="midnight">Midnight</option>
-                    </optgroup>
-                    <optgroup label="Light">
-                        <option value="light">Light</option>
-                        <option value="whiteout">Whiteout</option>
-                    </optgroup>
-            </select>
-        </div>
-        <div class="option-container">
-            <label for="gallery-items-per-page">Gallery items per page</label>
-            <input type="number" id="gallery-items-per-page" min="1" max="100" value="20">
-            <input type="button" value="Set gallery items per page" id="set-gallery-items-per-page">
-        </div>
-        <div class="option-container">
-            <input type="button" value="Clear saved input values" id="clear-saved-input-values">
-        </div>
+        <h1>Settings</h1>
+        <h2>General</h2>
+        <section>
+            <div class="option-container">
+                <span class="option-label-container">
+                    <label for="select-theme">Theme</label>
+                    <span class="option-help-button" data-tooltip="Select a theme to customize the look of ComfyUIMini.<br /><br />You can submit your own custom theme to be added by joining the 'Enthusaist' tier on <a href='https://buymeacoffee.com/imdarktom/' target='_blank'>Buy Me A Coffee</a>.">ⓘ</span>
+                </span>
+                <select id="select-theme">
+                    <option value="" disabled selected>Select a theme</option>
+                        <optgroup label="Dark">
+                            <option value="aurora">Aurora</option>
+                            <option value="conifer">Conifer</option>
+                            <option value="dark">Dark (Default)</option>
+                            <option value="nord">Nord</option>
+                            <option value="midnight">Midnight</option>
+                        </optgroup>
+                        <optgroup label="Light">
+                            <option value="light">Light</option>
+                            <option value="whiteout">Whiteout</option>
+                        </optgroup>
+                </select>
+            </div>
+        </section>
+        <h2>Workflow</h2>
+        <section>
+            <div class="option-container">
+                <span class="option-label-container">
+                    <label for="compensate-preview-saturation">Compensate preview saturation</label>
+                    <span class="option-help-button" data-tooltip="Increases the saturation of the preview image to account for the lowered opacity. This may however look odd on some browsers.">ⓘ</span>
+                </span>
+                <input type="checkbox" id="compensate-preview-saturation">
+            </div>
+            <div class="option-container">
+                <span class="option-label-container">
+                    <label for="clear-saved-input-values">Clear saved input values</label>
+                    <span class="option-help-button" data-tooltip="When a workflow is ran, the input values are saved to localStorage so they are kept incase of a page refresh. This button clears any saved input values.">ⓘ</span>
+                </span>
+                <input type="button" value="Clear saved input values" id="clear-saved-input-values">
+            </div>
+        </section>
+        <h2>Gallery</h2>
+        <section>
+            <div class="option-container">
+                <span class="option-label-container">
+                    <label for="gallery-items-per-page">Gallery items per page</label>
+                    <span class="option-help-button" data-tooltip="How many images to show in a gallery per page. Minimum is 1, default is 20.">ⓘ</span>
+                </span>
+                <input type="number" id="gallery-items-per-page" min="1" max="100" value="20">
+                <input type="button" value="Set gallery items per page" id="set-gallery-items-per-page">
+            </div>
+        </section>
     </div>
 </body>
 </html>

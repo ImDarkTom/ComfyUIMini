@@ -1,9 +1,21 @@
+import { getConfig, setConfig } from '../common/configLoader.js';
 import { openPopupWindow, PopupWindowType } from '../common/popupWindow.js';
 import { clearAllSavedInputValues } from '../modules/savedInputValues.js';
 
 const themeSelectElem = document.getElementById('select-theme') as HTMLSelectElement;
 const saveGalleryItemsPerPageButton = document.getElementById('set-gallery-items-per-page') as HTMLButtonElement;
 const clearSavedInputValuesButton = document.getElementById('clear-saved-input-values') as HTMLButtonElement;
+const compensatePreviewSaturationCheckbox = document.getElementById(
+    'compensate-preview-saturation'
+) as HTMLInputElement;
+
+const allTooltipElems = document.querySelectorAll('[data-tooltip]');
+
+allTooltipElems.forEach((elem) => {
+    elem.addEventListener('click', () => {
+        openPopupWindow(PopupWindowType.INFO, (elem as HTMLElement).dataset.tooltip ?? '');
+    });
+});
 
 themeSelectElem.addEventListener('change', async (e) => {
     if (!e.target) {
@@ -51,3 +63,19 @@ clearSavedInputValuesButton.addEventListener('click', () => {
         openPopupWindow(PopupWindowType.ERROR, 'An error occured while clearing saved input values', error);
     }
 });
+
+compensatePreviewSaturationCheckbox.addEventListener('change', () => {
+    const checked = compensatePreviewSaturationCheckbox.checked;
+
+    setConfig('workflow.compensatePreviewSaturation', checked);
+});
+
+function loadConfigsIntoPage() {
+    const saturationCompensationConfig = getConfig('workflow.compensatePreviewSaturation') as boolean;
+
+    if (saturationCompensationConfig === true || saturationCompensationConfig === undefined) {
+        compensatePreviewSaturationCheckbox.checked = true;
+    }
+}
+
+loadConfigsIntoPage();

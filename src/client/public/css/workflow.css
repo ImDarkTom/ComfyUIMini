@@ -1,6 +1,7 @@
 :root {
     --input-height: 3rem;
     --input-font-size: 1.2rem;
+    --config-preview-saturation: 2;
 }
 
 .title-text {
@@ -385,7 +386,7 @@ textarea.workflow-input {
     padding: 0.5rem;
     border-radius: 1rem; /* 0.5 default plus padding */
     opacity: 0.5;
-    filter: saturate(2); /* compensate for opacity */
+    filter: saturate(var(--config-preview-saturation)); /* compensate for opacity */
 }
 
 .resolution-selector-button .icon {
