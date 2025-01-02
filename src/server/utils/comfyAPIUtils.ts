@@ -1,104 +1,28 @@
 import WebSocket from 'ws';
-import fs from 'fs';
-import path from 'path';
 import config from 'config';
 import FormData from 'form-data';
 import logger from './logger';
 import { Workflow } from '@shared/types/Workflow';
 import { HistoryResponse } from '@shared/types/History';
 import { ObjectInfoPartial } from '@shared/types/ComfyObjectInfo';
-import { clientId, comfyuiAxios, httpsAgent } from './comfyAPIUtils/comfyUIAxios';
+import { clientId, comfyUIAxios, httpsAgent } from './comfyAPIUtils/comfyUIAxios';
 import comfyUICheck from './comfyAPIUtils/startupCheck';
-
-async function queuePrompt(workflowPrompt: Workflow) {
-    const postContents = { prompt: workflowPrompt, client_id: clientId };
-
-    const response = await comfyuiAxios.post('/prompt', postContents, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    return response.data;
-}
-
-async function getImage(filename: string, subfolder: string, type: string) {
-    const params = new URLSearchParams({ filename, subfolder, type });
-
-    try {
-        const response = await comfyuiAxios.get(`/view?${params.toString()}`, { responseType: 'arraybuffer' });
-
-        return response;
-    } catch (err: unknown) {
-        if (err instanceof Error && 'code' in err) {
-            if (err.code === 'ECONNREFUSED') {
-                // Fallback if ComfyUI is unavailable
-                if (type === 'output') {
-                    const readFile = fs.readFileSync(path.join(config.get('output_dir'), subfolder, filename));
-
-                    return {
-                        data: readFile,
-                        headers: {
-                            'content-type': 'image/png',
-                            'content-length': readFile.length,
-                        },
-                    };
-                }
-            }
-        }
-
-        console.error('Unknown error when fetching image:', err);
-        return null;
-    }
-}
-
-/**
- * Gets the list of available models.
- *
- * @returns {Promise<string[]>} A promise that resolves to an array of strings representing the available models.
- */
-async function getModelTypesList(): Promise<string[]> {
-    try {
-        const response = await comfyuiAxios.get('/models');
-
-        return response.data;
-    } catch (error) {
-        logger.warn('Could not get model types list from ComfyUI:', error);
-        return [];
-    }
-}
-
-/**
- * Gets the list of available models for a specific model type.
- *
- * @param {string} modelType The model type to get the list of available models for.
- * @returns {Promise<string[]>} A promise that resolves to a list of strings representing the available models for the specified model type.
- */
-async function getItemsForModelType(modelType: string): Promise<string[]> {
-    const response = await comfyuiAxios.get(`/models/${modelType}`);
-
-    return response.data;
-}
-
-async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
-    const params = new URLSearchParams({ filename, subfolder, type: folderType });
-
-    return `/comfyui/image?${params.toString()}`;
-}
+import getQueue from './comfyAPIUtils/getQueue';
+import getImage from './comfyAPIUtils/getImage';
 
 async function getHistory(promptId: string): Promise<HistoryResponse> {
-    const response = await comfyuiAxios.get(`/history/${promptId}`);
-
-    return response.data;
-}
-
-async function getQueue() {
-    const response = await comfyuiAxios.get('/queue');
+    const response = await comfyUIAxios.get(`/history/${promptId}`);
 
     return response.data;
 }
 
 async function getOutputImages(promptId: string) {
+    async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
+        const params = new URLSearchParams({ filename, subfolder, type: folderType });
+
+        return `/comfyui/image?${params.toString()}`;
+    }
+
     const outputImages: Record<string, string[]> = {};
 
     const history = await getHistory(promptId);
@@ -119,17 +43,29 @@ async function getOutputImages(promptId: string) {
     return outputImages;
 }
 
-function bufferIsText(buffer: Buffer) {
-    try {
-        const text = buffer.toString('utf8');
-        JSON.parse(text);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
 async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
+    function bufferIsText(buffer: Buffer) {
+        try {
+            const text = buffer.toString('utf8');
+            JSON.parse(text);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    async function queuePrompt(workflowPrompt: Workflow) {
+        const postContents = { prompt: workflowPrompt, client_id: clientId };
+
+        const response = await comfyUIAxios.post('/prompt', postContents, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return response.data;
+    }
+
     const comfyuiWsUrl: string = config.get('comfyui_ws_url');
     const wsOptions: WebSocket.ClientOptions = {};
 
@@ -261,14 +197,14 @@ async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
 }
 
 async function interruptGeneration() {
-    const response = await comfyuiAxios.post('/interrupt');
+    const response = await comfyUIAxios.post('/interrupt');
 
     return response.data;
 }
 
 async function fetchRawObjectInfo(): Promise<ObjectInfoPartial | null> {
     try {
-        const response = await comfyuiAxios.get('/api/object_info');
+        const response = await comfyUIAxios.get('/api/object_info');
 
         return response.data;
     } catch (error) {
@@ -285,7 +221,7 @@ async function uploadImage(file: Express.Multer.File) {
             contentType: file.mimetype,
         });
 
-        const response = await comfyuiAxios.post('/upload/image', form, {
+        const response = await comfyUIAxios.post('/upload/image', form, {
             headers: {
                 ...form.getHeaders(),
             },
@@ -304,8 +240,6 @@ export {
     comfyUICheck,
     interruptGeneration,
     getImage,
-    getModelTypesList,
-    getItemsForModelType,
     fetchRawObjectInfo,
     uploadImage,
 };

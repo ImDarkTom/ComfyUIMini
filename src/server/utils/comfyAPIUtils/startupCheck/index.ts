@@ -1,6 +1,6 @@
 import logger from 'server/utils/logger';
 import config from 'config';
-import { comfyuiAxios, comfyUIUrl } from '../comfyUIAxios';
+import { comfyUIAxios, comfyUIUrl } from '../comfyUIAxios';
 import versionCheck from './versionCheck';
 import formatVersion from './formatVersion';
 
@@ -27,7 +27,7 @@ async function comfyUICheck() {
     }
 
     try {
-        await comfyuiAxios.get('/');
+        await comfyUIAxios.get('/');
 
         logger.success(`ComfyUI is running.`);
     } catch (error) {
@@ -46,7 +46,7 @@ async function comfyUICheck() {
     }
 
     try {
-        const infoRequest = await comfyuiAxios.get('/system_stats');
+        const infoRequest = await comfyUIAxios.get('/system_stats');
 
         comfyUIVersion = infoRequest.data.system.comfyui_version;
 

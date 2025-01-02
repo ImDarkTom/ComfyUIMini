@@ -12,7 +12,7 @@ const httpsAgent = new https.Agent({
     rejectUnauthorized: config.get('reject_unauthorised_cert') || false,
 });
 
-const comfyuiAxios = axios.create({
+const comfyUIAxios = axios.create({
     baseURL: comfyUIUrl,
     timeout: 10000,
     headers: {
@@ -21,4 +21,4 @@ const comfyuiAxios = axios.create({
     httpsAgent: httpsAgent,
 });
 
-export { comfyuiAxios, clientId, comfyUIUrl, httpsAgent };
+export { comfyUIAxios, clientId, comfyUIUrl, httpsAgent };
