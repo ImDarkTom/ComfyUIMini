@@ -1,33 +1,14 @@
-import axios from 'axios';
 import WebSocket from 'ws';
-import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import config from 'config';
 import FormData from 'form-data';
-import https from 'https';
 import logger from './logger';
 import { Workflow } from '@shared/types/Workflow';
 import { HistoryResponse } from '@shared/types/History';
 import { ObjectInfoPartial } from '@shared/types/ComfyObjectInfo';
-import { getAppVersion } from './getAppVersion';
-
-const clientId = crypto.randomUUID();
-const appVersion = getAppVersion();
-const comfyUiUrl: string = config.get('comfyui_url');
-
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: config.get('reject_unauthorised_cert') || false,
-});
-
-const comfyuiAxios = axios.create({
-    baseURL: comfyUiUrl,
-    timeout: 10000,
-    headers: {
-        'User-Agent': `ComfyUIMini/${appVersion}`,
-    },
-    httpsAgent: httpsAgent,
-});
+import { clientId, comfyuiAxios, httpsAgent } from './comfyAPIUtils/comfyUIAxios';
+import comfyUICheck from './comfyAPIUtils/startupCheck';
 
 async function queuePrompt(workflowPrompt: Workflow) {
     const postContents = { prompt: workflowPrompt, client_id: clientId };
@@ -277,111 +258,6 @@ async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
             }
         }
     });
-}
-
-/**
- * Formats a ComfyUI version string to a semver-compatible version string.
- *
- * The part after the first '-' indicates how many commits since the downloaded release,
- * we can just use this as another part of the version as `major > minor > patch > commit`
- * in order to be able to check if a feature from a certain commit is available in ComfyUI.
- *
- * E.g. `v0.2.2-84-gd1cdf51` becomes `0.2.2.84`.
- *
- * @param {string} versionString The input ComfyUI version string.
- * @returns {string} The output semver-compatible version string.
- */
-function formatVersion(versionString: string): string {
-    return versionString
-        .replace('v', '')
-        .replace(/-[a-z0-9]+$/, '')
-        .replace(/-/g, '.');
-}
-
-/**
- * Compares a passed `comfyui_version` string with a requirement version string.
- *
- * @param {string} version The string version for comfyui_version. E.g. `v0.2.2-84-gd1cdf51`
- * @param {string} versionRequirement The version to check against. Commit hash is not included in comparison. E.g. `0.2.2-49`
- * @returns {boolean} If the version is greater than or equal to the requirement version.
- */
-function versionCheck(version: string, versionRequirement: string): boolean {
-    const versionSplit = formatVersion(version).split('.');
-    const versionRequirementSplit = formatVersion(versionRequirement).split('.');
-
-    for (const versionPart in versionSplit) {
-        if (parseInt(versionSplit[versionPart]) > parseInt(versionRequirementSplit[versionPart])) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Check if ComfyUI is running and meets minimum required version
- * @returns
- */
-async function comfyUICheck() {
-    let comfyUIVersion = null;
-    let comfyUIVersionRequirement = false;
-
-    const minComfyUIVersion: string = config.get('developer.min_comfyui_version');
-
-    if (!minComfyUIVersion) {
-        logger.warn('No minimum ComfyUI version specified in config.');
-        return;
-    }
-
-    if (comfyUiUrl.startsWith('https://')) {
-        if (config.get('reject_unauthorised_cert')) {
-            logger.warn(
-                'Reject unauthorised certificates is enabled, this may cause issues when attempting to connect to a https:// ComfyUI websocket.'
-            );
-        }
-    }
-
-    try {
-        await comfyuiAxios.get('/');
-
-        logger.success(`ComfyUI is running.`);
-    } catch (error) {
-        if (error instanceof Error && 'code' in error) {
-            const errorCode = error.code;
-
-            if (errorCode === 'ECONNREFUSED') {
-                logger.warn(
-                    `Could not connect to ComfyUI, make sure it is running and accessible at the url in the config.json file.`
-                );
-                return;
-            } else {
-                logger.warn(`Unknown error when checking for ComfyUI: ${error}`);
-            }
-        }
-    }
-
-    try {
-        const infoRequest = await comfyuiAxios.get('/system_stats');
-
-        comfyUIVersion = infoRequest.data.system.comfyui_version;
-
-        if (comfyUIVersion === undefined || comfyUIVersion === null) {
-            comfyUIVersion = '>=0.2.0';
-        }
-
-        comfyUIVersionRequirement = versionCheck(comfyUIVersion, minComfyUIVersion);
-    } catch (error) {
-        logger.warn(`Could not check ComfyUI version: ${error}`);
-    }
-
-    if (!comfyUIVersionRequirement) {
-        logger.warn(
-            `Your ComfyUI version (${comfyUIVersion}) is lower than the required version (${minComfyUIVersion}). ComfyUIMini may not behave as exptected.`
-        );
-        return;
-    }
-
-    logger.success(`ComfyUI version: ${comfyUIVersion}`);
 }
 
 async function interruptGeneration() {
