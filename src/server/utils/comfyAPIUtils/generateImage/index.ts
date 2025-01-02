@@ -1,47 +1,10 @@
 import WebSocket from 'ws';
 import config from 'config';
-import FormData from 'form-data';
-import logger from './logger';
 import { Workflow } from '@shared/types/Workflow';
-import { HistoryResponse } from '@shared/types/History';
-import { ObjectInfoPartial } from '@shared/types/ComfyObjectInfo';
-import { clientId, comfyUIAxios, httpsAgent } from './comfyAPIUtils/comfyUIAxios';
-import comfyUICheck from './comfyAPIUtils/startupCheck';
-import getQueue from './comfyAPIUtils/getQueue';
-import getImage from './comfyAPIUtils/getImage';
-
-async function getHistory(promptId: string): Promise<HistoryResponse> {
-    const response = await comfyUIAxios.get(`/history/${promptId}`);
-
-    return response.data;
-}
-
-async function getOutputImages(promptId: string) {
-    async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
-        const params = new URLSearchParams({ filename, subfolder, type: folderType });
-
-        return `/comfyui/image?${params.toString()}`;
-    }
-
-    const outputImages: Record<string, string[]> = {};
-
-    const history = await getHistory(promptId);
-    const historyOutputs = history[promptId].outputs;
-
-    for (const nodeId in historyOutputs) {
-        const nodeOutput = historyOutputs[nodeId];
-        if (nodeOutput.images) {
-            const imageUrls = await Promise.all(
-                nodeOutput.images.map(async (image) => {
-                    return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
-                })
-            );
-            outputImages[nodeId] = imageUrls;
-        }
-    }
-
-    return outputImages;
-}
+import logger from 'server/utils/logger';
+import { clientId, comfyUIAxios, httpsAgent } from '../comfyUIAxios';
+import getHistory from '../getHistory';
+import getQueue from '../getQueue';
 
 async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
     function bufferIsText(buffer: Buffer) {
@@ -64,6 +27,33 @@ async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
         });
 
         return response.data;
+    }
+
+    async function getOutputImages(promptId: string) {
+        async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
+            const params = new URLSearchParams({ filename, subfolder, type: folderType });
+
+            return `/comfyui/image?${params.toString()}`;
+        }
+
+        const outputImages: Record<string, string[]> = {};
+
+        const history = await getHistory(promptId);
+        const historyOutputs = history[promptId].outputs;
+
+        for (const nodeId in historyOutputs) {
+            const nodeOutput = historyOutputs[nodeId];
+            if (nodeOutput.images) {
+                const imageUrls = await Promise.all(
+                    nodeOutput.images.map(async (image) => {
+                        return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
+                    })
+                );
+                outputImages[nodeId] = imageUrls;
+            }
+        }
+
+        return outputImages;
     }
 
     const comfyuiWsUrl: string = config.get('comfyui_ws_url');
@@ -196,50 +186,4 @@ async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
     });
 }
 
-async function interruptGeneration() {
-    const response = await comfyUIAxios.post('/interrupt');
-
-    return response.data;
-}
-
-async function fetchRawObjectInfo(): Promise<ObjectInfoPartial | null> {
-    try {
-        const response = await comfyUIAxios.get('/api/object_info');
-
-        return response.data;
-    } catch (error) {
-        logger.warn(`Could not get ComfyUI object info: ${error}`);
-        return null;
-    }
-}
-
-async function uploadImage(file: Express.Multer.File) {
-    try {
-        const form = new FormData();
-        form.append('image', file.buffer, {
-            filename: file.originalname,
-            contentType: file.mimetype,
-        });
-
-        const response = await comfyUIAxios.post('/upload/image', form, {
-            headers: {
-                ...form.getHeaders(),
-            },
-        });
-
-        return response;
-    } catch (error) {
-        return { error: error };
-    }
-}
-
-export {
-    generateImage,
-    getQueue,
-    getHistory,
-    comfyUICheck,
-    interruptGeneration,
-    getImage,
-    fetchRawObjectInfo,
-    uploadImage,
-};
+export default generateImage;
