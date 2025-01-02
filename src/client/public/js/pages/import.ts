@@ -58,8 +58,8 @@ workflowFileInput.addEventListener('change', () => {
 
         if (importingWorkflowJson.version !== undefined) {
             openPopupWindow(
-                PopupWindowType.WARNING,
-                "<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>"
+                "<p>Could not import workflow as it was not saved with API Format, if you do not see the option or do not know how to export with API formatting you can look at the guide <a href='https://imgur.com/a/YsZQu83' target='_blank'>here (external link)</a>.</p>",
+                PopupWindowType.WARNING
             );
             return;
         }
@@ -67,7 +67,7 @@ workflowFileInput.addEventListener('change', () => {
         try {
             workflowEditor.workflowObject = new WorkflowInstance(importingWorkflowJson);
         } catch (error) {
-            openPopupWindow(PopupWindowType.WARNING, 'Could not import workflow', error);
+            openPopupWindow('Could not import workflow', PopupWindowType.WARNING, error);
             return;
         }
 

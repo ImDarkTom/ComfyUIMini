@@ -9,7 +9,7 @@ const inputsContainer = document.querySelector('.inputs-container') as HTMLEleme
 const inputsInfoResponse = await fetch('/comfyui/inputsinfo');
 
 if (!inputsInfoResponse.ok) {
-    openPopupWindow(PopupWindowType.ERROR, 'Could not fetch inputs info', inputsInfoResponse.statusText);
+    openPopupWindow('Could not fetch inputs info', PopupWindowType.ERROR, inputsInfoResponse.statusText);
 }
 
 const inputsInfoObject: ProcessedObjectInfo = await inputsInfoResponse.json();

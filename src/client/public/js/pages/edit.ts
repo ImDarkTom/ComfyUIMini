@@ -43,7 +43,7 @@ function loadWorkflow() {
         workflowEditor.workflowObject = workflowInstance;
         workflowEditor.renderWorkflow();
     } catch (error) {
-        openPopupWindow(PopupWindowType.ERROR, 'An error occured while loading workflow', error);
+        openPopupWindow('An error occured while loading workflow', PopupWindowType.ERROR, error);
     }
 }
 
@@ -79,7 +79,7 @@ export async function saveWorkflow() {
         });
 
         if (response.status !== 200) {
-            openPopupWindow(PopupWindowType.ERROR, 'An error occured while saving workflow', await response.text());
+            openPopupWindow('An error occured while saving workflow', PopupWindowType.ERROR, await response.text());
             return;
         }
 

@@ -87,7 +87,7 @@ function fetchLocalWorkflow(): WorkflowWithMetadata {
 
     if (!localWorkflow) {
         const errorMessage = `Workflow '${workflowIdentifier}' not found.`;
-        openPopupWindow(PopupWindowType.ERROR, errorMessage);
+        openPopupWindow(errorMessage, PopupWindowType.ERROR);
         throw new Error(errorMessage);
     }
 
@@ -483,7 +483,7 @@ function handleWebSocketMessage(event: MessageEvent<any>) {
 
         case 'error':
             console.error('Error:', message.message);
-            openPopupWindow(PopupWindowType.ERROR, message.message);
+            openPopupWindow(message.message, PopupWindowType.ERROR);
             break;
 
         default:

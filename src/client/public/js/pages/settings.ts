@@ -13,7 +13,7 @@ const allTooltipElems = document.querySelectorAll('[data-tooltip]');
 
 allTooltipElems.forEach((elem) => {
     elem.addEventListener('click', () => {
-        openPopupWindow(PopupWindowType.INFO, (elem as HTMLElement).dataset.tooltip ?? '');
+        openPopupWindow((elem as HTMLElement).dataset.tooltip ?? '', PopupWindowType.INFO);
     });
 });
 
@@ -32,7 +32,7 @@ themeSelectElem.addEventListener('change', async (e) => {
     if (response.status === 200) {
         location.reload();
     } else {
-        openPopupWindow(PopupWindowType.ERROR, responseText);
+        openPopupWindow(responseText, PopupWindowType.ERROR);
     }
 });
 
@@ -49,18 +49,18 @@ saveGalleryItemsPerPageButton.addEventListener('click', async (e) => {
     const responseJson = await response.json();
 
     if (response.status === 200) {
-        openPopupWindow(PopupWindowType.INFO, responseJson.message);
+        openPopupWindow(responseJson.message, PopupWindowType.INFO);
     } else {
-        openPopupWindow(PopupWindowType.ERROR, responseJson.error);
+        openPopupWindow(responseJson.error, PopupWindowType.ERROR);
     }
 });
 
 clearSavedInputValuesButton.addEventListener('click', () => {
     try {
         clearAllSavedInputValues();
-        openPopupWindow(PopupWindowType.INFO, 'Cleared all saved input values.');
+        openPopupWindow('Cleared all saved input values.', PopupWindowType.INFO);
     } catch (error) {
-        openPopupWindow(PopupWindowType.ERROR, 'An error occured while clearing saved input values', error);
+        openPopupWindow('An error occured while clearing saved input values', PopupWindowType.ERROR, error);
     }
 });
 

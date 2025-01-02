@@ -20,7 +20,7 @@ function parseError(error: unknown): string {
     }
 }
 
-function openPopupWindow(type: PopupWindowType = PopupWindowType.ERROR, message: string, error: unknown = null) {
+function openPopupWindow(message: string, type: PopupWindowType = PopupWindowType.ERROR, error: unknown = null) {
     const popupContainerDiv = document.createElement('div');
     popupContainerDiv.classList.add('popup-container');
 
@@ -63,7 +63,6 @@ function closePopupWindow() {
     }
 
     popupContainer.remove();
-    return;
 }
 
 export { openPopupWindow, PopupWindowType };
