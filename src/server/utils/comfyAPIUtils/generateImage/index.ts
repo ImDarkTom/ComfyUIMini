@@ -6,56 +6,56 @@ import { clientId, comfyUIAxios, httpsAgent } from '../comfyUIAxios';
 import getHistory from '../getHistory';
 import getQueue from '../getQueue';
 
+function bufferIsText(buffer: Buffer) {
+    try {
+        const text = buffer.toString('utf8');
+        JSON.parse(text);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function queuePrompt(workflowPrompt: Workflow) {
+    const postContents = { prompt: workflowPrompt, client_id: clientId };
+
+    const response = await comfyUIAxios.post('/prompt', postContents, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    return response.data;
+}
+
+async function getOutputImages(promptId: string) {
+    async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
+        const params = new URLSearchParams({ filename, subfolder, type: folderType });
+
+        return `/comfyui/image?${params.toString()}`;
+    }
+
+    const outputImages: Record<string, string[]> = {};
+
+    const history = await getHistory(promptId);
+    const historyOutputs = history[promptId].outputs;
+
+    for (const nodeId in historyOutputs) {
+        const nodeOutput = historyOutputs[nodeId];
+        if (nodeOutput.images) {
+            const imageUrls = await Promise.all(
+                nodeOutput.images.map(async (image) => {
+                    return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
+                })
+            );
+            outputImages[nodeId] = imageUrls;
+        }
+    }
+
+    return outputImages;
+}
+
 async function generateImage(workflowPrompt: Workflow, wsClient: WebSocket) {
-    function bufferIsText(buffer: Buffer) {
-        try {
-            const text = buffer.toString('utf8');
-            JSON.parse(text);
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    async function queuePrompt(workflowPrompt: Workflow) {
-        const postContents = { prompt: workflowPrompt, client_id: clientId };
-
-        const response = await comfyUIAxios.post('/prompt', postContents, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        return response.data;
-    }
-
-    async function getOutputImages(promptId: string) {
-        async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
-            const params = new URLSearchParams({ filename, subfolder, type: folderType });
-
-            return `/comfyui/image?${params.toString()}`;
-        }
-
-        const outputImages: Record<string, string[]> = {};
-
-        const history = await getHistory(promptId);
-        const historyOutputs = history[promptId].outputs;
-
-        for (const nodeId in historyOutputs) {
-            const nodeOutput = historyOutputs[nodeId];
-            if (nodeOutput.images) {
-                const imageUrls = await Promise.all(
-                    nodeOutput.images.map(async (image) => {
-                        return await generateProxiedImageUrl(image.filename, image.subfolder, image.type);
-                    })
-                );
-                outputImages[nodeId] = imageUrls;
-            }
-        }
-
-        return outputImages;
-    }
-
     const comfyuiWsUrl: string = config.get('comfyui_ws_url');
     const wsOptions: WebSocket.ClientOptions = {};
 
