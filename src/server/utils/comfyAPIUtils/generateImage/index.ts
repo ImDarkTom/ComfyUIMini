@@ -2,31 +2,11 @@ import WebSocket from 'ws';
 import config from 'config';
 import { Workflow } from '@shared/types/Workflow';
 import logger from 'server/utils/logger';
-import { clientId, comfyUIAxios, httpsAgent } from '../comfyUIAxios';
+import { clientId, httpsAgent } from '../comfyUIAxios';
 import getHistory from '../getHistory';
 import getQueue from '../getQueue';
-
-function bufferIsText(buffer: Buffer) {
-    try {
-        const text = buffer.toString('utf8');
-        JSON.parse(text);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-async function queuePrompt(workflowPrompt: Workflow) {
-    const postContents = { prompt: workflowPrompt, client_id: clientId };
-
-    const response = await comfyUIAxios.post('/prompt', postContents, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    return response.data;
-}
+import bufferIsText from './bufferIsText';
+import queuePrompt from './queuePrompt';
 
 async function getOutputImages(promptId: string) {
     async function generateProxiedImageUrl(filename: string, subfolder: string, folderType: string) {
