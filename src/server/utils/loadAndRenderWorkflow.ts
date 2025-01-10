@@ -14,7 +14,7 @@ function loadAndRenderWorkflow(
         res.render(page, {
             workflowTitle: workflowIdentifier,
             workflowIdentifier: workflowIdentifier,
-            workflowText: '',
+            workflowText: 'null',
             workflowType: 'local',
             workflowFilename: '',
             theme: req.theme,
