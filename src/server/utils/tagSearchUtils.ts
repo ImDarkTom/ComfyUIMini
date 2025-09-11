@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
+import { CsvValidator, CsvValidationResult } from './csvValidator';
+import { getCsvWhitelist, isValidationEnabled, getCsvPath } from './configLoader';
 
 export interface TagSuggestion {
     tag: string;
@@ -14,20 +16,56 @@ class TagSearcher {
     private tagsFilePath: string;
     private isFileChecked = false;
     private fileExists = false;
+    private isValidationChecked = false;
+    private validationResult: CsvValidationResult | null = null;
 
     constructor() {
-        this.tagsFilePath = path.join(process.cwd(), 'config', 'tags.csv');
+        this.tagsFilePath = getCsvPath('tags.csv');
     }
 
     /**
-     * Checks if the tags file exists
+     * Checks if the tags file exists and is whitelisted
      */
     private checkFileExists(): boolean {
         if (!this.isFileChecked) {
             this.fileExists = fs.existsSync(this.tagsFilePath);
             this.isFileChecked = true;
+            
+            if (this.fileExists) {
+                // Check if file is whitelisted
+                const fileName = path.basename(this.tagsFilePath);
+                const whitelist = getCsvWhitelist();
+                
+                if (!whitelist.includes(fileName)) {
+                    console.warn(`CSV file "${fileName}" is not in the whitelist. Allowed files:`, whitelist);
+                    this.fileExists = false;
+                }
+            }
         }
         return this.fileExists;
+    }
+
+    /**
+     * Validates the CSV file if validation is enabled
+     */
+    private validateFile(): CsvValidationResult | null {
+        if (!this.isValidationChecked) {
+            const validationEnabled = isValidationEnabled();
+            
+            if (validationEnabled && this.checkFileExists()) {
+                this.validationResult = CsvValidator.validateFile(this.tagsFilePath);
+                
+                if (!this.validationResult.isValid) {
+                    console.error('CSV validation failed:', this.validationResult.errors);
+                } else if (this.validationResult.warnings.length > 0) {
+                    console.warn('CSV validation warnings:', this.validationResult.warnings);
+                }
+            }
+            
+            this.isValidationChecked = true;
+        }
+        
+        return this.validationResult;
     }
 
     /**
@@ -35,7 +73,14 @@ class TagSearcher {
      */
     public async searchTags(query: string, maxResults: number = 10): Promise<TagSuggestion[]> {
         if (!this.checkFileExists()) {
-            console.warn('Tags file not found at:', this.tagsFilePath);
+            console.warn('Tags file not found or not whitelisted at:', this.tagsFilePath);
+            return [];
+        }
+
+        // Validate file if validation is enabled
+        const validationResult = this.validateFile();
+        if (validationResult && !validationResult.isValid) {
+            console.error('Cannot search tags: CSV validation failed');
             return [];
         }
 
@@ -65,7 +110,7 @@ class TagSearcher {
                     return;
                 }
 
-                const match = this.parseCsvLine(line);
+                const match = this.parseCsvLine(line, results.length + 1);
                 if (!match) return;
 
                 const { mainTag, postCount, aliases } = match;
@@ -127,25 +172,20 @@ class TagSearcher {
     }
 
     /**
-     * Parses a single CSV line and extracts tag information
+     * Parses a single CSV line and extracts tag information with validation
      */
-    private parseCsvLine(line: string): { mainTag: string; postCount: number; aliases: string[] } | null {
+    private parseCsvLine(line: string, lineNumber: number): { mainTag: string; postCount: number; aliases: string[] } | null {
         if (!line.trim()) return null;
 
         try {
-            // More flexible regex to handle different CSV formats
-            // Handles: mainTag,aliasCount,postCount,"aliases" OR mainTag,aliasCount,postCount,
-            const match = line.match(/^([^,]+),(\d+),(\d+),?(?:"([^"]*)")?/);
-            if (!match) return null;
-
-            const [, mainTag, , postCountStr, aliasesStr] = match;
-            const aliases = aliasesStr ? aliasesStr.split(',').map(a => a.trim()).filter(a => a) : [];
-            const postCount = parseInt(postCountStr);
+            // Use the validated CSV parser
+            const parsedData = CsvValidator.parseCsvLine(line, lineNumber);
+            if (!parsedData) return null;
 
             return {
-                mainTag: mainTag.trim(),
-                postCount,
-                aliases
+                mainTag: parsedData.mainTag,
+                postCount: parsedData.postCount,
+                aliases: parsedData.aliases
             };
         } catch {
             return null;

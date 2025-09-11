@@ -10,7 +10,8 @@ import {
 import { getGalleryPageData } from '../utils/galleryUtils';
 import { RequestWithTheme } from '@shared/types/Requests';
 import loadAndRenderWorkflow from 'server/utils/loadAndRenderWorkflow';
-import path from 'path';
+import fs from 'fs';
+import { getCsvWhitelist, getCsvPath } from '../utils/configLoader';
 
 const router = express.Router();
 
@@ -133,9 +134,32 @@ router.get('/allserverworkflows', async (req, res) => {
     res.json(infoList);
 });
 
-// Serve the CSV file for tag autocomplete
+// Serve the CSV file for tag autocomplete (with whitelist validation)
 router.get('/config/tags.csv', (req, res) => {
-    const csvPath = path.join(process.cwd(), 'config', 'tags.csv');
+    const fileName = 'tags.csv';
+    const csvPath = getCsvPath(fileName);
+    
+    // Check if file is whitelisted
+    const whitelist = getCsvWhitelist();
+    
+    if (!whitelist.includes(fileName)) {
+        res.status(403).json({ 
+            error: 'File not allowed', 
+            message: `File "${fileName}" is not in the whitelist`,
+            allowedFiles: whitelist
+        });
+        return;
+    }
+    
+    // Check if file exists
+    if (!fs.existsSync(csvPath)) {
+        res.status(404).json({ 
+            error: 'File not found', 
+            message: `CSV file "${fileName}" not found`
+        });
+        return;
+    }
+    
     res.sendFile(csvPath);
 });
 

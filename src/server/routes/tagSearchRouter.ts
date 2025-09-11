@@ -1,5 +1,8 @@
 import express from 'express';
+import fs from 'fs';
 import { tagSearcher } from '../utils/tagSearchUtils';
+import { CsvValidator } from '../utils/csvValidator';
+import { getCsvWhitelist, isValidationEnabled, getCsvPath } from '../utils/configLoader';
 
 const router = express.Router();
 
@@ -60,6 +63,75 @@ router.get('/health', async (req, res): Promise<void> => {
         res.status(503).json({ 
             status: 'error', 
             message: 'Tag search service is unavailable'
+        });
+    }
+});
+
+/**
+ * Validation endpoint to check CSV file validation status
+ */
+router.get('/validate', async (req, res): Promise<void> => {
+    try {
+        const validationEnabled = isValidationEnabled();
+        
+        if (!validationEnabled) {
+            res.json({
+                status: 'disabled',
+                message: 'CSV validation is disabled',
+                validationEnabled: false
+            });
+            return;
+        }
+        
+        const whitelist = getCsvWhitelist();
+        
+        // Check if there are any whitelisted files
+        if (whitelist.length === 0) {
+            res.json({
+                status: 'error',
+                message: 'No CSV files are whitelisted',
+                validationEnabled: true,
+                whitelist: whitelist
+            });
+            return;
+        }
+        
+        // Use the first whitelisted file for validation
+        const fileName = whitelist[0] as string;
+        const csvPath = getCsvPath(fileName);
+        
+        // Check if the whitelisted file actually exists
+        if (!fs.existsSync(csvPath)) {
+            res.json({
+                status: 'error',
+                message: `Whitelisted file "${fileName}" does not exist`,
+                validationEnabled: true,
+                whitelist: whitelist,
+                filePath: csvPath
+            });
+            return;
+        }
+        
+        const validationResult = CsvValidator.validateFile(csvPath);
+        
+        res.json({
+            status: validationResult.isValid ? 'valid' : 'invalid',
+            validationEnabled: true,
+            validationResult: {
+                isValid: validationResult.isValid,
+                errors: validationResult.errors,
+                warnings: validationResult.warnings,
+                lineCount: validationResult.lineCount,
+                maxLineLength: validationResult.maxLineLength
+            },
+            whitelist: whitelist,
+            filePath: csvPath
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Validation check failed',
+            error: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 });

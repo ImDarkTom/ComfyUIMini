@@ -11,5 +11,20 @@
     "output_dir": "path/to/comfyui/output/folder",
     "developer": {
         "min_comfyui_version": "v0.2.2-50-7183fd1"
+    },
+    "tagAutocomplete": {
+        "enabled": true,
+        "useUnderscores": true,
+        "csvWhitelist": [
+            "tags.csv"
+        ],
+        "validation": {
+            "enabled": true,
+            "maxFileSize": 52428800,
+            "maxLines": 1000000,
+            "maxLineLength": 10000,
+            "maxTagLength": 200,
+            "maxAliasesPerTag": 100
+        }
     }
 }
