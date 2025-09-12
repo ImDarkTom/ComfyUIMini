@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import randomNumInRange from '../../../utils/randomNumInRange';
 import { FaPlus } from 'vue-icons-plus/fa';
 import { nanoid } from 'nanoid';
 import IncrementToggles from './IncrementToggles.vue';
 import TagInput from './TagInput.vue';
+import AutocompleteDropdown from '../../../components/AutocompleteDropdown.vue';
 
 const props = defineProps<{
     comfyInputInfo: any;
@@ -41,6 +42,13 @@ const incrementToggleId = `increment-toggle${incrementTogglesId}`;
 const fixedToggleId = `fixed-toggle${incrementTogglesId}`;
 
 const showExtraMenu = ref(false);
+
+// Check if this is a prompt input that should have autocomplete
+const isPromptInput = computed(() => {
+    const title = props.appInputInfo.title.toLowerCase();
+    const promptKeywords = ['prompt', 'negative prompt', 'positive prompt', 'text'];
+    return promptKeywords.some(keyword => title.includes(keyword));
+});
 </script>
 
 <template>
@@ -58,6 +66,12 @@ const showExtraMenu = ref(false);
         <template v-else-if="comfyInputInfo[0] === 'STRING'">
             <input type="text" v-if="!comfyInputInfo[1].multiline" v-model="inputValue"
                 :title="comfyInputInfo[1].tooltip ?? undefined" />
+
+            <AutocompleteDropdown 
+                v-else-if="!appInputInfo.features?.tag_input && isPromptInput" 
+                v-model="inputValue"
+                :placeholder="comfyInputInfo[1].tooltip ?? undefined"
+            />
 
             <textarea v-else-if="!appInputInfo.features?.tag_input" :title="comfyInputInfo[1].tooltip ?? undefined"
                 v-model="inputValue">{{ defaultValue ?? comfyInputInfo[1].default ?? '' }}</textarea>

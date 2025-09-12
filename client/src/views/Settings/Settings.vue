@@ -31,6 +31,16 @@ const config = useConfigStore();
                 v-model="config.ui.transitionSpeedMs"
                 @update:model-value="config.loadTransitionSpeed()"
              />
+            <h2 class="text-2xl font-semibold">Tag Autocomplete</h2>
+            <CheckboxSetting label="Enable tag autocomplete" v-model="config.tagAutocomplete.enabled" />
+            <CheckboxSetting label="Use underscores in tags" v-model="config.tagAutocomplete.useUnderscores" />
+            <TextSetting 
+                label="CSV Whitelist (comma-separated)" 
+                :model-value="config.tagAutocomplete.csvWhitelist.join(', ')"
+                @update:model-value="config.tagAutocomplete.csvWhitelist = $event.split(',').map(s => s.trim()).filter(s => s)"
+                placeholder="tags.csv"
+            />
+            <CheckboxSetting label="Enable CSV validation" v-model="config.tagAutocomplete.validation.enabled" />
         </div>
     </div>
 </template>

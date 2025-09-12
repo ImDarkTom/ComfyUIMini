@@ -13,6 +13,19 @@ interface Config {
     ui: {
         animations: boolean;
         transitionSpeedMs: number;
+    },
+    tagAutocomplete: {
+        enabled: boolean;
+        useUnderscores: boolean;
+        csvWhitelist: string[];
+        validation: {
+            enabled: boolean;
+            maxFileSize: number;
+            maxLines: number;
+            maxLineLength: number;
+            maxTagLength: number;
+            maxAliasesPerTag: number;
+        }
     }
 }
 
@@ -31,6 +44,19 @@ export const useConfigStore = defineStore('config', {
             animations: true,
             transitionSpeedMs: 125,
         },
+        tagAutocomplete: {
+            enabled: true,
+            useUnderscores: true,
+            csvWhitelist: ['tags.csv'],
+            validation: {
+                enabled: true,
+                maxFileSize: 52428800, // 50MB
+                maxLines: 1000000,
+                maxLineLength: 10000,
+                maxTagLength: 200,
+                maxAliasesPerTag: 100
+            }
+        }
     }),
     getters: {
         comfyUiUrl(state): string {

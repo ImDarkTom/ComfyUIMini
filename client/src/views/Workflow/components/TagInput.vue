@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { AiOutlineClose } from 'vue-icons-plus/ai';
 import { FaPlus, FaTrash } from 'vue-icons-plus/fa';
 import { TbArrowBigDownFilled, TbArrowBigUpFilled } from 'vue-icons-plus/tb';
+import { useTagAutocomplete } from '../../../composables/useTagAutocomplete';
 
 const props = defineProps<{
     modelValue: string;
@@ -31,6 +32,11 @@ const tagInputElem = ref<HTMLInputElement | null>(null);
 
 const editingIndex = ref(-1);
 
+// Autocomplete functionality
+const { autocompleteItems, loading, searchTags, clearSuggestions } = useTagAutocomplete();
+const showAutocomplete = ref(false);
+const selectedAutocompleteIndex = ref(-1);
+
 function handleSubmit() {
     const newValue = tagInputElem.value?.value.trim() || '';
 
@@ -49,6 +55,68 @@ function handleSubmit() {
     }
 
     tagInputElem.value!.value = "";
+    hideAutocomplete();
+}
+
+function handleInput() {
+    const inputValue = tagInputElem.value?.value.trim() || '';
+    
+    if (inputValue.length >= 2) {
+        searchTags(inputValue);
+        showAutocomplete.value = true;
+        selectedAutocompleteIndex.value = -1;
+    } else {
+        hideAutocomplete();
+    }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+    if (!showAutocomplete.value || autocompleteItems.value.length === 0) return;
+    
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            selectedAutocompleteIndex.value = Math.min(selectedAutocompleteIndex.value + 1, autocompleteItems.value.length - 1);
+            break;
+            
+        case 'ArrowUp':
+            event.preventDefault();
+            selectedAutocompleteIndex.value = Math.max(selectedAutocompleteIndex.value - 1, -1);
+            break;
+            
+        case 'Tab':
+        case 'Enter':
+            event.preventDefault();
+            if (selectedAutocompleteIndex.value >= 0) {
+                selectAutocompleteItem(selectedAutocompleteIndex.value);
+            } else {
+                handleSubmit();
+            }
+            break;
+            
+        case 'Escape':
+            event.preventDefault();
+            hideAutocomplete();
+            break;
+    }
+}
+
+function selectAutocompleteItem(index: number) {
+    if (index < 0 || index >= autocompleteItems.value.length) return;
+    
+    const selectedItem = autocompleteItems.value[index];
+    if (tagInputElem.value) {
+        tagInputElem.value.value = selectedItem.text;
+        nextTick(() => {
+            handleSubmit();
+        });
+    }
+}
+
+function hideAutocomplete() {
+    showAutocomplete.value = false;
+    selectedAutocompleteIndex.value = -1;
+    clearSuggestions();
 }
 
 function handleBlur() {
@@ -56,6 +124,8 @@ function handleBlur() {
         editingIndex.value = -1;
         tagInputElem.value!.value = "";
     }
+    // Delay hiding autocomplete to allow for clicks
+    setTimeout(() => hideAutocomplete(), 150);
 }
 
 
@@ -228,12 +298,53 @@ function clearTags() {
             Enter a keyword and press <kbd class="bg-surface-light px-1 rounded-sm">+</kbd> get started.
         </div>
         <div class="h-0.5 w-full bg-surface-light my-2"></div>
-        <form @submit.prevent="handleSubmit" class="flex flex-row gap-2">
+        <form @submit.prevent="handleSubmit" class="flex flex-row gap-2 relative">
             <button type="button" @click="clearTags"
                 class="bg-surface-light text-red-300 p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaTrash class="p-0.5" />
-            </button><input type="text" ref="tagInputElem" class="bg-surface-light p-2 rounded-lg w-full"
-                placeholder="Keyword..." @blur="handleBlur">
+            </button>
+            <div class="relative w-full">
+                <input 
+                    type="text" 
+                    ref="tagInputElem" 
+                    class="bg-surface-light p-2 rounded-lg w-full"
+                    placeholder="Keyword..." 
+                    @blur="handleBlur"
+                    @input="handleInput"
+                    @keydown="handleKeydown"
+                />
+                
+                <!-- Autocomplete Dropdown -->
+                <div
+                    v-if="showAutocomplete && autocompleteItems.length > 0"
+                    class="absolute top-full left-0 right-0 z-50 max-h-48 overflow-y-auto bg-surface border border-surface-light rounded-b-lg shadow-lg"
+                >
+                    <div
+                        v-for="(item, index) in autocompleteItems"
+                        :key="index"
+                        :class="[
+                            'px-3 py-2 cursor-pointer text-sm transition-colors',
+                            index === selectedAutocompleteIndex ? 'bg-surface-light' : 'hover:bg-surface-light',
+                            item.isSecondary ? 'text-text-secondary italic' : 'text-text',
+                            item.isAlias ? 'bg-orange-100' : ''
+                        ]"
+                        @mousedown.prevent="selectAutocompleteItem(index)"
+                        @click.prevent="selectAutocompleteItem(index)"
+                    >
+                        <span v-if="item.isAlias && item.originalSearch" class="font-semibold">
+                            {{ item.text }}
+                            <span class="text-text-secondary italic text-xs">
+                                (from "{{ item.originalSearch }}")
+                            </span>
+                        </span>
+                        <span v-else>{{ item.text }}</span>
+                    </div>
+                    
+                    <div v-if="loading" class="px-3 py-2 text-text-secondary text-sm">
+                        Loading...
+                    </div>
+                </div>
+            </div>
             <button type="submit"
                 class="bg-surface-light p-2 rounded-lg cursor-pointer hover:brightness-110 active:brightness-125 active:scale-95 transition-all duration-150">
                 <FaPlus />
